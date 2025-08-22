@@ -1,0 +1,45 @@
+const express = require('express');
+const mongoose = require('mongoose');
+const dotenv = require('dotenv');
+const helmet = require('helmet');
+const cors = require('cors');
+const rateLimit = require('express-rate-limit');
+
+dotenv.config();
+
+const app = express();
+app.use(helmet());
+app.use(cors({ origin: '*', allowedHeaders: ['Content-Type', 'Authorization'] }));
+app.use(express.json());
+
+// 安全限流（对认证与邮件相关接口）
+const authLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 20,
+});
+app.use(['/api/auth', '/api/user', '/api/game'], authLimiter);
+
+// 路由
+const authRoutes = require('./routes/auth');
+const breedRoutes = require('./routes/breeds');
+const userRoutes = require('./routes/user');
+const gameRoutes = require('./routes/game');
+
+app.get('/', (req, res) => res.send('TOPTEAM API OK'));
+app.use('/api/auth', authRoutes);
+app.use('/api/breeds', breedRoutes);
+app.use('/api/user', userRoutes);
+app.use('/api/game', gameRoutes);
+
+// DB & 启动
+mongoose.connect(process.env.MONGO_URI, { dbName: 'topteam' })
+  .then(() => {
+    console.log('MongoDB connected');
+    app.listen(process.env.PORT || 5001, () =>
+      console.log(`Server running on ${process.env.PORT || 5001}`)
+    );
+  })
+  .catch(err => {
+    console.error('Mongo connect error:', err);
+    process.exit(1);
+  });
