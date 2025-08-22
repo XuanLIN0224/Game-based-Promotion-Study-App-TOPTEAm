@@ -1,0 +1,176 @@
+/* 页面容器 */
+.auth-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(80% 60% at 50% 0%, #222 0%, #111 60%, #0c0c0c 100%);
+  color: #fff;
+  padding: 24px;
+}
+
+/* 卡片 */
+.auth-card {
+  width: min(560px, 92vw);
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  backdrop-filter: blur(6px);
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+}
+
+.auth-card h2 {
+  margin: 0 0 16px;
+  font-size: 24px;
+  letter-spacing: 0.5px;
+}
+
+/* 表单 */
+.auth-form {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.auth-form label {
+  font-size: 13px;
+  color: #ddd;
+}
+.auth-input {
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+  padding: 0 12px;
+  outline: none;
+}
+.auth-input:focus {
+  border-color: #6cf;
+  box-shadow: 0 0 0 3px rgba(102,204,255,0.2);
+}
+
+/* 组块标题 */
+.block-label {
+  margin-top: 8px;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+/* 选择 dog/cat */
+.group-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.group-card, .breed-card {
+  display: grid;
+  place-items: center;
+  gap: 8px;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.16);
+  background: rgba(255,255,255,0.06);
+  color: #fff;
+  cursor: pointer;
+  transition: transform .12s ease, border-color .12s ease, background .12s ease;
+}
+.group-card img {
+  width: 72px; height: 72px; object-fit: contain;
+}
+.group-card.selected,
+.breed-card.selected {
+  border-color: #6cf;
+  background: rgba(102,204,255,0.12);
+  transform: translateY(-1px);
+}
+
+/* 品种网格（四个按钮） */
+.breed-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+.breed-name {
+  font-weight: 600;
+  letter-spacing: .3px;
+}
+
+/* 按钮 */
+.btn {
+  height: 42px;
+  padding: 0 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn.primary {
+  background: linear-gradient(90deg, #49b, #5cd);
+  border: none;
+}
+.btn.primary:disabled { opacity: .7; cursor: not-allowed; }
+.btn.ghost {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.25);
+}
+
+/* 下部链接 */
+.auth-actions {
+  margin-top: 8px;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+.auth-actions a { color: #9df; text-decoration: none; }
+.auth-actions a:hover { text-decoration: underline; }
+
+/* 信息/错误 */
+.auth-error {
+  margin: 6px 0;
+  color: #ffb3b3;
+  background: rgba(255,0,0,0.12);
+  border: 1px solid rgba(255,0,0,0.25);
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+.auth-info {
+  margin: 6px 0;
+  color: #bfe3ff;
+  background: rgba(0,110,255,0.14);
+  border: 1px solid rgba(0,110,255,0.25);
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+.auth-ok {
+  margin: 6px 0;
+  color: #b9ffcc;
+  background: rgba(0,180,60,0.14);
+  border: 1px solid rgba(0,180,60,0.25);
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+/* 行内操作区 */
+.actions-row {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+
+/* 响应式 */
+@media (max-width: 520px) {
+  .group-grid, .breed-grid { grid-template-columns: 1fr 1fr; }
+  .auth-card { padding: 22px; }
+}

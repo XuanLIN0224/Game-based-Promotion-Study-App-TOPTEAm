@@ -2,17 +2,39 @@
 // import PetDisplay from '../components/PetDisplay';
 // import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { api } from "../api/client";
 import "./Home.css";
 
-function Home() {
 //   const { coins, bones, fish, resetDailyIfNewDay } = useStore();
 //   resetDailyIfNewDay(); // simple client check on load
+function Home() {
+  const [score, setScore] = useState(0);
+  const [group, setGroup] = useState('');
+  const [breed, setBreed] = useState('');
+  const [username, setUsername] = useState('');
   const navigate = useNavigate();
+
+  useEffect(() => {
+    api('/auth/me')
+      .then(data => {
+        setScore(data?.score || 0);
+        setGroup(data?.group || '');
+        setBreed(data?.breed?.name || '');
+        setUsername(data?.username || '');
+      })
+      .catch(err => console.error('Failed to fetch score:', err));
+  }, []);
 
   return (
     
     <main className="page">
-        
+        {/* User summary */}
+        <div className="user-summary">
+          <p className="iconcaption">User: {username || '—'}</p>
+          <p className="iconcaption">Group: {group || '—'}</p>
+          <p className="iconcaption">Breed: {breed || '—'}</p>
+        </div>
         <div className="leftside">
 
             <div className="pagelinkicon">
@@ -25,12 +47,14 @@ function Home() {
                 <p className="iconcaption">Backpack</p>
             </div>
 
-
-            <img
-                src="/icons/moneybag_icon.png"
-                className="icon"
-                alt="Money"
-            />
+            <div className="pagelinkicon">
+                <img
+                    src="/icons/moneybag_icon.png"
+                    className="icon"
+                    alt="Money"
+                />
+                <p className="iconcaption">{score}</p>
+            </div>
         </div>
 
         <div className="rightside">
