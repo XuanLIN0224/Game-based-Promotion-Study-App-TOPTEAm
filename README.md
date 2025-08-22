@@ -93,22 +93,25 @@ PATCH /api/game/reward           # add score / pet food
 ```
 ## Backend File Overview
 src/app.js (Main entrypoint)
+```
 	•	Loads .env.
 	•	Connects to MongoDB.
 	•	Sets up middleware
  	•	Mounts routes
-  •	Starts the Express server on the specified port.
-  
+    •	Starts the Express server on the specified port.
+```
 src/middleware/auth.js
+```
 	•	Authentication middleware.
 	•	Reads Authorization: Bearer <token> header.
 	•	Verifies the JWT using JWT_SECRET.
 	•	Loads the user from MongoDB (with breed populated).
 	•	Attaches req.user for downstream routes.
 	•	Used to protect endpoints like /api/auth/me.
-
+```
 src/routes/
 auth.js (Authentication & account)
+```
 	•	POST /auth/register/step1 → create user without breed (requires email, username, password, group).
 	•	POST /auth/register/step2 → bind a breed to the user, return JWT token.
 	•	POST /auth/login → verify password, return JWT token (with optional single-session control).
@@ -116,13 +119,17 @@ auth.js (Authentication & account)
 	•	POST /auth/forgot-password → generate and send 6-digit reset code (always returns success to prevent user enumeration).
 	•	POST /auth/reset-password → verify code, reset password.
 	•	GET /auth/me → return current user’s info (requires auth).
-
+```
 breeds.js
+```
 	•	GET /breeds?group=dog|cat → list breeds for a group.
 	•	GET /breeds/seed → insert 4 dog + 4 cat breeds (dev use only).
-
+```
 user.js
+```
 	•	PATCH /user/me (auth required) → update user profile (e.g., username, clothingConfig).
-
+```
 game.js
+```
 	•	PATCH /game/reward (auth required) → increment score/pet food.
+```
