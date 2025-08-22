@@ -28,7 +28,16 @@ PowerUpTesting/
 ├── src/
 │   ├── background/
 │   ├── components/
+│   ├── api/
+│   │   └── client.js
 │   ├── pages/
+│   │   ├── auth/
+│   │   │   ├── Auth.css
+│   │   │   ├── ForgotPassword.jsx
+│   │   │   ├── Login.jsx
+│   │   │   ├── RegisterStep1.css
+│   │   │   ├── RegisterStep2.css
+│   │   │   └── ResetPassword.jsx
 │   │   ├── Home.jsx
 │   │   └── Settings.py
 │   ├── state/
@@ -41,6 +50,37 @@ PowerUpTesting/
 └── README.md
 ```
 
+## Routing and auth flow
+	•	Public routes:
+	•	/login – login form with link to create account & forgot password
+	•	/register/step1 – collect email/username/password/confirm and group (dog/cat)
+	•	/register/step2 – fetch /breeds?group=..., choose one of four breeds, create account
+	•	/forgot → /reset – request & use a 6-digit email code
+ 	•	Guard:
+	•	RequireAuth in App.jsx checks localStorage.getItem('token')
+	•	If no token, redirects to /login (or stays per your config)
+
+## API Client Usage 
+
+Get current user
+```ruby
+const me = await api('/auth/me');
+// me = { email, username, group, breed: { id, name, group }, score, numPetFood, clothingConfig }
+```
+Update profile
+```ruby
+await api('/user/me', {
+  method: 'PATCH',
+  body: { username: 'NewName', clothingConfig: { hat: 'wizard' } }
+});
+```
+Increment score / pet food
+```ruby
+await api('/game/reward', {
+  method: 'PATCH',
+  body: { scoreDelta: 10, petFoodDelta: 2 }
+});
+```
 ## Liscence
 MIT License © 2025 TOPTEAm
 
