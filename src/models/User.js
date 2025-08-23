@@ -1,32 +1,34 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { api } from "../api/client";
+const mongoose = require('mongoose');
+const bcrypt = require('bcrypt');
 
-function Home() {
-  const [score, setScore] = useState(0);
-  const navigate = useNavigate();
+const UserSchema = new mongoose.Schema({
+  email: { type: String, required: true, unique: true, maxlength: 50, trim: true },
+  username: { type: String, required: true, maxlength: 50, trim: true },
+  password: { type: String, required: true }, // 存哈希
+  group: { type: String, enum: ['dog', 'cat'], required: true },
+  breed: { type: mongoose.Schema.Types.ObjectId, ref: 'Breed' }, // Step2 绑定
+  score: { type: Number, default: 0 },
+  numPetFood: { type: Number, default: 0 },
+  clothingConfig: { type: Object, default: {} },
 
-  useEffect(() => {
-    api('/auth/me')
-      .then(data => setScore(data?.score || 0))
-      .catch(err => console.error('Failed to fetch score:', err));
-  }, []);
+  // 单会话可选（阻止多设备同时登录）
+  activeToken: { type: String },
 
-  return (
-    <div>
-      {/* other JSX */}
-      <div className="pagelinkicon">
-        <img
-          src="/icons/moneybag_icon.png"
-          className="icon"
-          alt="Money"
-        />
-        <p className="iconcaption">{score}</p>
-      </div>
-      {/* other JSX */}
-    </div>
-  );
-}
+  // 可选：审计
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now }
+});
 
-export default Home;
+UserSchema.pre('save', async function (next) {
+  this.updatedAt = new Date();
+  if (!this.isModified('password')) return next();
+  const saltRounds = 10;
+  this.password = await bcrypt.hash(this.password, saltRounds);
+  next();
+});
+
+UserSchema.methods.comparePassword = function (plain) {
+  return bcrypt.compare(plain, this.password);
+};
+
+module.exports = mongoose.model('User', UserSchema);
