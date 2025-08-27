@@ -24,7 +24,11 @@ const authRoutes = require('./routes/auth');
 const breedRoutes = require('./routes/breeds');
 const userRoutes = require('./routes/user');
 const gameRoutes = require('./routes/game');
+const inventoryRoutes = require('./routes/inventory');
+const shopRoutes = require('./routes/shop');
 
+app.use('/api/inventory', inventoryRoutes);
+app.use('/api/shop', shopRoutes);
 app.get('/', (req, res) => res.send('TOPTEAM API OK'));
 app.use('/api/auth', authRoutes);
 app.use('/api/breeds', breedRoutes);

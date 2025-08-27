@@ -16,7 +16,12 @@ const UserSchema = new mongoose.Schema({
 
   // 可选：审计
   createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now }
+  updatedAt: { type: Date, default: Date.now },
+  inventory: {
+    type: [{ key: { type: String }, qty: { type: Number, default: 0 } }],
+    default: []
+  },
+  boosterExpiresAt: { type: Date }, // for quiz_booster_today
 });
 
 UserSchema.pre('save', async function (next) {
