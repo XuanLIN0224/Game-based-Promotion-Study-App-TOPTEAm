@@ -11,7 +11,7 @@ const app = express();
 app.set('trust proxy', 1); // behind Render/Proxy, needed for accurate req.ip in rate-limit
 app.use(helmet());
 app.use(cors({ origin: '*', allowedHeaders: ['Content-Type', 'Authorization'] }));
-app.options('*', cors());
+app.options(/.*/, cors()); // Express 5 + path-to-regexp: avoid '*' wildcard
 app.use(express.json());
 
 // 安全限流（对认证与邮件相关接口）
