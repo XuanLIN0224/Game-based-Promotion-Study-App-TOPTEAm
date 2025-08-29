@@ -11,7 +11,7 @@ export default function Rank () {
 
                 <div className="pagelinkicon" onClick={() => navigate("/")}>
                     <img
-                    src="/icons/home.png"
+                    src={`${import.meta.env.BASE_URL}icons/home.png`}
                     className="icon"
                     alt="Home"
                     />

@@ -10,7 +10,7 @@ export default function Quiz () {
 
             <div className="pagelinkicon" onClick={() => navigate("/")}>
                 <img
-                src="/icons/home.png"
+                src={`${import.meta.env.BASE_URL}icons/home.png`}
                 className="icon"
                 alt="Home"
                 />
@@ -19,7 +19,7 @@ export default function Quiz () {
 
 
             <img
-                src="/icons/moneybag_icon.png"
+                src={`${import.meta.env.BASE_URL}icons/moneybag_icon.png`}
                 className="icon"
                 alt="Money"
             />
