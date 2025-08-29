@@ -10,7 +10,7 @@ export default function Quiz () {
 
             <div className="pagelinkicon" onClick={() => navigate("/")}>
                 <img
-                src={`${import.meta.env.BASE_URL}icons/home.png`}
+                src="icons/home.png"
                 className="icon"
                 alt="Home"
                 />

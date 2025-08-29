@@ -54,7 +54,7 @@ export default function Backpack () {
 
       <div className="leftside">
         <div className="pagelinkicon" onClick={() => navigate("/")}>
-          <img src={`${import.meta.env.BASE_URL}icons/home.png`} className="icon" alt="Home" />
+          <img src="icons/home.png" className="icon" alt="Home" />
           <p className="iconcaption">Home</p>
         </div>
       </div>
