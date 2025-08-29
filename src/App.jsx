@@ -42,7 +42,7 @@ function NavBar() {
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/Game-based-Promotion-Study-App-TOPTEAm">
       {/* <NavBar /> */}
       <div className="app">
         <StarBackground count={120} /> 
