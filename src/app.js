@@ -8,8 +8,10 @@ const rateLimit = require('express-rate-limit');
 dotenv.config();
 
 const app = express();
+app.set('trust proxy', 1); // behind Render/Proxy, needed for accurate req.ip in rate-limit
 app.use(helmet());
 app.use(cors({ origin: '*', allowedHeaders: ['Content-Type', 'Authorization'] }));
+app.options('*', cors());
 app.use(express.json());
 
 // 安全限流（对认证与邮件相关接口）
