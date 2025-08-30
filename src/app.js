@@ -8,10 +8,8 @@ const rateLimit = require('express-rate-limit');
 dotenv.config();
 
 const app = express();
-app.set('trust proxy', 1); // behind Render/Proxy, needed for accurate req.ip in rate-limit
 app.use(helmet());
 app.use(cors({ origin: '*', allowedHeaders: ['Content-Type', 'Authorization'] }));
-app.options(/.*/, cors()); // Express 5 + path-to-regexp: avoid '*' wildcard
 app.use(express.json());
 
 // 安全限流（对认证与邮件相关接口）
@@ -28,14 +26,22 @@ const userRoutes = require('./routes/user');
 const gameRoutes = require('./routes/game');
 const inventoryRoutes = require('./routes/inventory');
 const shopRoutes = require('./routes/shop');
+const settingRoutes = require('./routes/setting');
 
 app.use('/api/inventory', inventoryRoutes);
 app.use('/api/shop', shopRoutes);
+app.use('/api/setting', settingRoutes);
 app.get('/', (req, res) => res.send('TOPTEAM API OK'));
 app.use('/api/auth', authRoutes);
 app.use('/api/breeds', breedRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/game', gameRoutes);
+
+console.log('[BOOT] app mounting /api/setting');
+
+
+app.use((req,res,next)=>{ console.log(`[REQ] ${req.method} ${req.path}`); next(); });
+
 
 // DB & 启动
 mongoose.connect(process.env.MONGO_URI, { dbName: 'topteam' })

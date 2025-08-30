@@ -188,7 +188,9 @@ router.post('/reset-password', async (req, res) => {
 
 // GET /api/auth/me
 router.get('/me', auth, async (req, res) => {
+  console.log('[ROUTE] /api/auth/me HIT');
   const u = req.user;
+  console.log('createdAt:', u?.createdAt, 'updatedAt:', u?.updatedAt);
   res.json({
     email: u.email,
     username: u.username,
@@ -196,7 +198,9 @@ router.get('/me', auth, async (req, res) => {
     breed: u.breed ? { id: u.breed._id, name: u.breed.name, group: u.breed.group } : null,
     score: u.score,
     numPetFood: u.numPetFood,
-    clothingConfig: u.clothingConfig
+    clothingConfig: u.clothingConfig,
+    createdAt: u.createdAt,
+    updatedAt: u.updatedAt
   });
 });
 
