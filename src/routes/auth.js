@@ -19,7 +19,7 @@ const registerStep1Schema = z.object({
 }).refine(d => d.password === d.confirmPassword, { message: 'Passwords do not match', path: ['confirmPassword'] });
 
 // POST /api/auth/register/step1
-// 用户注册的第一步接口
+/* Store in email, username, password, and group */
 router.post('/register/step1', async (req, res) => {
   const parsed = registerStep1Schema.safeParse(req.body);
   if (!parsed.success) {
@@ -96,11 +96,13 @@ router.post('/login', async (req, res) => {
   if (!parsed.success) return res.status(400).json({ message: 'Invalid credentials' });
 
   const { email, password } = parsed.data;
+
+  // Check whether the pair is already in the system
   const user = await User.findOne({ email }).populate('breed');
   if (!user) return res.status(401).json({ message: 'User not found' });
 
-  const ok = await user.comparePassword(password);
-  if (!ok) return res.status(401).json({ message: 'Invalid password' });
+  const match = await user.comparePassword(password);
+  if (!match) return res.status(401).json({ message: 'Invalid password' });
 
   // 单会话控制（可选）
   if (user.activeToken) {
@@ -191,7 +193,9 @@ router.post('/reset-password', async (req, res) => {
 
 // GET /api/auth/me
 router.get('/me', auth, async (req, res) => {
+  console.log('[ROUTE] /api/auth/me HIT');
   const u = req.user;
+  console.log('createdAt:', u?.createdAt, 'updatedAt:', u?.updatedAt);
   res.json({
     email: u.email,
     username: u.username,
@@ -199,7 +203,9 @@ router.get('/me', auth, async (req, res) => {
     breed: u.breed ? { id: u.breed._id, name: u.breed.name, group: u.breed.group } : null,
     score: u.score,
     numPetFood: u.numPetFood,
-    clothingConfig: u.clothingConfig
+    clothingConfig: u.clothingConfig,
+    createdAt: u.createdAt,
+    updatedAt: u.updatedAt
   });
 });
 
