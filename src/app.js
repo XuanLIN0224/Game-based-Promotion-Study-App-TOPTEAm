@@ -7,6 +7,11 @@ const rateLimit = require('express-rate-limit');
 
 dotenv.config();
 
+// // 为了连接
+// const dns = require('dns');
+// dns.setServers(['8.8.8.8', '1.1.1.1']);    // 强制使用稳定 DNS
+// require('dns').setDefaultResultOrder('ipv4first');
+
 const app = express();
 app.set('trust proxy', 1); // behind Render/Proxy, needed for accurate req.ip in rate-limit
 app.use(helmet());
@@ -28,6 +33,7 @@ const userRoutes = require('./routes/user');
 const gameRoutes = require('./routes/game');
 const inventoryRoutes = require('./routes/inventory');
 const shopRoutes = require('./routes/shop');
+//const rankRoutes = require('./routes/rank')
 
 app.use('/api/inventory', inventoryRoutes);
 app.use('/api/shop', shopRoutes);
@@ -36,6 +42,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/breeds', breedRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/game', gameRoutes);
+//app.use('/api/rank', rankRoutes);
 
 // DB & 启动
 mongoose.connect(process.env.MONGO_URI, { dbName: 'topteam' })
