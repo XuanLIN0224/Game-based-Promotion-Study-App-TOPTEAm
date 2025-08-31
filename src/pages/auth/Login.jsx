@@ -10,6 +10,7 @@ export default function Login() {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
 
+  /* Triggered when the user clicks "Log in" button */
   const onSubmit = async (e) => {
     e.preventDefault();
     setErr('');

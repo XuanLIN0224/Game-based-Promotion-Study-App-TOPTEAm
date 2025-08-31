@@ -1,3 +1,4 @@
+/* Start point of the React */
 import { BrowserRouter, Routes, Route, NavLink, Navigate, Outlet } from 'react-router-dom';
 import Home from './pages/Home';
 import Game from './pages/Game';
@@ -19,6 +20,7 @@ import ForgotPassword from './pages/auth/ForgotPassword';
 import ResetPassword from './pages/auth/ResetPassword';
 
 // Guard: require token to access app routes
+// Support auto-log-in
 function RequireAuth() {
   const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
   return token ? <Outlet /> : <Navigate to="/login" replace />;
