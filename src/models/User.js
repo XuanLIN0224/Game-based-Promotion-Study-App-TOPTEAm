@@ -22,7 +22,10 @@ const UserSchema = new mongoose.Schema({
     default: []
   },
   boosterExpiresAt: { type: Date }, // for quiz_booster_today
-});
+},
+  // Enable the auto-update for 'updatedAt' when a user's record is updated
+  { timestamps: true }
+);
 
 UserSchema.pre('save', async function (next) {
   this.updatedAt = new Date();
