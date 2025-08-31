@@ -30,7 +30,7 @@ export default function Settings() {
   const [username, setUsername] = useState(null);
   const [email, setEmail] = useState("");
 
-  const password = "**********";    // Not shown directly for security
+  //const password = "**********";    // Not shown directly for security
 
   const [createdAt, setCreatedAt] = useState(null);
   const [updatedAt, setUpdatedAt] = useState(null);
@@ -103,7 +103,7 @@ export default function Settings() {
     setErr(""); setMsg("");
     // Read in the username
     const value = (usernameInput ?? "").trim();
-    if (!value) { setErr("Username cannot be empty."); return; }
+    if (!value) { setErr("Username cannot be empty"); return; }
     // Tell the UI the user personal info--username field is updating
     setBusyField("username");
     try {
@@ -127,7 +127,7 @@ export default function Settings() {
     setErr(""); setMsg("");
     const value = (emailInput ?? "").trim();
     // very light email check
-    if (!/^\S+@\S+\.\S+$/.test(value)) { setErr("Please enter a valid email."); return; }
+    if (!/^\S+@\S+\.\S+$/.test(value)) { setErr("Please enter a valid email"); return; }
     setBusyField("email");
     try {
       await updateUser("email", value);
@@ -148,6 +148,7 @@ export default function Settings() {
     const oldPwd = (oldPassword ?? "").trim();
     const newPwd = (newPassword ?? "").trim();
     const newConfirmPwd = (newConfirmPassword ?? "").trim();
+    if (!oldPwd || !newPwd || !newConfirmPwd) { setErr("Please enter valid passwords"); return; }
     // Tell the UI the password field is updating
     setBusyField("password");
     try {
@@ -192,7 +193,7 @@ export default function Settings() {
       navigate("/auth/Login");
     } catch (err) {
       console.error("Logout failed:", err);
-      setErr("Failed to logout. Please try again.");
+      setErr("Failed to logout. Please try again");
     }
   }
 
@@ -333,7 +334,7 @@ export default function Settings() {
                   id="oldPassword"
                   type="password"
                   value={oldPassword}
-                  onChange={(e) => setOldPassword(e.target.value)}
+                  onChange={(e) => {setOldPassword(e.target.value); setErr(""); setMsg(""); }}
                   disabled={busyField === "password"}
                 />
 
@@ -342,7 +343,7 @@ export default function Settings() {
                   id="newPassword"
                   type="password"
                   value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
+                  onChange={(e) => {setNewPassword(e.target.value); setErr(""); setMsg(""); }}
                   disabled={busyField === "password"}
                 />
 
@@ -351,7 +352,7 @@ export default function Settings() {
                   id="newConfirmPassword"
                   type="password"
                   value={newConfirmPassword}
-                  onChange={(e) => setNewConfirmPassword(e.target.value)}
+                  onChange={(e) => {setNewConfirmPassword(e.target.value); setErr(""); setMsg(""); }}
                   disabled={busyField === "password"}
                 />
 
