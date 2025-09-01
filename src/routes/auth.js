@@ -196,7 +196,8 @@ router.get('/me', auth, async (req, res) => {
     breed: u.breed ? { id: u.breed._id, name: u.breed.name, group: u.breed.group } : null,
     score: u.score,
     numPetFood: u.numPetFood,
-    clothingConfig: u.clothingConfig
+    clothingConfig: u.clothingConfig,
+    isStudent: u.isStudent === undefined ? true : !!u.isStudent
   });
 });
 
