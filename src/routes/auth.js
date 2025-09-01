@@ -203,7 +203,8 @@ router.get('/me', auth, async (req, res) => {
     numPetFood: u.numPetFood,
     clothingConfig: u.clothingConfig,
     createdAt: u.createdAt,
-    updatedAt: u.updatedAt
+    updatedAt: u.updatedAt,
+    isStudent: u.isStudent === undefined ? true : !!u.isStudent
   });
 });
 
