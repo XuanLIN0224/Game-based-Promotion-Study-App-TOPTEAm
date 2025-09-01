@@ -5,17 +5,17 @@ const User = require('../models/User');
 const router = express.Router();
 
 
-// GET /api/rank/top?percent=20
+// GET /api/rank/top？percent=20
 router.get('/top', /* auth, */ async (req, res) => {
   try {
-    const pct = Math.max(1, Math.min(100, Number(req.query.percent) || 20)); // 1..100
+    const percentage = Math.max(1, Math.min(100, Number(req.query.percent) || 20)); 
     const total = await User.countDocuments({});
     if (total === 0) return res.json([]);
 
-    // 至少返回 1 名
-    const topN = Math.max(1, Math.ceil(total * (pct / 100)));
+    // at least one user is shown
+    const topN = Math.max(1, Math.ceil(total * (percentage / 100)));
 
-    // 如果最高分是 0，就按注册时间返回，保证有列表可看
+    // if the top score is 0, still show it according to the user's registration time
     const leader = await User.findOne({}).sort({ score: -1 }).select('score').lean();
     const maxScore = leader?.score ?? 0;
 
@@ -25,7 +25,7 @@ router.get('/top', /* auth, */ async (req, res) => {
     const rows = await query
       .sort(sort)
       .limit(topN)
-      .select('username score group breed') // _id 默认会带上
+      .select('username score group breed') 
       .lean();
 
     res.json(rows);
