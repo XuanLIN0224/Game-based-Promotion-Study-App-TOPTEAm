@@ -40,6 +40,11 @@ export default function Backpack () {
     setBusyKey(key);
     try {
       await api('/inventory/use', { method: 'POST', body: { key, qty }});
+
+    if (key === 'extra_attempt') {
+      await api('/quiz/attempts/use-extra', { method: 'POST' });
+    }
+
       const inv = await api('/inventory');
       setInventory(inv || []);
     } catch (e) {

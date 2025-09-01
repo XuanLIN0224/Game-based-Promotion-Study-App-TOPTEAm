@@ -5,4 +5,5 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   base: '/Game-based-Promotion-Study-App-TOPTEAm/',
+  //base: '/',
 })

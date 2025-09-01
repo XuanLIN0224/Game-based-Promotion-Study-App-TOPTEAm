@@ -21,6 +21,9 @@ export default function Login() {
         body: { email, password }
       });
       setToken(resp.token);
+      const me = await api('/auth/me');
+      if (me?.isStudent === false) navigate('/teacher', { replace: true });
+      else navigate('/', { replace: true });
       nav('/', { replace: true }); // 成功后进 Home
     } catch (e) {
       setErr(e.message);
