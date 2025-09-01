@@ -22,9 +22,11 @@ export default function Login() {
       });
       setToken(resp.token);
       const me = await api('/auth/me');
-      if (me?.isStudent === false) navigate('/teacher', { replace: true });
-      else navigate('/', { replace: true });
-      nav('/', { replace: true }); // 成功后进 Home
+      if (me?.isStudent === false) {
+        nav('/teacher', { replace: true });
+      } else {
+        nav('/', { replace: true });
+      }
     } catch (e) {
       setErr(e.message);
     } finally {

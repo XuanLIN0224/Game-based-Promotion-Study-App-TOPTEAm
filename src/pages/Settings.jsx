@@ -204,7 +204,7 @@ export default function Settings() {
       {/* Left side nav */}
       <div className="leftside">
         <div className="pagelinkicon" onClick={() => navigate("/")}>
-          <img src="/icons/home.png" className="icon" alt="Home" />
+          <img src="icons/home.png" className="icon" alt="Home" />
           <p className="iconcaption">Home</p>
         </div>
       </div>
