@@ -11,7 +11,7 @@ app.set('trust proxy', 1); // behind Render/Proxy, needed for accurate req.ip in
 app.use(helmet());
 app.use(express.json());
 const corsOptions = {
-  origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
+  origin: ['http://localhost:5173', 'http://127.0.0.1:5173', 'https://xuanlin0224.github.io'],
   methods: ['GET','POST','PUT','PATCH','DELETE','OPTIONS'],
   allowedHeaders: ['Content-Type','Authorization'],
   credentials: true, // 如需携带 cookie 时使用；纯 Bearer 也可保留
