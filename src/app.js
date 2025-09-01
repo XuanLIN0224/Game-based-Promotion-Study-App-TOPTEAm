@@ -31,7 +31,8 @@ const userRoutes = require('./routes/user');
 const gameRoutes = require('./routes/game');
 const inventoryRoutes = require('./routes/inventory');
 const shopRoutes = require('./routes/shop');
-//const rankRoutes = require('./routes/rank')
+const settingRoutes = require('./routes/setting');
+const rankRoutes = require('./routes/rank')
 
 app.use('/api/inventory', inventoryRoutes);
 app.use('/api/shop', shopRoutes);
@@ -41,7 +42,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/breeds', breedRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/game', gameRoutes);
-//app.use('/api/rank', rankRoutes);
+app.use('/api/rank', rankRoutes);
 
 console.log('[BOOT] app mounting /api/setting');
 
