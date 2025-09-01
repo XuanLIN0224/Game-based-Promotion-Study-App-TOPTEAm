@@ -6,11 +6,9 @@ const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 
 dotenv.config();
-
 const app = express();
-app.use(helmet());
-
 app.set('trust proxy', 1); // behind Render/Proxy, needed for accurate req.ip in rate-limit
+app.use(helmet());
 app.use(express.json());
 const corsOptions = {
   origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
