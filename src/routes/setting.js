@@ -76,7 +76,7 @@ router.patch('/password', auth, async (req, res) => {
   if(!same) return res.status(400).json({ message: 'New passwords do not match. Please try again' });
 
   // S3: Check whether the new and old passwords are the same--non-allowed behaviour
-  const allowed = (newPassword === oldPassword);
+  const allowed = (newPassword !== oldPassword);
   if(!allowed) return res.status(400).json({ message: 'The new password should not be the same as the old one. Please enter a different password' });
 
   // If both of the two checks are passed
