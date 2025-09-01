@@ -65,7 +65,7 @@ export default function Shop () {
 
       <div className="leftside">
         <div className="pagelinkicon" onClick={() => navigate("/")}>
-          <img src="icons/home.png" className="icon" alt="Home" />
+          <img src="/icons/home.png" className="icon" alt="Home" />
           <p className="iconcaption">Home</p>
         </div>
       </div>

@@ -11,7 +11,7 @@ export default function Game () {
 
                 <div className="pagelinkicon" onClick={() => navigate("/")}>
                     <img
-                    src="icons/home.png"
+                    src="/icons/home.png"
                     className="icon"
                     alt="Home"
                     />

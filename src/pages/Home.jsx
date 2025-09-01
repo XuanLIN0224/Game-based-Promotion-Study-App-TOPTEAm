@@ -47,7 +47,7 @@ function Home() {
       <div className="leftside">
         <div className="pagelinkicon">
           <img
-            src="icons/backpack_icon.png"
+            src="/icons/backpack_icon.png"
             className="icon"
             alt="Backpack"
             onClick={() => navigate("/backpack")}
@@ -57,7 +57,7 @@ function Home() {
 
         <div className="pagelinkicon">
           <img
-            src="icons/moneybag_icon.png"
+            src="/icons/moneybag_icon.png"
             className="icon"
             alt="Money"
           />
@@ -69,7 +69,7 @@ function Home() {
         {/* Scan */}
         <div className="pagelinkicon">
           <img
-            src="icons/scan_icon.png"
+            src="/icons/scan_icon.png"
             className="icon"
             alt="Scan"
             style={{ filter: "invert(1)" }}
@@ -81,7 +81,7 @@ function Home() {
         {/* Rank */}
         <div className="pagelinkicon">
           <img
-            src="icons/rank.png"
+            src="/icons/rank.png"
             className="icon"
             alt="Rank"
             onClick={() => navigate("/rank")}
@@ -92,7 +92,7 @@ function Home() {
         {/* Settings */}
         <div className="pagelinkicon">
           <img
-            src="icons/setting_icon.png"
+            src="/icons/setting_icon.png"
             className="icon"
             alt="Settings"
             onClick={() => navigate("/settings")}
@@ -109,7 +109,7 @@ function Home() {
         <h1 className="title1">PowerUp</h1>
         <h1 className="title2">O O S D</h1>
 
-        <img className="pic" src="icons/main_logo.png" alt="logo"/>
+        <img className="pic" src="/icons/main_logo.png" alt="logo"/>
 
         <p className="line">Click or tap anywhere to play...</p>
       </section>
@@ -117,7 +117,7 @@ function Home() {
       <div className="downpad">
         <button onClick={() => navigate("/quiz")}>
           <img
-            src="icons/question_icon.png"
+            src="/icons/question_icon.png"
             className="icon"
             alt="Quiz"
           />
@@ -126,7 +126,7 @@ function Home() {
 
         <button onClick={() => navigate("/shop")}>
           <img
-            src="icons/shop_icon.png"
+            src="/icons/shop_icon.png"
             className="icon"
             alt="Shop"
             onClick={() => navigate("/shop")}
@@ -136,7 +136,7 @@ function Home() {
 
         <button onClick={() => navigate("/customise")}>
           <img
-            src="icons/customise.png"
+            src="/icons/customise.png"
             className="icon"
             alt="Customise"
           />
