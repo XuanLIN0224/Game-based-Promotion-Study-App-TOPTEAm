@@ -64,10 +64,12 @@ router.post('/register/step2', async (req, res) => {
   user.breed = breed._id;
   await user.save();
 
+  //生成登录用的 JWT， 存储 token
   const token = jwt.sign({ userId: user._id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '7d' });
   user.activeToken = token; // 可选：单会话
   await user.save();
 
+  // 返回一个 JSON， 提示注册成功
   return res.json({
     message: 'Registration completed',
     token,
