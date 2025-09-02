@@ -6,15 +6,12 @@ const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 
 dotenv.config();
-<<<<<<< HEAD
-=======
 
 // // 为了连接
 // const dns = require('dns');
 // dns.setServers(['8.8.8.8', '1.1.1.1']);    // 强制使用稳定 DNS
 // require('dns').setDefaultResultOrder('ipv4first');
 
->>>>>>> rankFeature
 const app = express();
 app.set('trust proxy', 1); // behind Render/Proxy, needed for accurate req.ip in rate-limit
 app.use(helmet());
