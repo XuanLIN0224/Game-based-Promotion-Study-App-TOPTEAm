@@ -21,7 +21,12 @@ export default function Login() {
         body: { email, password }
       });
       setToken(resp.token);
-      nav('/', { replace: true }); // 成功后进 Home
+      const me = await api('/auth/me');
+      if (me?.isStudent === false) {
+        nav('/teacher', { replace: true });
+      } else {
+        nav('/', { replace: true });
+      }
     } catch (e) {
       setErr(e.message);
     } finally {

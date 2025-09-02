@@ -14,6 +14,11 @@ function Home() {
   useEffect(() => {
     api('/auth/me')
       .then(data => {
+        if (data && data.isStudent === false) {
+          navigate('/teacher', { replace: true });
+          console.log('Redirecting to /teacher because user is not a student');
+          return; // stop setting student-specific state
+        }
         setScore(data?.score || 0);
         setGroup(data?.group || '');
         setBreed(data?.breed?.name || '');

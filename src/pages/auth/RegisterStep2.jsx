@@ -29,6 +29,9 @@ export default function RegisterStep2() {
         body: { email, breedId: selected }
       });
       setToken(resp.token);
+      const me = await api('/auth/me');
+      if (me?.isStudent === false) navigate('/teacher', { replace: true });
+      else navigate('/', { replace: true });
       // 清掉临时
       sessionStorage.removeItem('registerEmail');
       sessionStorage.removeItem('registerGroup');

@@ -10,6 +10,7 @@ import Quiz from './pages/Quiz';
 import Shop from './pages/Shop';
 import Customise from './pages/Customise';
 import StarBackground from "./background/StarBackground";
+import Teacher from './pages/Teacher';
 // import './styles.css';
 
 // Auth pages
@@ -68,6 +69,7 @@ function App() {
               <Route path="shop" element={<Shop />} />
               <Route path="customise" element={<Customise />} />
               <Route path="settings" element={<Settings />} />
+              <Route path="teacher" element={<Teacher />} />
             </Route>
 
             {/* Fallback */}
