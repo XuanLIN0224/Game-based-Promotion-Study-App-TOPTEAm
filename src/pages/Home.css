@@ -7,14 +7,14 @@
 .title1 {
   text-align: center;
   font-size: 7em;
-  color: #D2F1E4;
-  margin: 30px 0 0 0;
+  color: #c0e5d6;
+  margin: 10px 0 0 0;
 }
 
 .title2 {
   text-align: center;
-  font-size: 6em;
-  margin: -100px 0 0 0;
+  font-size: 6.25em;
+  margin: -110px 0 0 0;
 }
 
 .pic {
@@ -23,23 +23,60 @@
   height: auto;
   object-fit: contain;
   display: block;
-  margin: -95px 0 0 0
+  margin: -70px 0 0 0
 }
 
 .line {
   font-family: "SuperShiny", sans-serif; 
-  margin: -25px 0 0 0;
-  font-size: 1.25em;
+  margin: 0 0 0 0;
+  font-size: 0.75em;
+}
+
+.scorePad {
+  flex: 1 1 auto;
+  display:  flex;
+  flex-direction: column;
+  gap : 2px;
+  margin: 8px 0 0 8px
+}
+
+.scorePad img {
+  margin: 0;            
+  padding: 0;
+  display: block;       
+  width: 25px;        
+  height: 25px;
 }
 
 .downpad {
-    flex: 1 1 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    align-items: center;
-    margin: 0;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  /* gap: 20px; */
+  align-items: center;
+  width: 100%;
+  /* padding: 1rem; */
+  /* margin: 0; */
 }
+
+.downpad button {
+  flex: 0 0 auto;
+  margin: 0 0.5rem;   
+  font-size: 1.75em;     
+}
+
+button {
+  display: flex;
+  width: clamp(180px, 30vw, 250px);
+  height: clamp(60px, 6vh, 92px);
+  border-radius: 10px;
+  border: 3px solid transparent;
+  gap: 0.2rem;
+  width: auto;
+  padding: 0rem 1rem;
+}
+
 
 @media (min-width: 768px) {
   .pic {
@@ -48,41 +85,51 @@
 
   .downpad {
     flex-direction: row;
-    gap: 30px;
+    /* gap: 30px; */
+  }
+
+  .downpad button {
+    flex: 0 0 auto;
+    margin: 0 0.5rem;   
+    font-size: 2.8em;     
+  }
+
+  button {
+    width: clamp(180px, 30vw, 250px);
+    height: clamp(50px, 9.5vh, 92px);
+    border-radius: 10px;
+    border: 3px solid transparent;
+    gap: 0.2rem;
+    width: auto;
+    padding: 0rem 1rem;
+  }
+
+  .scorePad {
+    gap : 0px;
+    margin: 10px 0 0 0  
+  }
+
+  .scorePad img {     
+    width: 40px;        
+    height: 40px;
   }
 
   .title1 {
-    font-size: 11em;
-    margin: 0;
+    font-size: 12.5em;
+    margin: -20px;
   }
 
   .title2 {
-    font-size: 9em;
-    margin: -160px 0 0 0;
+    font-size: 10em;
+    margin: -180px 0 0 0;
   }
 
   .pic {
-    margin: -140px 0 0 0
+    margin: -75px 0 0 0
   }
 
   .line {
-    margin: -30px 0 0 0;
+    margin: 0 0 0 0;
     font-size: 1.5em;
   }
 }
-
-/* .largeicon {
-  width: 40px;
-  height: auto;
-  cursor: pointer;
-  margin: 8px;
-  transition: transform .15s ease;
-}
-.largeicon:active, .icon:hover { transform: scale(1.12); }
-
-@media (min-width: 768px) {
-  .icon {
-    width: 60px;
-    margin: 10px;
-  }
-} */

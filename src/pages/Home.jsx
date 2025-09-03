@@ -31,6 +31,73 @@ function Home() {
   const boosterActive = boosterExpiresAt ? new Date(boosterExpiresAt) > new Date() : false;
   const boosterUntil = boosterActive ? new Date(boosterExpiresAt).toLocaleTimeString() : null;
 
+
+  {/* Home Page Breed Images */}
+  const breedImages = {
+
+    // Dog Breeds
+    dog: {
+      "Border Collie": "/icons/home/BorderCollie.gif",
+      "Dachshund": "/icons/home/Dachshund.gif",
+      "Samoyed": "/icons/home/Samoyed.gif",
+      "Toy Poodle": "/icons/home/Poodle.gif",
+      default: "/icons/main.gif"
+      },
+
+    // Cat Breeds
+    cat: {
+      "Golden British": "/icons/home/golden_british_cat.gif",
+      "Bombay": "/icons/home/Bombay_cat.gif",
+      "Ragdoll": "/icons/home/ragdoll_cat.gif",
+      "Siamese": "/icons/home/Siamese_cat.gif",
+      default: "/icons/main.gif"
+    }
+  };
+
+  {/* Group Icons */}
+  const groupIcons = {
+
+    default: {
+      backpack: "/icons/default/backpack.png",
+      feed: "/icons/default/feed.png",
+      coin: "/icons/default/moneybag_icon.png",
+      scan: "/icons/default/scan_icon.png",
+      rank: "/icons/default/rank.png",
+      settings: "/icons/default/setting_icon.png",
+      quiz: "/icons/default/question_icon.png",
+      shop: "/icons/default/shop_icon.png",
+      customise: "/icons/default/customise.png",
+    },
+
+    dog:{
+      backpack: "/icons/dog/backpack.png",
+      feed: "/icons/dog/bone.png",
+      coin: "/icons/dog/coin.png",
+      scan: "/icons/dog/scan.png",
+      rank: "/icons/dog/rank.png",
+      settings: "/icons/dog/settings.png",
+      quiz: "/icons/dog/quiz.png",
+      shop: "/icons/dog/shop.png",
+      customise: "/icons/dog/customise.png"
+    },
+
+    cat: {
+      backpack: "/icons/cat/backpack.png",
+      feed: "/icons/cat/bone.png",
+      coin: "/icons/cat/coin.png",
+      scan: "/icons/cat/scan.png",
+      rank: "/icons/cat/rank.png",
+      settings: "/icons/cat/settings.png",
+      quiz: "/icons/cat/quiz.png",
+      shop: "/icons/cat/shop.png",
+      customise: "/icons/cat/customise.png"
+    }
+
+  }
+
+  const icons = groupIcons[group] ?? groupIcons.default;
+
+
   return (
     <main className="page">
       {/* User summary */}
@@ -49,10 +116,12 @@ function Home() {
         )}
       </div>
 
+      
       <div className="leftside">
+        {/* Backpack */}
         <div className="pagelinkicon">
           <img
-            src="/icons/backpack_icon.png"
+            src={ icons.backpack }
             className="icon"
             alt="Backpack"
             onClick={() => navigate("/backpack")}
@@ -60,13 +129,28 @@ function Home() {
           <p className="iconcaption">Backpack</p>
         </div>
 
-        <div className="pagelinkicon">
-          <img
-            src="/icons/moneybag_icon.png"
-            className="icon"
-            alt="Money"
-          />
-          <p className="iconcaption">{score}</p>
+        <div className="scorePad">
+          {/* Money */}
+          <div className="pagelinkicon"
+            style={{display: "flex", flexDirection: "row", gap: "10px"}}>
+            <img
+              src={ icons.coin }
+              className="icon"
+              alt="Money"
+            />
+            <p className="iconcaption">{score}</p>
+          </div>
+          
+          {/* Bones/Fishes */}
+          <div className="pagelinkicon"
+            style={{display: "flex", flexDirection: "row", gap: "10px"}}>
+            <img
+              src={ icons.feed }
+              className="icon"
+              alt="Feed"
+            />
+            <p className="iconcaption">{score}</p>
+          </div>
         </div>
       </div>
 
@@ -74,10 +158,9 @@ function Home() {
         {/* Scan */}
         <div className="pagelinkicon">
           <img
-            src="/icons/scan_icon.png"
+            src={ icons.scan }
             className="icon"
             alt="Scan"
-            style={{ filter: "invert(1)" }}
             onClick={() => navigate("/scan")}
           />
           <p className="iconcaption">Scan</p>
@@ -86,7 +169,7 @@ function Home() {
         {/* Rank */}
         <div className="pagelinkicon">
           <img
-            src="/icons/rank.png"
+            src={ icons.rank }
             className="icon"
             alt="Rank"
             onClick={() => navigate("/rank")}
@@ -97,7 +180,7 @@ function Home() {
         {/* Settings */}
         <div className="pagelinkicon">
           <img
-            src="/icons/setting_icon.png"
+            src={ icons.settings }
             className="icon"
             alt="Settings"
             onClick={() => navigate("/settings")}
@@ -106,6 +189,7 @@ function Home() {
         </div>
       </div>
 
+      {/* Main Image */}
       <section 
         className="content" 
         style={{textAlign: "center"}} 
@@ -114,24 +198,34 @@ function Home() {
         <h1 className="title1">PowerUp</h1>
         <h1 className="title2">O O S D</h1>
 
-        <img className="pic" src="/icons/main_logo.png" alt="logo"/>
+        <img
+          src={
+            (breedImages[group] && breedImages[group][breed]) ||
+            (breedImages[group] && breedImages[group].default) ||
+            "/icons/home/main.gif"
+          }
+          alt={breed || group || "default"}
+          className="pic"
+        />
 
         <p className="line">Click or tap anywhere to play...</p>
       </section>
 
       <div className="downpad">
+        {/* Quiz */}
         <button onClick={() => navigate("/quiz")}>
           <img
-            src="/icons/question_icon.png"
+            src={ icons.quiz }
             className="icon"
             alt="Quiz"
           />
           <div className="buttoncaption">Quiz</div>
         </button>
-
+        
+        {/* Shop */}
         <button onClick={() => navigate("/shop")}>
           <img
-            src="/icons/shop_icon.png"
+            src={ icons.shop }
             className="icon"
             alt="Shop"
             onClick={() => navigate("/shop")}
@@ -139,9 +233,10 @@ function Home() {
           <div className="buttoncaption">Shop</div>
         </button>
 
+        {/* Customise */}
         <button onClick={() => navigate("/customise")}>
           <img
-            src="/icons/customise.png"
+            src={ icons.customise }
             className="icon"
             alt="Customise"
           />
