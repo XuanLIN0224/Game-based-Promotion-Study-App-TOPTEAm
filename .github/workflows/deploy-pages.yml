@@ -1,44 +1,28 @@
-name: Deploy Frontend to GitHub Pages
+name: Build and Push to gh-pages
 
 on:
   push:
-    branches: [ "main" ]     
-  workflow_dispatch:       
+    branches: [ main ]
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: ./frontend
-
-    permissions:
-      contents: write       
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: 20
 
-      - name: Install deps
-        run: npm ci
+      - run: npm ci
+      - run: npm run build
 
-      - name: Create .env.production
-        run: |
-          echo "VITE_API_BASE=${{ secrets.VITE_API_BASE }}" > .env.production
-
-      - name: Build
-        run: npm run build
-
-      - name: Copy 404.html
-        run: cp dist/index.html dist/404.html
-
-      - name: Deploy to GitHub Pages
+      - name: Deploy to gh-pages branch
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./frontend/dist
+          publish_branch: gh-pages
