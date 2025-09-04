@@ -200,7 +200,7 @@ function Home() {
 
         <img
           src={
-            (breedImages[group] && breedImages[group][breed]) ||
+            (breedImages[group] && breedImages[group]["Toy Poodle"]) ||
             (breedImages[group] && breedImages[group].default) ||
             "/icons/home/main.gif"
           }
