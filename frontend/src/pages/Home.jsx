@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { api } from "../api/client";
 import "./Home.css";
 
+const BASE = import.meta.env.BASE_URL || '/';
+
 function Home() {
   const [score, setScore] = useState(0);
   const [group, setGroup] = useState('');
@@ -37,20 +39,20 @@ function Home() {
 
     // Dog Breeds
     dog: {
-      "Border Collie": "/icons/home/BorderCollie.gif",
-      "Dachshund": "/icons/home/Dachshund.gif",
-      "Samoyed": "/icons/home/Samoyed.gif",
-      "Toy Poodle": "/icons/home/Poodle.gif",
-      default: "/icons/home/main.gif"
+      "Border Collie": `${BASE}icons/home/BorderCollie.gif`,
+      "Dachshund": `${BASE}icons/home/Dachshund.gif`,
+      "Samoyed": `${BASE}icons/home/Samoyed.gif`,
+      "Toy Poodle": `${BASE}icons/home/Poodle.gif`,
+      default: `${BASE}icons/home/main.gif`
       },
 
     // Cat Breeds
     cat: {
-      "Golden British": "/icons/home/golden_british_cat.gif",
-      "Bombay": "/icons/home/Bombay_cat.gif",
-      "Ragdoll": "/icons/home/ragdoll_cat.gif",
-      "Siamese": "/icons/home/Siamese_cat.gif",
-      default: "/icons/home/main.gif"
+      "Golden British": `${BASE}icons/home/golden_british_cat.gif`,
+      "Bombay": `${BASE}icons/home/Bombay_cat.gif`,
+      "Ragdoll": `${BASE}icons/home/ragdoll_cat.gif`,
+      "Siamese": `${BASE}icons/home/Siamese_cat.gif`,
+      default: `${BASE}icons/home/main.gif`
     }
   };
 
@@ -58,39 +60,39 @@ function Home() {
   const groupIcons = {
 
     default: {
-      backpack: "/icons/default/backpack.png",
-      feed: "/icons/default/feed.png",
-      coin: "/icons/default/moneybag_icon.png",
-      scan: "/icons/default/scan_icon.png",
-      rank: "/icons/default/rank.png",
-      settings: "/icons/default/setting_icon.png",
-      quiz: "/icons/default/question_icon.png",
-      shop: "/icons/default/shop_icon.png",
-      customise: "/icons/default/customise.png",
+      backpack: `${BASE}icons/default/backpack.png`,
+      feed: `${BASE}icons/default/feed.png`,
+      coin: `${BASE}icons/default/moneybag_icon.png`,
+      scan: `${BASE}icons/default/scan_icon.png`,
+      rank: `${BASE}icons/default/rank.png`,
+      settings: `${BASE}icons/default/setting_icon.png`,
+      quiz: `${BASE}icons/default/question_icon.png`,
+      shop: `${BASE}icons/default/shop_icon.png`,
+      customise: `${BASE}icons/default/customise.png`,
     },
 
     dog:{
-      backpack: "/icons/dog/backpack.png",
-      feed: "/icons/dog/bone.png",
-      coin: "/icons/dog/coin.png",
-      scan: "/icons/dog/scan.png",
-      rank: "/icons/dog/rank.png",
-      settings: "/icons/dog/settings.png",
-      quiz: "/icons/dog/quiz.png",
-      shop: "/icons/dog/shop.png",
-      customise: "/icons/dog/customise.png"
+      backpack: `${BASE}icons/dog/backpack.png`,
+      feed: `${BASE}icons/dog/bone.png`,
+      coin: `${BASE}icons/dog/coin.png`,
+      scan: `${BASE}icons/dog/scan.png`,
+      rank: `${BASE}icons/dog/rank.png`,
+      settings: `${BASE}icons/dog/settings.png`,
+      quiz: `${BASE}icons/dog/quiz.png`,
+      shop: `${BASE}icons/dog/shop.png`,
+      customise: `${BASE}icons/dog/customise.png`
     },
 
     cat: {
-      backpack: "/icons/cat/backpack.png",
-      feed: "/icons/cat/fish.png",
-      coin: "/icons/cat/coin.png",
-      scan: "/icons/cat/scan.png",
-      rank: "/icons/cat/rank.png",
-      settings: "/icons/cat/settings.png",
-      quiz: "/icons/cat/quiz.png",
-      shop: "/icons/cat/shop.png",
-      customise: "/icons/cat/customise.png"
+      backpack: `${BASE}icons/cat/backpack.png`,
+      feed: `${BASE}icons/cat/fish.png`,
+      coin: `${BASE}icons/cat/coin.png`,
+      scan: `${BASE}icons/cat/scan.png`,
+      rank: `${BASE}icons/cat/rank.png`,
+      settings: `${BASE}icons/cat/settings.png`,
+      quiz: `${BASE}icons/cat/quiz.png`,
+      shop: `${BASE}icons/cat/shop.png`,
+      customise: `${BASE}icons/cat/customise.png`
     }
 
   }
@@ -202,7 +204,7 @@ function Home() {
           src={
             (breedImages[group] && breedImages[group][breed]) ||
             (breedImages[group] && breedImages[group].default) ||
-            "/icons/home/main.gif"
+            `${BASE}icons/home/main.gif`
           }
           alt={breed || group || "default"}
           className="pic"
