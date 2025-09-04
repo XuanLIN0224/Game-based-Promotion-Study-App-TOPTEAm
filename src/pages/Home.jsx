@@ -41,7 +41,7 @@ function Home() {
       "Dachshund": "/icons/home/Dachshund.gif",
       "Samoyed": "/icons/home/Samoyed.gif",
       "Toy Poodle": "/icons/home/Poodle.gif",
-      default: "/icons/main.gif"
+      default: "/icons/home/main.gif"
       },
 
     // Cat Breeds
@@ -50,7 +50,7 @@ function Home() {
       "Bombay": "/icons/home/Bombay_cat.gif",
       "Ragdoll": "/icons/home/ragdoll_cat.gif",
       "Siamese": "/icons/home/Siamese_cat.gif",
-      default: "/icons/main.gif"
+      default: "/icons/home/main.gif"
     }
   };
 
@@ -83,7 +83,7 @@ function Home() {
 
     cat: {
       backpack: "/icons/cat/backpack.png",
-      feed: "/icons/cat/bone.png",
+      feed: "/icons/cat/fish.png",
       coin: "/icons/cat/coin.png",
       scan: "/icons/cat/scan.png",
       rank: "/icons/cat/rank.png",
@@ -200,7 +200,7 @@ function Home() {
 
         <img
           src={
-            (breedImages[group] && breedImages[group]["Toy Poodle"]) ||
+            (breedImages[group] && breedImages[group][breed]) ||
             (breedImages[group] && breedImages[group].default) ||
             "/icons/home/main.gif"
           }
