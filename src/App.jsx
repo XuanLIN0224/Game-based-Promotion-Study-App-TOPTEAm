@@ -9,7 +9,7 @@ import Settings from './pages/Settings';
 import Quiz from './pages/Quiz';
 import Shop from './pages/Shop';
 import Customise from './pages/Customise';
-import StarBackground from "./background/StarBackground";
+// import StarBackground from "./background/StarBackground";
 import Teacher from './pages/Teacher';
 // import './styles.css';
 
@@ -48,7 +48,7 @@ function App() {
     <BrowserRouter basename="/Game-based-Promotion-Study-App-TOPTEAm">
       {/* <NavBar /> */}
       <div className="app">
-        <StarBackground count={120} /> 
+        {/* <StarBackground count={120} />  */}
         <main className='page'>
           <Routes>
             {/* Public auth routes */}
