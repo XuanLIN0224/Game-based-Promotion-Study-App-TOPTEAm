@@ -7,12 +7,13 @@ export default function Rank() {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
+  const API_BASE = (import.meta.env.VITE_API_BASE || "/api").replace(/\/$/, "");
 
   useEffect(() => {
     (async () => {
       try {
         const token = localStorage.getItem("token");
-        const res = await fetch("http://localhost:5001/api/rank/top", {
+        const res = await fetch(`${API_BASE}/rank/top`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {}
         });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
