@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Home.css";
+const API_BASE = (import.meta.env.VITE_API_BASE || "/api").replace(/\/$/, "");
 
 export default function Rank() {
   const navigate = useNavigate();
@@ -12,9 +13,12 @@ export default function Rank() {
     (async () => {
       try {
         const token = localStorage.getItem("token");
-        const res = await fetch("http://localhost:5001/api/rank/top", {
+        const res = await fetch(`${API_BASE}/rank/top`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {}
         });
+        // const res = await fetch("http://localhost:5001/api/rank/top", {
+        //   headers: token ? { Authorization: `Bearer ${token}` } : {}
+        // });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         setRows(Array.isArray(data) ? data : []);
