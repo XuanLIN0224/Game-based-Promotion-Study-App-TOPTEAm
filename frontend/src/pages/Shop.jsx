@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../api/client";
 
+const BASE = import.meta.env.BASE_URL || '/';
+
 export const LABELS = {
   extra_attempt: { title: "Extra Quiz Attempt", desc: "Grants +1 quiz attempt", step: 1 },
   quiz_booster_today: { title: "Quiz Booster (Today)", desc: "Double quiz score until midnight", step: 1 },
@@ -65,7 +67,7 @@ export default function Shop () {
 
       <div className="leftside">
         <div className="pagelinkicon" onClick={() => navigate("/")}>
-          <img src="/icons/home.png" className="icon" alt="Home" />
+          <img src={`${BASE}icons/home/home.png` || `${BASE}icons/default/home.png`} className="icon" alt="Home" />
           <p className="iconcaption">Home</p>
         </div>
       </div>

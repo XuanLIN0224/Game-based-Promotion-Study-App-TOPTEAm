@@ -10,6 +10,7 @@ import { Link } from "react-router-dom";
 
 import { api, clearToken } from "../api/client";
 
+const BASE = import.meta.env.BASE_URL || '/';
 
 export const LABELS = {
   user_name: { title: "User Name", prop: "Could be reset (countless times allowed)" },
@@ -204,7 +205,7 @@ export default function Settings() {
       {/* Left side nav */}
       <div className="leftside">
         <div className="pagelinkicon" onClick={() => navigate("/")}>
-          <img src="icons/home.png" className="icon" alt="Home" />
+          <img src={`${BASE}icons/home/home.png` || `${BASE}icons/default/home.png`} className="icon" alt="Home" />
           <p className="iconcaption">Home</p>
         </div>
       </div>

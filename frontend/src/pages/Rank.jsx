@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Home.css";
 
+const BASE = import.meta.env.BASE_URL || '/';
+
 export default function Rank() {
   const navigate = useNavigate();
   const [rows, setRows] = useState([]);
@@ -30,7 +32,7 @@ export default function Rank() {
     <div className="page">
       <div className="leftside">
         <div className="pagelinkicon" onClick={() => navigate("/")}>
-          <img src="/icons/home.png" className="icon" alt="Home" />
+          <img src={`${BASE}icons/home/home.png` || `${BASE}icons/default/home.png`} className="icon" alt="Home" />
           <p className="iconcaption">Home</p>
         </div>
       </div>
@@ -39,7 +41,7 @@ export default function Rank() {
 
       {loading && <p>Loading…</p>}
       {err && <p style={{ color: "red" }}>{err}</p>}
-      {!loading && !err && rows.length === 0 && <p>暂无排行榜数据</p>}
+      {!loading && !err && rows.length === 0 && <p>no rank data yet</p>}
 
       {!loading && !err && rows.length > 0 && (
         <ul style={{ listStyleType: "none", paddingLeft: 0, fontSize: "50px", fontFamily: "'SuperShiny', sans-serif", }}>

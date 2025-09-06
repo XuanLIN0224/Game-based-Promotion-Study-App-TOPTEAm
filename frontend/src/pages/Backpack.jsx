@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../api/client";
 
+const BASE = import.meta.env.BASE_URL || '/';
+
 const LABELS = {
   extra_attempt: { title: "Extra Quiz Attempt", hint: "Use to get +1 attempt" },
   lecture_qr: { title: "Lecture QR Code", hint: "Show QR during lecture" },
@@ -59,7 +61,7 @@ export default function Backpack () {
 
       <div className="leftside">
         <div className="pagelinkicon" onClick={() => navigate("/")}>
-          <img src="/icons/home.png" className="icon" alt="Home" />
+          <img src={`${BASE}icons/home/home.png` || `${BASE}icons/default/home.png`} className="icon" alt="Home" />
           <p className="iconcaption">Home</p>
         </div>
       </div>

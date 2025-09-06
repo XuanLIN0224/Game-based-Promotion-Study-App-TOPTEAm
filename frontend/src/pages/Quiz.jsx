@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../api/client";
 
+const BASE = import.meta.env.BASE_URL || '/';
+
 export default function Quiz () {
   const nav = useNavigate();
   const [quiz, setQuiz] = useState(null);
@@ -57,7 +59,7 @@ export default function Quiz () {
       <div className="page">
         <div className="leftside">
           <div className="pagelinkicon" onClick={() => nav("/")}>
-            <img src="icons/home.png" className="icon" alt="Home"/>
+            <img src={`${BASE}icons/home/home.png` || `${BASE}icons/default/home.png`} className="icon" alt="Home"/>
             <p className="iconcaption">Home</p>
           </div>
         </div>
@@ -71,11 +73,11 @@ export default function Quiz () {
     <div className="page">
       <div className="leftside">
         <div className="pagelinkicon" onClick={() => nav("/")}>
-          <img src="icons/home.png" className="icon" alt="Home"/>
+          <img src={`${BASE}icons/home/home.png` || `${BASE}icons/default/home.png`} className="icon" alt="Home"/>
           <p className="iconcaption">Home</p>
         </div>
         <div className="pagelinkicon">
-          <img src="icons/moneybag_icon.png" className="icon" alt="Money"/>
+          <img src={`${BASE}icons/home/moneybag_icon.png`} className="icon" alt="Money"/>
         </div>
       </div>
 
