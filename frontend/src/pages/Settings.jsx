@@ -197,34 +197,219 @@ export default function Settings() {
     }
   }
 
+  // For styling
+
 
   /** UI Part */
   return (
-    <section className="page">
+    <section className="page page-settings">
+
+
+      {/* ② page-scoped CSS (affects only elements inside .page-settings) */}
+            <style>{`
+              /* General Font */
+              .page-settings h1{ font-size: 48px; line-height: 1.2; }
+              .page-settings p{ font-size: 22px; }
+              /* Line spacing */
+              .page-settings li {
+                line-height: 2;
+              }
+
+              .user-info{
+                display: grid;
+                gap: 8px;
+                max-width: 640px;
+              }
+
+              /* Each row becomes a 2-column grid: label/value | button */
+              .user-info > div{
+                display: grid;
+                grid-template-columns: 1fr max-content; /* left fills, right hugs */
+                align-items: center;
+                column-gap: 12px;
+                /* optional: stop children from stretching horizontally */
+                justify-items: start;
+              }
+
+
+              /* Buttons */
+              .page-settings .btn {
+                  /* STOP stretching (works in grid or flex parents) */
+                  justify-self: start;         /* grid: align to start, don't stretch */
+                  flex: 0 0 auto;              /* flex: don't grow/shrink */
+
+                  /* Compact, content-based box */
+                  display: inline-flex;
+                  align-items: center;
+                  justify-content: center;
+                  width: max-content;          /* <-- key: hug text in grid/flex */
+                  white-space: nowrap;         /* keep label on one line */
+                  line-height: 1;              /* tighter height */
+                  padding: 2px 8px;            /* smaller frame */
+                  min-height: 0;               /* remove tall constraint */
+
+                  /* Visuals */
+                  font-size: 1.2em;            /* keep or tweak */
+                  font-weight: 600;
+                  font-family: "SuperShiny", sans-serif;
+                  background: #c0e5d6;
+                  color: #888;
+                  border: 1px solid rgba(0,0,0,.18);
+                  border-radius: 6px;
+
+                  /* spacing */
+                  margin-right: 30px;
+              }
+              .page-settings .btn:hover { filter:brightness(0.98); }
+              .page-settings .btn:focus-visible { outline:2px solid #111; outline-offset:2px; }
+
+              /* Buttons with strong/primary action (e.g., "Log out") */
+              .page-settings .btn.primary { background:#3c97b5; color:#fff; }
+              .page-settings .btn.primary:hover { opacity:.95; }
+
+
+
+              /* Text (aligned with the css from the home page) */
+              /* Text in View Mode */
+              .line {
+                font-family: "SuperShiny", sans-serif;
+                margin: 0 0 0 0;
+                font-size: 1.8em;
+              }
+
+              /* Text in Edit Mode */
+              .line_hide {
+                /* try */
+                display: flex;
+                align-items: center;
+                flex-wrap: wrap;    /* allow wrapping when space is tight */
+                font-family: "SuperShiny", sans-serif;
+                margin: 0 0 0 0;
+                font-size: 1.5em;
+                color: #9dc9b7;
+              }
+
+              .page-settings .line_hide input{
+                flex: 0 0 auto;
+                justify-self: start;
+                font-size: 1rem;
+                width: 600px;
+                justify-self:start;
+              }
+
+              /* Text navigating to the home page */
+              .line_nev_back {
+                font-family: "SuperShiny", sans-serif;
+                margin: 0 0 0 0;
+                font-size: 1.5em;
+                color: #3c97b5;
+              }
+
+              /* Text popping up as a successful message */
+              .line_msg {
+                /* Text styles */
+                font-family: "SuperShiny", sans-serif;
+                margin: 0;
+                font-size: 1.4em;
+                color: #8cf72f;
+
+                /* Let the frame hug the text instead of full width */
+                display: inline-block;
+                width: fit-content;
+
+                /* Frame */
+                padding: 8px 12px;
+                border: 2px solid #8cf72f;  /* the “frame” */
+                border-radius: 10px;    /* rounded corners */
+                background: rgba(140, 247, 47, 0.08);   /* subtle glow behind text */
+              }
+              /* Text popping up as a warning message */
+              .line_err {
+                font-family: "SuperShiny", sans-serif;
+                margin: 0 0 0 0;
+                font-size: 1.4em;
+                color: #ff6e42;
+
+                display: inline-block;
+                width: fit-content;
+
+                padding: 8px 12px;
+                border: 2px solid #ff6e42;
+                border-radius: 10px;
+                background: rgba(140, 247, 47, 0.08);
+              }
+
+
+              /* Mobile View Adjustment */
+              @media (max-width:650px){
+                /* let buttons size to their content */
+                .page-settings .btn{
+                  width: 20px;  /* or: width: fit-content; */
+                  justify-self: start;    /* prevent grid from stretching this item */
+                }
+
+                /* Solve the problem of out-side width when editing */
+                  .page-settings .user-info{
+                    max-width: 360px !important;
+                    width: 100%;
+                    margin: 0 auto;
+                    justify-items: start;
+                  }
+
+                  .page-settings .line_hide{
+                    /* Set spacing between elements */
+                    gap: 8px 6px;
+                  }
+
+                  /* Let the label ("username/email" in our case) on its own line--above the input box */
+                  .page-settings .line_hide label{
+                    flex:0 0 100%;
+                  }
+
+                  /* Let the input box be full width on its own line */
+                  .page-settings .line_hide input{
+                    flex:0 0 80%;
+                  }
+
+              }
+
+            `}</style>
+
       {/* Left side nav */}
       <div className="leftside">
         <div className="pagelinkicon" onClick={() => navigate("/")}>
           <img src="icons/home.png" className="icon" alt="Home" />
-          <p className="iconcaption">Home</p>
+          <p className="line_nev_back">Home</p>
         </div>
       </div>
 
-      <h1>Settings</h1>
+
+      <h1
+        style={{
+          fontSize: 50,
+          margin: "0 0 16px",   // 16px below
+          lineHeight: 4,
+          textAlign: "center"
+        }}
+      >
+        Settings
+      </h1>
+
 
       {loading ? (
-        <p>Loading...</p>
+        <p className="line_nev_back">Loading...</p>
       ) : (
         <>
-          {err && <div className="auth-error" style={{ maxWidth: 520 }}>{err}</div>}
-          {msg && <div className="auth-success" style={{ maxWidth: 520, color: "limegreen" }}>{msg}</div>}
+          {err && <div className="line_err" style={{ maxWidth: 520 }}>{err}</div>}
+          {msg && <div className="line_msg" style={{ maxWidth: 520 }}>{msg}</div>}
 
-          <div className="user-info" style={{ display: "grid", gap: 8, maxWidth: 640 }}>
+          <div className="user-info">
             {/* Username row */}
             {!editingUsername ? (
               // C1: "editingUsername == false"--display the username--View MODE
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                 {/* Display the user's username */}
-                <p style={{ margin: 0 }}><strong>User Name:</strong> {username}</p>
+                <p className="line" style={{ margin: 0 }}><strong>User Name:</strong> {username}</p>
                 {/* if the button "Change" is hit, switch to the Edit MODE */}
                 <button
                   className="btn"
@@ -236,7 +421,7 @@ export default function Settings() {
             ) : (
               // C2: "editingUsername == true"--allow editing--Edit MODE
               // <form> here: When the user clicks "Save" or presses Enter, call my saveUsername function
-              <form onSubmit={saveUsername} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <form className="line_hide" onSubmit={saveUsername} style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <label htmlFor="username" style={{ minWidth: 100 }}><strong>User Name:</strong></label>
                 {/* Expected input */}
                 <input
@@ -266,7 +451,7 @@ export default function Settings() {
             {/* Email row */}
             {!editingEmail ? (
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <p style={{ margin: 0 }}><strong>Email:</strong> {email}</p>
+                <p className="line" style={{ margin: 0 }}><strong>Email:</strong> {email}</p>
                 <button
                   className="btn"
                   onClick={() => { setEmailInput(email || ""); setEditingEmail(true); }}
@@ -275,7 +460,7 @@ export default function Settings() {
                 </button>
               </div>
             ) : (
-              <form onSubmit={saveEmail} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <form className="line_hide" onSubmit={saveEmail} style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <label htmlFor="email" style={{ minWidth: 100 }}><strong>Email:</strong></label>
                 <input
                   id="email"
@@ -299,12 +484,12 @@ export default function Settings() {
             )}
 
             {/* Read-only fields */}
-            <p><strong>Group:</strong> {group}</p>
-            <p><strong>Breed:</strong> {breed}</p>
-            <p><strong>Join Date:</strong> {createdAt ? new Date(createdAt).toLocaleString() : "-"}</p>
-            <p><strong>Last Update Date:</strong> {updatedAt ? new Date(updatedAt).toLocaleString() : "-"}</p>
-            <p><strong>Total Score:</strong> {score}</p>
-            <p><strong>Total Assets:</strong> {asset}</p>
+            <p className="line"><strong>Group:</strong> {group}</p>
+            <p className="line"><strong>Breed:</strong> {breed}</p>
+            <p className="line"><strong>Join Date:</strong> {createdAt ? new Date(createdAt).toLocaleString() : "-"}</p>
+            <p className="line"><strong>Last Update Date:</strong> {updatedAt ? new Date(updatedAt).toLocaleString() : "-"}</p>
+            <p className="line"><strong>Total Score:</strong> {score}</p>
+            <p className="line"><strong>Total Assets:</strong> {asset}</p>
 
 
             {/* Password row */}
@@ -312,7 +497,7 @@ export default function Settings() {
               // C1: "performReset == false" -- View MODE
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                 {/* Display masked password */}
-                <p style={{ margin: 0 }}><strong>Password:</strong> ••••••••</p>
+                <p className="line" style={{ margin: 0 }}><strong>Password:</strong> ••••••••</p>
                 {/* if the button "Change" is hit, switch to the Edit MODE*/}
                 <button
                   className="btn"
@@ -328,7 +513,7 @@ export default function Settings() {
               </div>
             ) : (
               // C2: "editingPassword == true" -- Edit MODE
-              <form onSubmit={resetPassword} style={{ display: "flex", flexDirection: "column", gap: 8, maxWidth: 400 }}>
+              <form className = "line_hide" onSubmit={resetPassword} style={{ display: "flex", gap: 8, maxWidth: 400 }}>
                 <label htmlFor="oldPassword"><strong>Old Password:</strong></label>
                 <input
                   id="oldPassword"
@@ -378,7 +563,7 @@ export default function Settings() {
                 </div>
 
                 {/* Forget password link */}
-                <Link to="/forgot" className="text-sm" style={{ color: "#2563eb" }}>
+                <Link to="/forgot" className="text-sm" style={{ color: "#3c97b5" }}>
                 Forgot password?
                 </Link>
 
@@ -388,8 +573,8 @@ export default function Settings() {
 
 
             {/* Logout */}
-            <button className="btn primary" onClick={handleLogout}>
-              <p><strong>Log out</strong></p>
+            <button className="btn primary" onClick={handleLogout} style={{marginTop: 30, minWidth: 300}}>
+              <p className="line" ><strong>Log out</strong></p>
             </button>
 
           </div>
