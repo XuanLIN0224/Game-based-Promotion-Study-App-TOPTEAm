@@ -6,15 +6,15 @@
 
 .title1 {
   text-align: center;
-  font-size: 7em;
+  font-size: 5em;
   color: #c0e5d6;
-  margin: 10px 0 0 0;
+  margin: -10px 0 0 0;
 }
 
 .title2 {
   text-align: center;
-  font-size: 6.25em;
-  margin: -110px 0 0 0;
+  font-size: 4.25em;
+  margin: -90px 0 0 0;
 }
 
 .pic {
@@ -23,7 +23,7 @@
   height: auto;
   object-fit: contain;
   display: block;
-  margin: -70px 0 0 0
+  margin: -50px 0 0 0
 }
 
 .line {
@@ -78,6 +78,7 @@ button {
 }
 
 
+/* Laptop View */
 @media (min-width: 768px) {
   .pic {
     max-width: 600px; 

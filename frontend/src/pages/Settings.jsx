@@ -261,12 +261,12 @@ export default function Settings() {
                   /* spacing */
                   margin-right: 30px;
               }
-              .page-settings .btn:hover { filter:brightness(0.98); }
-              .page-settings .btn:focus-visible { outline:2px solid #111; outline-offset:2px; }
+              .page-settings .btn: hover { filter:brightness(0.98); }
+              .page-settings .btn: focus-visible { outline:2px solid #111; outline-offset:2px; }
 
               /* Buttons with strong/primary action (e.g., "Log out") */
               .page-settings .btn.primary { background:#3c97b5; color:#fff; }
-              .page-settings .btn.primary:hover { opacity:.95; }
+              .page-settings .btn.primary: hover { opacity:.95; }
 
 
 
@@ -295,7 +295,7 @@ export default function Settings() {
                 justify-self: start;
                 font-size: 1rem;
                 width: 600px;
-                justify-self:start;
+                justify-self: start;
               }
 
               /* Text navigating to the home page */
@@ -342,34 +342,37 @@ export default function Settings() {
 
 
               /* Mobile View Adjustment */
-              @media (max-width:650px){
+              @media (max-width: 650px){
                 /* let buttons size to their content */
+                .page-settings p{ font-size: 15px; }
                 .page-settings .btn{
-                  width: 20px;  /* or: width: fit-content; */
+                  font-size: 15px;
+                  width: fit-content;
                   justify-self: start;    /* prevent grid from stretching this item */
                 }
 
                 /* Solve the problem of out-side width when editing */
                   .page-settings .user-info{
                     max-width: 360px !important;
-                    width: 100%;
+                    width: 80%;
                     margin: 0 auto;
                     justify-items: start;
                   }
 
                   .page-settings .line_hide{
                     /* Set spacing between elements */
+                    font-size: 15.5px;
                     gap: 8px 6px;
                   }
 
                   /* Let the label ("username/email" in our case) on its own line--above the input box */
                   .page-settings .line_hide label{
-                    flex:0 0 100%;
+                    flex: 0 0 100%;
                   }
 
                   /* Let the input box be full width on its own line */
                   .page-settings .line_hide input{
-                    flex:0 0 80%;
+                    flex: 0 0 80%;
                   }
 
               }

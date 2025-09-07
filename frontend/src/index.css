@@ -126,10 +126,11 @@ h1, .title {
 }
 
 .iconcaption {
-  font-size: 12px;
-  line-height: 1;
+  font-size: 0.75em;
+  font-family: "SuperShiny", sans-serif;
+  line-height: 1.5;
   font-weight: bold;
-  margin: -2px;
+  margin: -1px;
   opacity: .85;
   transition: opacity .15s ease;
 }
@@ -172,7 +173,8 @@ button:focus-visible {
   align-content: center;
 }
 
-/* Laptop Screen */
+
+/* Laptop View */
 @media (min-width: 768px) {
 
   .icon {
@@ -186,7 +188,7 @@ button:focus-visible {
   }
 
   .iconcaption {
-    font-size: 16px;
+    font-size: 1.3em;
   }
 
 }
