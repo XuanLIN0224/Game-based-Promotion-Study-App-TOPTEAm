@@ -1,38 +1,25 @@
-// import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from "react-router-dom";
 
 export default function Scan() {
-//   const videoRef = useRef(null);
-//   const [err, setErr] = useState('');
-
-//   useEffect(() => {
-//     (async () => {
-//       try {
-//         const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-//         videoRef.current.srcObject = stream;
-//         await videoRef.current.play();
-//       } catch (e) {
-//         setErr('Camera permission denied or not available.');
-//       }
-//     })();
-//     return () => {
-//       const s = videoRef.current?.srcObject;
-//       s && s.getTracks().forEach(t => t.stop());
-//     };
-//   }, []);
+  const navigate = useNavigate();
+  const BASE = import.meta.env.BASE_URL || "/";
 
   return (
-    <section className="page">
+    <div className="page">
+      <div className="leftside">
+        <div className="pagelinkicon" onClick={() => navigate("/")}>
+          <img
+            src={`${BASE}icons/home/home.png`}
+            className="icon"
+            alt="Home"
+            onError={(e) => { e.currentTarget.src = `${BASE}icons/default/home.png`; }}
+          />
+          <p className="iconcaption">Home</p>
+        </div>
+      </div>
 
-
-
-      <h1>Scan</h1>
-
-
-
-      {/* {err && <p>{err}</p>}
-      <video ref={videoRef} style={{ width: '100%', maxWidth: 480 }} playsInline muted /> */}
-      {/* For QR/barcodes, later integrate a decoder (e.g., a ZXing-based package) */}
-    </section>
+      <h1 className="title">Scan</h1>
+      <div className="content">Hi there is nothing hehe</div>
+    </div>
   );
 }
