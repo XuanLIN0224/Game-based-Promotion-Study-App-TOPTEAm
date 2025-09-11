@@ -1,27 +1,25 @@
 import { useNavigate } from "react-router-dom";
 
-export default function Customise () {
+export default function Customise() {
+  const navigate = useNavigate();
+  const BASE = import.meta.env.BASE_URL || "/";
 
-    const navigate = useNavigate();
-
-    return (
-        <div className="page">
-
-            <div className="leftside">
-
-                <div className="pagelinkicon" onClick={() => navigate("/")}>
-                    <img
-                    src="/icons/home.png"
-                    className="icon"
-                    alt="Home"
-                    />
-                    <p className="iconcaption">Home</p>
-                </div>
-            </div>
-
-
-            <h1 className="title">Customise</h1>
-            <div className="content">Hi there is nothing</div>
+  return (
+    <div className="page">
+      <div className="leftside">
+        <div className="pagelinkicon" onClick={() => navigate("/")}>
+          <img
+            src={`${BASE}icons/home/home.png`}
+            className="icon"
+            alt="Home"
+            onError={(e) => { e.currentTarget.src = `${BASE}icons/default/home.png`; }}
+          />
+          <p className="iconcaption">Home</p>
         </div>
-    );
+      </div>
+
+      <h1 className="title">Customise</h1>
+      <div className="content">Hi there is nothing</div>
+    </div>
+  );
 }
