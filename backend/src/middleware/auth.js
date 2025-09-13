@@ -10,6 +10,20 @@ module.exports = async function auth(req, res, next) {
   // If token not found
   if (!token) return res.status(401).json({ message: 'Unauthorized' });
 
+  // Enforce single-session & expiry: token must match DB and not be expired
+  const now = new Date();
+  if (!user.activeToken || user.activeToken !== token) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+  if (user.tokenExpiresAt && now > new Date(user.tokenExpiresAt)) {
+    // Auto clean up expired token
+    user.activeToken = null;
+    user.tokenExpiresAt = null;
+    await user.save();
+    return res.status(401).json({ message: 'Session expired' });
+  }
+
+
   try {
     // Verify the token using a security key
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
