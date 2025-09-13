@@ -1,42 +1,51 @@
 /* 页面容器 */
 .auth-page {
-  min-height: 100vh;
+  min-height: 100dvh; /* mobile-safe viewport height */
   display: grid;
   place-items: center;
-  background: radial-gradient(80% 60% at 50% 0%, #222 0%, #111 60%, #0c0c0c 100%);
   color: #fff;
-  padding: 24px;
+  padding: clamp(12px, 4vw, 24px); /* scale padding for small screens */
 }
 
 /* 卡片 */
 .auth-card {
-  width: min(560px, 92vw);
+  width: 100%;
+  max-width: 560px; /* keep desktop cap */
   background: rgba(255,255,255,0.06);
   border: 1px solid rgba(255,255,255,0.12);
   backdrop-filter: blur(6px);
   border-radius: 16px;
-  padding: 28px;
+  padding: clamp(18px, 4.5vw, 28px); /* scale card padding */
   box-shadow: 0 10px 30px rgba(0,0,0,0.4);
 }
 
 .auth-card h2 {
   margin: 0 0 16px;
-  font-size: 24px;
+  font-size: clamp(18px, 2.6vw, 24px);
   letter-spacing: 0.5px;
 }
 
 /* 表单 */
 .auth-form {
   display: grid;
-  gap: 10px;
+  gap: clamp(8px, 2.5vw, 10px);
   margin-bottom: 12px;
 }
+
+/* two-column on wider screens; single column on phones */
+.form-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+
+@media (min-width: 680px) {
+  .form-grid { grid-template-columns: 1fr 1fr; }
+}
+
 .auth-form label {
   font-size: 13px;
   color: #ddd;
 }
 .auth-input {
-  height: 40px;
+  height: 44px; /* larger touch target */
   border-radius: 10px;
   border: 1px solid rgba(255,255,255,0.15);
   background: rgba(255,255,255,0.08);
@@ -59,7 +68,7 @@
 /* 选择 dog/cat */
 .group-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
   margin-bottom: 8px;
 }
@@ -74,9 +83,10 @@
   color: #fff;
   cursor: pointer;
   transition: transform .12s ease, border-color .12s ease, background .12s ease;
+  width: 100%;
 }
 .group-card img {
-  width: 72px; height: 72px; object-fit: contain;
+  width: clamp(56px, 14vw, 72px); height: clamp(56px, 14vw, 72px);
 }
 .group-card.selected,
 .breed-card.selected {
@@ -169,8 +179,23 @@
   margin-top: 12px;
 }
 
-/* 响应式 */
-@media (max-width: 520px) {
-  .group-grid, .breed-grid { grid-template-columns: 1fr 1fr; }
-  .auth-card { padding: 22px; }
+.list-picker {
+  display: grid;
+  gap: 12px;
+}
+
+/* 竖屏时再收紧一点（iPhone 上观感更好） */
+@media (orientation: portrait) {
+  .auth-card {
+    max-width: calc(100vw - 20vw);  /* 保留边距，避免紧贴边缘 */
+  }
+}
+/* Respect iOS safe areas (e.g., notch) */
+@supports (padding: max(0px)) {
+  .auth-page {
+    padding-left: max(12px, env(safe-area-inset-left));
+    padding-right: max(12px, env(safe-area-inset-right));
+    padding-top: max(12px, env(safe-area-inset-top));
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+  }
 }

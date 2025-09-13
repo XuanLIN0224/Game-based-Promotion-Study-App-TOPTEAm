@@ -30,8 +30,8 @@ export default function RegisterStep2() {
       });
       setToken(resp.token);
       const me = await api('/auth/me');
-      if (me?.isStudent === false) navigate('/teacher', { replace: true });
-      else navigate('/', { replace: true });
+      if (me?.isStudent === false) nav('/teacher', { replace: true });
+      else nav('/', { replace: true });
       // 清掉临时
       sessionStorage.removeItem('registerEmail');
       sessionStorage.removeItem('registerGroup');
@@ -48,7 +48,7 @@ export default function RegisterStep2() {
       <div className="auth-card">
         <h2>Choose your {group === 'dog' ? 'puppy' : 'kitty'}</h2>
         <form onSubmit={onSubmit}>
-          <div className="breed-grid">
+          <div className="list-picker">
             {breeds.map(b=>(
               <button key={b._id} type="button"
                 className={`breed-card ${selected===b._id?'selected':''}`}

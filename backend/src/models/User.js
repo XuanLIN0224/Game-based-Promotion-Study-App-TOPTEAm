@@ -12,7 +12,6 @@ const UserSchema = new mongoose.Schema({
   clothingConfig: { type: Object, default: {} },
 
   // 单会话可选（阻止多设备同时登录）
-  tokenExpiresAt: { type: Date, default: null },
   activeToken: { type: String },
 
   // 可选：审计

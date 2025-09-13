@@ -30,7 +30,7 @@ router.post('/register/step1', async (req, res) => {
   const exists = await User.findOne({ email });
   if (exists) return res.status(400).json({ message: 'Email already registered' });
 
-  // Create user with hashed password
+  // 先创建用户但不绑定 breed（Step2 再选）
   const user = new User({ email, username, password, group });
   await user.save();
 
@@ -64,15 +64,12 @@ router.post('/register/step2', async (req, res) => {
   user.breed = breed._id;
   await user.save();
 
-  //create token for auto login
+  //生成登录用的 JWT， 存储 token
   const token = jwt.sign({ userId: user._id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '7d' });
-  const remember = !!req.body.remember; // optional – default 24h
-  const ttlMs = (remember ? 7 : 1) * 24 * 60 * 60 * 1000;
-  user.activeToken = token;
-  user.tokenExpiresAt = new Date(Date.now() + ttlMs);
+  user.activeToken = token; // 可选：单会话
   await user.save();
 
-  // return user info + token
+  // 返回一个 JSON， 提示注册成功
   return res.json({
     message: 'Registration completed',
     token,
@@ -98,7 +95,7 @@ router.post('/login', async (req, res) => {
   const parsed = loginSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ message: 'Invalid credentials' });
 
-  const { email, password, remember} = parsed.data;
+  const { email, password } = parsed.data;
 
   // Check whether the pair is already in the system
   const user = await User.findOne({ email }).populate('breed');
@@ -107,10 +104,19 @@ router.post('/login', async (req, res) => {
   const match = await user.comparePassword(password);
   if (!match) return res.status(401).json({ message: 'Invalid password' });
 
+  // 单会话控制（可选）
+  if (user.activeToken) {
+    try {
+      jwt.verify(user.activeToken, process.env.JWT_SECRET);
+      return res.status(409).json({ message: 'Account is logged in elsewhere' });
+    } catch {
+      user.activeToken = null;
+      await user.save();
+    }
+  }
+
   const token = jwt.sign({ userId: user._id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '7d' });
-  const ttlMs = (remember ? 7 : 1) * 24 * 60 * 60 * 1000; // 7 days or 1 day
   user.activeToken = token;
-  user.tokenExpiresAt = new Date(Date.now() + ttlMs);
   await user.save();
 
   return res.json({
@@ -131,18 +137,17 @@ router.post('/login', async (req, res) => {
 // POST /api/auth/logout
 router.post('/logout', auth, async (req, res) => {
   req.user.activeToken = null;
-  req.user.tokenExpiresAt = null;
   await req.user.save();
   res.json({ message: 'Logged out' });
 });
 
-// POST /api/auth/forgot-password  -> send reset code
+// POST /api/auth/forgot-password  -> 发送6位验证码
 router.post('/forgot-password', async (req, res) => {
   const email = (req.body.email || '').trim();
   if (!email) return res.status(400).json({ message: 'Email required' });
 
   const user = await User.findOne({ email });
-  // prevent account enumeration
+  // 避免暴露是否注册：统一返回成功
   if (!user) return res.json({ message: 'If the email exists, a code has been sent' });
 
   const code = String(Math.floor(100000 + Math.random() * 900000));
@@ -153,7 +158,7 @@ router.post('/forgot-password', async (req, res) => {
     await sendResetCodeEmail(email, code);
   } catch (e) {
     console.error('Email send error:', e);
-    // if email fails, still respond OK to avoid enumeration
+    // 仍返回成功，避免撞库
   }
   res.json({ message: 'If the email exists, a code has been sent' });
 });
@@ -164,7 +169,7 @@ const resetSchema = z.object({
   newPassword: z.string().min(6).max(100),
 });
 
-// POST /api/auth/reset-password  -> use code to reset password
+// POST /api/auth/reset-password  -> 使用验证码重置
 router.post('/reset-password', async (req, res) => {
   const parsed = resetSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ message: 'Invalid request' });
@@ -177,7 +182,7 @@ router.post('/reset-password', async (req, res) => {
   const user = await User.findOne({ email });
   if (!user) return res.status(404).json({ message: 'User not found' });
 
-  user.password = newPassword; // pre-save hash
+  user.password = newPassword; // 触发 pre-save hash
   await user.save();
 
   rec.used = true;

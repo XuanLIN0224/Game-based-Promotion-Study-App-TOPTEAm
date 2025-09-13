@@ -1,6 +1,6 @@
 /* Token middleware--for system safety--security gate */
 const jwt = require('jsonwebtoken');    // The library to sign/verify token
-const User = require('../models/User');
+const user = require('../models/User');
 
 // Run before the actual route handler
 // Check whether the request has a valid token and attach the user (making request) or not

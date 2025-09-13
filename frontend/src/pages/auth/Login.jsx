@@ -7,8 +7,10 @@ export default function Login() {
   const nav = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [remember, setRemember] = useState(false);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   /* Triggered when the user clicks "Log in" button */
   const onSubmit = async (e) => {
@@ -18,7 +20,7 @@ export default function Login() {
     try {
       const resp = await api('/auth/login', {
         method: 'POST',
-        body: { email, password }
+        body: { email, password, remember }
       });
       setToken(resp.token);
       const me = await api('/auth/me');
@@ -43,9 +45,25 @@ export default function Login() {
           <input className="auth-input" type="email" value={email}
                  onChange={e=>setEmail(e.target.value)} required maxLength={50}/>
           <label>Password</label>
-          <input className="auth-input" type="password" value={password}
+          <input className="auth-input" type={showPassword ? "text" : "password"} value={password}
                  onChange={e=>setPassword(e.target.value)} required/>
           {err && <div className="auth-error">{err}</div>}
+          <label className="remember-row">
+            <input
+              type="checkbox"
+              checked={showPassword}
+              onChange={(e) => setShowPassword(e.target.checked)}
+            />
+            Show password
+          </label>
+          <label className="remember-row">
+            <input
+              type="checkbox"
+              checked={remember}
+              onChange={(e) => setRemember(e.target.checked)}
+            />
+            Keep me logged in for a week
+          </label>
           <button className="btn primary" disabled={busy}>{busy?'Logging in...':'Log in'}</button>
         </form>
 

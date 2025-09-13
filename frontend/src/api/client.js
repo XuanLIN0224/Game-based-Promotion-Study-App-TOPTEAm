@@ -3,6 +3,13 @@
 // Base URL for all API requests--connecting to the backend
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5001/api';
 
+let onUnauthorized = null;
+export function setOnUnauthorized(handler) { onUnauthorized = handler; }
+
+function broadcastLogout(reason = 'unauthorized') {
+  try { window.dispatchEvent(new CustomEvent('auth:logout', { detail: { reason } })); } catch {}
+}
+
 // Save the token when log-in successfully
 export function setToken(token) {
   if (token) localStorage.setItem('token', token);  // Store the token locally
@@ -35,6 +42,8 @@ export async function api(path, { method = 'GET', body, headers = {} } = {}) {
   // Auto-logout
   if (res.status === 401) {
     clearToken();
+    if (typeof onUnauthorized === 'function') onUnauthorized();
+    broadcastLogout('401');
     throw new Error('Unauthorized, please log in again.');
   }
   if (!res.ok) {

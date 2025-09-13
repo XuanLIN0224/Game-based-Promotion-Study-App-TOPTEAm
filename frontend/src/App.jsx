@@ -20,6 +20,26 @@ import RegisterStep2 from './pages/auth/RegisterStep2';
 import ForgotPassword from './pages/auth/ForgotPassword';
 import ResetPassword from './pages/auth/ResetPassword';
 
+import { useEffect } from 'react';
+import { setOnUnauthorized } from './api/client';
+import { useNavigate } from 'react-router-dom';
+
+function AuthEvents() {
+  const nav = useNavigate();
+  useEffect(() => {
+    // 被 api() 捕获到 401 时的统一动作
+    setOnUnauthorized(() => nav('/login', { replace: true }));
+
+    // 多标签/跨组件广播的统一动作
+    const h = () => nav('/login', { replace: true });
+    window.addEventListener('auth:logout', h);
+
+    return () => window.removeEventListener('auth:logout', h);
+  }, [nav]);
+
+  return null; // 不渲染任何 UI
+}
+
 // Guard: require token to access app routes
 // Support auto-log-in
 function RequireAuth() {
@@ -46,6 +66,7 @@ function NavBar() {
 function App() {
   return (
     <BrowserRouter basename="/Game-based-Promotion-Study-App-TOPTEAm">
+      <AuthEvents /> 
       {/* <NavBar /> */}
       <div className="app">
         {/* <StarBackground count={120} />  */}
