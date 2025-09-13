@@ -1,11 +1,11 @@
-.title {
+h1.title {
   font-size: 4.5em;
   text-align: center;
   /*color: #c0e5d6;*/
 }
 
 @media (max-width: 600px) {
-  .title {
+  h1.title {
     font-size: 2em;
   }
 }
