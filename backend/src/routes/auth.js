@@ -66,7 +66,10 @@ router.post('/register/step2', async (req, res) => {
 
   //生成登录用的 JWT， 存储 token
   const token = jwt.sign({ userId: user._id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '7d' });
-  user.activeToken = token; // 可选：单会话
+  const remember = !!req.body.remember;              // 前端可传
+  const ttlMs = (remember ? 7 : 1) * 24*60*60*1000;  // 7天或1天
+  user.activeToken = token;
+  user.tokenExpiresAt = new Date(Date.now() + ttlMs);
   await user.save();
 
   // 返回一个 JSON， 提示注册成功
@@ -116,7 +119,10 @@ router.post('/login', async (req, res) => {
   }
 
   const token = jwt.sign({ userId: user._id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '7d' });
+  const remember = !!req.body.remember;              // 前端可传
+  const ttlMs = (remember ? 7 : 1) * 24*60*60*1000;  // 7天或1天
   user.activeToken = token;
+  user.tokenExpiresAt = new Date(Date.now() + ttlMs);
   await user.save();
 
   return res.json({

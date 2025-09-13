@@ -13,6 +13,7 @@ const UserSchema = new mongoose.Schema({
 
   // 单会话可选（阻止多设备同时登录）
   activeToken: { type: String },
+  tokenExpiresAt: { type: Date },
 
   // 可选：审计
   createdAt: { type: Date, default: Date.now },
