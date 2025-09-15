@@ -9,3 +9,43 @@ h1.title {
     font-size: 2em;
   }
 }
+
+.rank-list {
+  list-style: none;
+  padding-left: 0;
+  margin: 0.5rem 0 0;
+  font-family: "SuperShiny", sans-serif;
+  /* 手机端：18px 到 24px 之间自适应 */
+  font-size: clamp(18px, 5vw, 24px);
+  line-height: 1.2;
+}
+
+.rank-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 10px 0;
+}
+
+.rank-avatar {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+} 
+
+/* 平板/桌面端再放大一点 */
+@media (min-width: 768px) {
+  .rank-list { font-size: clamp(24px, 3vw, 50px); }
+  .rank-avatar { width: 56px; height: 56px; }
+}
+
+/* Rank 页面整体容器往下挪 */
+.page {
+  padding-top: 12px;   /* 手机端：距离顶部 12px */
+}
+
+/* @media (min-width: 768px) { 
+  .page {
+    padding-top: 30px; 
+  }
+} */

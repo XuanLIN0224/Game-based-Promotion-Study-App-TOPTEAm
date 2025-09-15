@@ -199,8 +199,10 @@ function Home() {
         style={{textAlign: "center"}} 
         onClick={() => navigate("/game")}
       >
-        <h1 className="title1">PowerUp</h1>
-        <h1 className="title2">O O S D</h1>
+        <div className="title-wrap">
+          <h1 className="title1">PowerUp</h1>
+          <h1 className="title2">O O S D</h1>
+        </div>
 
         <img
           src={
