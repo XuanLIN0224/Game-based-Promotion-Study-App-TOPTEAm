@@ -15,7 +15,7 @@ export default function Scan() {
     navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
-        videoRef.current.setAttribute("playsinline", true); // iOS fix
+        videoRef.current.setAttribute("playsinline", true);
         videoRef.current.play();
 
         const canvas = canvasRef.current;
@@ -23,28 +23,32 @@ export default function Scan() {
 
         const scan = () => {
           if (videoRef.current.readyState === videoRef.current.HAVE_ENOUGH_DATA) {
-            // Force square capture
-            const size = 400; // 👈 square size
-            canvas.width = size;
-            canvas.height = size;
+            canvas.height = videoRef.current.videoHeight;
+            canvas.width = videoRef.current.videoWidth;
+            ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
 
-            // Draw center square region of video
-            const minDim = Math.min(videoRef.current.videoWidth, videoRef.current.videoHeight);
-            const sx = (videoRef.current.videoWidth - minDim) / 2;
-            const sy = (videoRef.current.videoHeight - minDim) / 2;
-
-            ctx.drawImage(
-              videoRef.current,
-              sx, sy, minDim, minDim, // source rect (center square of video)
-              0, 0, size, size        // destination rect (scaled square)
-            );
-
-            const imageData = ctx.getImageData(0, 0, size, size);
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             const code = jsQR(imageData.data, imageData.width, imageData.height);
 
-            if (code) {
+            if (code && code.data !== qrResult) {
               setQrResult(code.data);
               console.log("QR Code:", code.data);
+
+              // Call backend to add score
+              fetch("http://localhost:5001/api/user/scan", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${localStorage.getItem("token")}`, // assuming you store JWT in localStorage
+                },
+                body: JSON.stringify({ code: code.data }),
+              })
+                .then((res) => res.json())
+                .then((data) => {
+                  console.log("Score updated:", data);
+                  alert(`✅ Scanned! Your new score: ${data.score}`);
+                })
+                .catch((err) => console.error("Scan error:", err));
             }
           }
           requestAnimationFrame(scan);
@@ -56,13 +60,12 @@ export default function Scan() {
 
     return () => {
       if (videoRef.current && videoRef.current.srcObject) {
-        const tracks = videoRef.current.srcObject.getTracks();
-        tracks.forEach((track) => track.stop());
+        videoRef.current.srcObject.getTracks().forEach((track) => track.stop());
       }
     };
-  }, []);
+  }, [qrResult]);
 
-  return (
+    return (
     <div className="page">
       <div className="leftside">
         <div className="pagelinkicon" onClick={() => navigate("/")}>
@@ -80,27 +83,48 @@ export default function Scan() {
 
       <h1 className="title">Scan</h1>
 
-      <div className="content" style={{ textAlign: "center" }}>
+      {/* Scanner block moved down */}
+      <div
+        className="content"
+        style={{
+          textAlign: "center",
+          position: "relative",
+          display: "inline-block",
+          marginTop: "40px", // 👈 moves scanner down
+        }}
+      >
         <video
           ref={videoRef}
           style={{
             width: "350px",
             height: "350px",
-            objectFit: "cover",   // force square cropping
-            border: "2px solid #4CAF50",
-            borderRadius: "8px"
+            objectFit: "cover",
+            border: "2px solid #0f0",
           }}
         />
         <canvas ref={canvasRef} style={{ display: "none" }} />
 
+        {/* Green scanning bar (thicker) */}
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            background: "limegreen",
+            animation: "scan 2s linear infinite",
+          }}
+        />
+
         {qrResult ? (
-          <p style={{ marginTop: "20px" }}>
-            QR Code: <b>{qrResult}</b>
+          < p style={{ marginTop: "20px" }}>
+             QR Code: <b>{qrResult}</b>
           </p>
         ) : (
-          <p style={{ marginTop: "20px" }}>📷 Please scan your QR code here </p>
+          <p style={{ marginTop: "20px" }}>📷 Scan your QR code here</p>
         )}
       </div>
     </div>
   );
+
 }

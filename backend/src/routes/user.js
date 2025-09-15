@@ -29,4 +29,25 @@ router.patch('/me', auth, async (req, res) => {
   }});
 });
 
+
+// POST /api/user/scan
+router.post('/scan', auth, async (req, res) => {
+  const { code } = req.body;
+
+  const VALID_CODES = Array.from({ length: 24 }, (_, i) => `reward:QR-${i + 1}`);
+
+  if (!VALID_CODES.includes(code)) {
+    return res.status(400).json({ message: 'Invalid QR code' });
+  }
+
+  if (req.user.scannedCodes.includes(code)) {
+    return res.status(400).json({ message: 'Code already used' });
+  }
+
+  req.user.score += 2; 
+  req.user.scannedCodes.push(code);
+  await req.user.save();
+
+  res.json({ message: 'OK', score: req.user.score });
+});
 module.exports = router;

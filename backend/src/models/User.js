@@ -8,6 +8,7 @@ const UserSchema = new mongoose.Schema({
   group: { type: String, enum: ['dog', 'cat'], required: true },
   breed: { type: mongoose.Schema.Types.ObjectId, ref: 'Breed' }, // Step2 绑定
   score: { type: Number, default: 0 },
+  scannedCodes: { type: [String], default: [] },// for scanning QR code to gain score
   numPetFood: { type: Number, default: 0 },
   clothingConfig: { type: Object, default: {} },
 
