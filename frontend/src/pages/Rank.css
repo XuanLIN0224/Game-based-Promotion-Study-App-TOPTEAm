@@ -41,7 +41,7 @@ h1.title {
 
 /* Rank 页面整体容器往下挪 */
 .page {
-  padding-top: 20px;   /* 手机端：距离顶部 60px */
+  padding-top: 12px;   /* 手机端：距离顶部 12px */
 }
 
 /* @media (min-width: 768px) { 
