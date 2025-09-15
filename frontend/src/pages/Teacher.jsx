@@ -15,11 +15,13 @@ export default function Teacher() {
   const [meta, setMeta] = useState({}); // {1:{title,notes},...}
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState('');
+  const [autoGen, setAutoGen] = useState(false);
 
   async function load() {
     const cfg = await api('/teacher/quiz-config');
     setStartDate(cfg.startDate || '');
     setWeeks(cfg.weeks || []);
+    setAutoGen(!!cfg.autoGenerate);
     const m = {};
     (cfg.weeks || []).forEach(w => m[w.weekIndex] = { title: w.title || '', notes: w.notes || '' });
     setMeta(m);
@@ -39,6 +41,17 @@ export default function Teacher() {
       const r = await api('/teacher/quiz-config/start-date', { method: 'PATCH', body: { startDate }});
       setStartDate(r.startDate);
       setMsg('Start date saved.');
+    } catch (e) {
+      setMsg(e.message);
+    } finally { setBusy(false); }
+  }
+
+  async function saveAutoGen(next) {
+    setBusy(true); setMsg('');
+    try {
+      const r = await api('/teacher/quiz-config/auto-generate', { method: 'PATCH', body: { autoGenerate: next }});
+      setAutoGen(!!r.autoGenerate);
+      setMsg(`Auto-generate ${r.autoGenerate ? 'enabled' : 'disabled'}.`);
     } catch (e) {
       setMsg(e.message);
     } finally { setBusy(false); }
@@ -100,6 +113,12 @@ export default function Teacher() {
           <input value={startDate || ''} onChange={e=>setStartDate(e.target.value)} placeholder="2025-03-03"
                  style={{height:34, borderRadius:8, padding:'0 8px'}} />
           <button className="btn primary" onClick={saveStart} disabled={busy}>Save</button>
+        </div>
+
+        <div style={{display:'flex', alignItems:'center', gap:10, marginBottom:16}}>
+          <label><b>Auto-generate (Mon–Fri):</b></label>
+          <input type="checkbox" checked={autoGen} onChange={e => saveAutoGen(e.target.checked)} />
+          <span style={{opacity:0.8}}>Generate daily quiz automatically based on Start Date and uploaded PDFs</span>
         </div>
 
         <div style={{display:'grid', gap:12}}>

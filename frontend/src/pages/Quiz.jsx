@@ -76,9 +76,6 @@ export default function Quiz () {
           <img src={`${BASE}icons/home/home.png` || `${BASE}icons/default/home.png`} className="icon" alt="Home"/>
           <p className="iconcaption">Home</p>
         </div>
-        <div className="pagelinkicon">
-          <img src={`${BASE}icons/home/moneybag_icon.png`} className="icon" alt="Money"/>
-        </div>
       </div>
 
       <h1 className="title">Quiz</h1>

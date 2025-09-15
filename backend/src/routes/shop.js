@@ -15,7 +15,7 @@ const Purchase = require('../models/Purchase');
  */
 const CATALOG = {
   extra_attempt:       { title: 'Extra Quiz Attempt',    weeklyLimit: 2,  type: 'inventory', price: 20 },
-  quiz_booster_today:  { title: 'Quiz Booster (Today)',  weeklyLimit: 1,  type: 'booster',   price: 30 },
+  quiz_booster_today:  { title: 'Quiz Booster (Today)',  weeklyLimit: 1,  type: 'inventory', price: 30 },
   lecture_qr:          { title: 'Lecture QR Code',       weeklyLimit: 1,  type: 'inventory', price: 10 },
   pet_food:            { title: 'Pet Food',              weeklyLimit: 20, type: 'counter',   price: 1  },
   lollies_voucher:     { title: 'Lollies Voucher',       weeklyLimit: 1,  type: 'inventory', price: 5  },
@@ -109,13 +109,7 @@ router.post('/purchase', auth, async (req, res) => {
     } else {
       return res.status(400).json({ message: 'Unsupported counter item' });
     }
-  } else if (meta.type === 'booster') {
-    if (itemKey === 'quiz_booster_today') {
-      req.user.boosterExpiresAt = endOfToday();
-    } else {
-      return res.status(400).json({ message: 'Unsupported booster item' });
-    }
-  } else {
+  }else {
     return res.status(400).json({ message: 'Unsupported item type' });
   }
 
@@ -123,7 +117,7 @@ router.post('/purchase', auth, async (req, res) => {
   await Purchase.create({ userId, itemKey, qty, weekStartISO: week });
   await req.user.save();
 
-  res.json({
+  return res.json({
     message: 'Purchased',
     itemKey,
     qty,

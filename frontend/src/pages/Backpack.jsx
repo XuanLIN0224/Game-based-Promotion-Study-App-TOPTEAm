@@ -10,6 +10,7 @@ const LABELS = {
   lollies_voucher: { title: "Lollies Voucher", hint: "Claim in workshop" },
   // if you later store pet_food in inventory instead of a counter:
   pet_food: { title: "Pet Food", hint: "Feed your pet" },
+  quiz_booster_today: { title: "Quiz Booster for today", hint: "double quiz score for today." },
 };
 
 export default function Backpack () {
@@ -81,7 +82,7 @@ export default function Backpack () {
           <ul style={{listStyle: 'none', padding: 0, maxWidth: 640, display: 'grid', gap: 10}}>
             {inventory.map((it) => {
               const meta = LABELS[it.key] || { title: it.key, hint: "" };
-              const canUse = it.key === 'extra_attempt' || it.key === 'lecture_qr' || it.key === 'lollies_voucher' || it.key === 'pet_food';
+              const canUse = it.key === 'extra_attempt' || it.key === 'lecture_qr' || it.key === 'lollies_voucher' || it.key === 'pet_food' || it.key === 'quiz_booster_today';
               return (
                 <li key={it.key} style={{display:'flex', alignItems:'center', justifyContent:'space-between', padding:'10px 12px', border:'1px solid rgba(255,255,255,0.2)', borderRadius:12, background:'rgba(255,255,255,0.06)'}}>
                   <div>

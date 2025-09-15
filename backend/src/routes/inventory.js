@@ -23,6 +23,11 @@ router.post('/use', auth, async (req, res) => {
     // remove zero rows
     req.user.inventory = inv.filter(i => i.qty > 0);
   }
+
+  if (key === 'quiz_booster_today') {
+    req.user.boosterExpiresAt = endOfToday();
+  }
+
   await req.user.save();
   res.json({ message: 'Used', inventory: req.user.inventory });
 });

@@ -10,6 +10,7 @@ function Home() {
   const [group, setGroup] = useState('');
   const [breed, setBreed] = useState('');
   const [username, setUsername] = useState('');
+  const [numPetfood, setPetfood] = useState('');
   const [boosterExpiresAt, setBoosterExpiresAt] = useState(null);
   const navigate = useNavigate();
 
@@ -25,6 +26,7 @@ function Home() {
         setGroup(data?.group || '');
         setBreed(data?.breed?.name || '');
         setUsername(data?.username || '');
+        setPetfood(data?.numPetFood || 0);
         setBoosterExpiresAt(data?.boosterExpiresAt || null);
       })
       .catch(err => console.error('Failed to fetch /auth/me:', err));
@@ -151,7 +153,7 @@ function Home() {
               className="icon"
               alt="Feed"
             />
-            <p className="iconcaption">{score}</p>
+            <p className="iconcaption">{numPetfood}</p>
           </div>
         </div>
       </div>

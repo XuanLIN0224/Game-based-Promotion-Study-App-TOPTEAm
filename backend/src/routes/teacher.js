@@ -33,6 +33,12 @@ function weekIndexForDate(startDateStr, dateStr) {
   return Math.min(Math.max(idx, 1), 12);
 }
 
+function isMonToFri(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00');
+  const day = d.getDay(); // 0 Sun .. 6 Sat
+  return day >= 1 && day <= 5;
+}
+
 // ===== GET current config =====
 router.get('/quiz-config', auth, requireTeacher, async (req, res) => {
   const [settings, weeks] = await Promise.all([
@@ -41,6 +47,7 @@ router.get('/quiz-config', auth, requireTeacher, async (req, res) => {
   ]);
   res.json({
     startDate: settings?.startDate || null,
+    autoGenerate: settings?.autoGenerate ?? false,
     weeks
   });
 });
@@ -48,7 +55,7 @@ router.get('/quiz-config', auth, requireTeacher, async (req, res) => {
 // ===== PATCH start date =====
 router.patch('/quiz-config/start-date', auth, requireTeacher, async (req, res) => {
   const { startDate } = req.body || {};
-  if (!/\\d{4}-\\d{2}-\\d{2}/.test(startDate || '')) {
+  if (!/\d{4}-\d{2}-\d{2}/.test(startDate || '')) {
     return res.status(400).json({ message: 'Invalid startDate (YYYY-MM-DD)' });
   }
   const doc = await CourseSettings.findOneAndUpdate(
@@ -57,6 +64,20 @@ router.patch('/quiz-config/start-date', auth, requireTeacher, async (req, res) =
     { new: true, upsert: true }
   );
   res.json({ startDate: doc.startDate });
+});
+
+// ===== Toggle auto-generate (Mon–Fri based on startDate) =====
+router.patch('/quiz-config/auto-generate', auth, requireTeacher, async (req, res) => {
+  const { autoGenerate } = req.body || {};
+  if (typeof autoGenerate !== 'boolean') {
+    return res.status(400).json({ message: 'autoGenerate must be boolean' });
+  }
+  const doc = await CourseSettings.findOneAndUpdate(
+    { key: 'course' },
+    { $set: { autoGenerate } },
+    { new: true, upsert: true }
+  );
+  res.json({ autoGenerate: !!doc.autoGenerate });
 });
 
 // ===== Upload/replace PDF for a week =====
@@ -97,7 +118,7 @@ router.post('/quiz-config/:weekIndex/generate', auth, requireTeacher, async (req
   if (!Number.isInteger(weekIndex) || weekIndex < 1 || weekIndex > 12) {
     return res.status(400).json({ message: 'Invalid weekIndex' });
   }
-  const targetDate = date && /\\d{4}-\\d{2}-\\d{2}/.test(date) ? date : isoDate();
+  const targetDate = date && /\d{4}-\d{2}-\d{2}/.test(date) ? date : isoDate();
   const cfg = await QuizWeekConfig.findOne({ weekIndex });
   if (!cfg || !cfg.pdfText) {
     return res.status(400).json({ message: 'No PDF uploaded for this week' });
