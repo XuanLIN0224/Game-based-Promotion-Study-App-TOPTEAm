@@ -96,47 +96,23 @@ export default function Rank() {
 
       <h1 className="title">Leaderboard</h1>
 
-      {loading && <p>Loading…</p>}
-      {err && <p style={{ color: "red" }}>{err}</p>}
-      {!loading && !err && rows.length === 0 && <p>no rank data yet</p>}
-
       {!loading && !err && rows.length > 0 && (
-        <ul
-          style={{
-            listStyleType: "none",
-            paddingLeft: 0,
-            fontSize: "50px",
-            fontFamily: "'SuperShiny', sans-serif",
-          }}
-        >
+        <ul className="rank-list">
           {rows.map((u, i) => {
-            const breedName = getBreedName(u.breed);    
-            const group = resolveGroup(u);             
+            const breedName = getBreedName(u.breed);
+            const group = resolveGroup(u);
             const imgSrc = getBreedImageSrc(group, breedName);
 
             return (
-              <li
-                key={u._id || i}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "16px",
-                  lineHeight: 1.2,
-                }}
-              >
-                <img
-                  src={imgSrc}
-                  alt={breedName || group || "pet"}
-                  style={{ width: 56, height: 56, objectFit: "contain" }}
-                />
-                <span>
-                  {i + 1}. {u.username} - {u.score}
-                </span>
+              <li key={u._id || i} className="rank-item">
+                <img src={imgSrc} alt={breedName || group || "pet"} className="rank-avatar" />
+                <span className="rank-text">{i + 1}. {u.username} - {u.score}</span>
               </li>
             );
           })}
         </ul>
       )}
+
     </div>
   );
 
