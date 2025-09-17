@@ -43,6 +43,7 @@ function endOfToday() {
 // === routes ===
 
 // GET /api/shop/catalog
+/* List out the total power-ups that have been already bought by the (specific) user and the user's remaining balance for the current week */
 // 列出当前用户本周的各道具购买剩余额度与价格
 router.get('/catalog', auth, async (req, res) => {
   const week = isoWeekKey();
