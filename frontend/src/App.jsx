@@ -11,6 +11,7 @@ import Shop from './pages/Shop';
 import Customise from './pages/Customise';
 // import StarBackground from "./background/StarBackground";
 import Teacher from './pages/Teacher';
+import TeacherEvents from './pages/TeacherEvents';
 // import './styles.css';
 
 // Auth pages
@@ -91,6 +92,7 @@ function App() {
               <Route path="customise" element={<Customise />} />
               <Route path="settings" element={<Settings />} />
               <Route path="teacher" element={<Teacher />} />
+              <Route path="teacher/events" element={<TeacherEvents />} />
             </Route>
 
             {/* Fallback */}

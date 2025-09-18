@@ -48,6 +48,15 @@ const shopRoutes = require('./routes/shop');
 const settingRoutes = require('./routes/setting');
 const rankRoutes = require('./routes/rank')
 
+const eventRoutes = require('./routes/events');
+const teacherEventRoutes = require('./routes/teacherEvents');
+
+const attachUser = require('./middleware/attachUser'); // 例子名字
+app.use(attachUser); // 放在挂载任何受保护路由之前
+
+app.use('/api/events', eventRoutes);
+app.use('/api/teacher/events', teacherEventRoutes);
+
 app.use('/api/inventory', inventoryRoutes);
 app.use('/api/shop', shopRoutes);
 app.use('/api/setting', settingRoutes);
@@ -121,3 +130,4 @@ cron.schedule('5 0 * * *', async () => {
     console.error('[cron] generation error', e);
   }
 });
+

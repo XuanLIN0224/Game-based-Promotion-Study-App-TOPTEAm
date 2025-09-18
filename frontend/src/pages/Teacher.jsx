@@ -104,6 +104,11 @@ export default function Teacher() {
       </div>
 
       <h1 className="title">Teacher Console</h1>
+      <div style={{ margin: '8px 0 16px 0', display: 'flex', gap: 8 }}>
+        <button className="btn" onClick={() => nav('/teacher/events')}>
+          Open Events (Cats vs Dogs)
+        </button>
+      </div>
 
       <div className="content" style={{maxWidth: 980}}>
         {msg && <div className="auth-ok" style={{marginBottom:10}}>{msg}</div>}
