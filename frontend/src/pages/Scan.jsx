@@ -60,9 +60,14 @@ export default function Scan() {
 
   // QR scanning effect (camera)
   useEffect(() => {
+    let stream;
+    let animationId;
+    let isActive = true;
+
     const constraints = { video: { facingMode: "environment" } };
 
-    navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
+    navigator.mediaDevices.getUserMedia(constraints).then((s) => {
+      stream = s;
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         videoRef.current.setAttribute("playsinline", true);
@@ -72,7 +77,8 @@ export default function Scan() {
         const ctx = canvas.getContext("2d");
 
         const scan = () => {
-          if (videoRef.current.readyState === videoRef.current.HAVE_ENOUGH_DATA) {
+          if (!isActive) return; // stop loop if unmounted
+          if (videoRef.current?.readyState === videoRef.current.HAVE_ENOUGH_DATA) {
             canvas.height = videoRef.current.videoHeight;
             canvas.width = videoRef.current.videoWidth;
             ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
@@ -82,7 +88,7 @@ export default function Scan() {
 
             if (code) handleScanResult(code.data);
           }
-          requestAnimationFrame(scan);
+          animationId = requestAnimationFrame(scan);
         };
 
         scan();
@@ -90,11 +96,18 @@ export default function Scan() {
     });
 
     return () => {
-      if (videoRef.current && videoRef.current.srcObject) {
-        videoRef.current.srcObject.getTracks().forEach((track) => track.stop());
+      isActive = false;
+      if (animationId) cancelAnimationFrame(animationId);
+      // stop using camera when leaving the page immeiatly
+      if (videoRef.current) {
+        videoRef.current.pause();
+        videoRef.current.srcObject = null;
+      }
+      if (stream) {
+        stream.getTracks().forEach((track) => track.stop());
       }
     };
-  }, [qrResult]);
+  }, []); // close camera
 
   // Handle file upload
   const handleFileUpload = (e) => {
