@@ -7,8 +7,58 @@ export default function Scan() {
   const BASE = import.meta.env.BASE_URL || "/";
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
-  const [qrResult, setQrResult] = useState("");
 
+  const [qrResult, setQrResult] = useState("");
+  const [score, setScore] = useState(0);
+  const [group, setGroup] = useState("");
+
+  // fetch current user 
+  useEffect(() => {
+    fetch("http://localhost:5001/api/auth/me", {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setScore(data?.score || 0);
+        setGroup(data?.group || "default");
+      })
+      .catch((err) => console.error("Failed to fetch /auth/me:", err));
+  }, []);
+
+  // Group icons 
+  const groupIcons = {
+    default: { coin: `${BASE}icons/default/moneybag_icon.png` },
+    dog: { coin: `${BASE}icons/dog/coin.png` },
+    cat: { coin: `${BASE}icons/cat/coin.png` },
+  };
+  const icons = groupIcons[group] ?? groupIcons.default;
+
+  // Handle QR code scan result
+  const handleScanResult = (code) => {
+    if (code && code !== qrResult) {
+      setQrResult(code);
+      console.log("QR Code:", code);
+
+      fetch("http://localhost:5001/api/user/scan", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({ code }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          setScore(data.score); // update score
+          alert(`✅ Scanned! Your new score: ${data.score}`);
+        })
+        .catch((err) => console.error("Scan error:", err));
+    }
+  };
+
+  // QR scanning effect (camera)
   useEffect(() => {
     const constraints = { video: { facingMode: "environment" } };
 
@@ -30,26 +80,7 @@ export default function Scan() {
             const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             const code = jsQR(imageData.data, imageData.width, imageData.height);
 
-            if (code && code.data !== qrResult) {
-              setQrResult(code.data);
-              console.log("QR Code:", code.data);
-
-              // Call backend to add score
-              fetch("http://localhost:5001/api/user/scan", {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  Authorization: `Bearer ${localStorage.getItem("token")}`, // assuming you store JWT in localStorage
-                },
-                body: JSON.stringify({ code: code.data }),
-              })
-                .then((res) => res.json())
-                .then((data) => {
-                  console.log("Score updated:", data);
-                  alert(`✅ Scanned! Your new score: ${data.score}`);
-                })
-                .catch((err) => console.error("Scan error:", err));
-            }
+            if (code) handleScanResult(code.data);
           }
           requestAnimationFrame(scan);
         };
@@ -65,8 +96,37 @@ export default function Scan() {
     };
   }, [qrResult]);
 
-    return (
+  // Handle file upload
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext("2d");
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0, img.width, img.height);
+
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const code = jsQR(imageData.data, imageData.width, imageData.height);
+        if (code) {
+          handleScanResult(code.data);
+        } else {
+          alert("❌ No QR code found in this image");
+        }
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  return (
     <div className="page">
+      {/* Left nav */}
       <div className="leftside">
         <div className="pagelinkicon" onClick={() => navigate("/")}>
           <img
@@ -81,16 +141,27 @@ export default function Scan() {
         </div>
       </div>
 
+      {/* Score Pad */}
+      <div className="scorePad">
+        <div
+          className="pagelinkicon"
+          style={{ display: "flex", flexDirection: "row", gap: "10px" }}
+        >
+          <img src={icons.coin} className="icon" alt="Score" />
+          <p className="iconcaption">{score}</p>
+        </div>
+      </div>
+
       <h1 className="title">Scan</h1>
 
-      {/* Scanner block moved down */}
+      {/* Scanner */}
       <div
         className="content"
         style={{
           textAlign: "center",
           position: "relative",
           display: "inline-block",
-          marginTop: "40px", // 👈 moves scanner down
+          marginTop: "20px",
         }}
       >
         <video
@@ -99,32 +170,54 @@ export default function Scan() {
             width: "350px",
             height: "350px",
             objectFit: "cover",
-            border: "2px solid #0f0",
+            border: "2px solid rgba(83, 248, 83, 1)",
           }}
         />
         <canvas ref={canvasRef} style={{ display: "none" }} />
 
-        {/* Green scanning bar (thicker) */}
+        {/* Green scanning bar */}
         <div
           style={{
             position: "absolute",
             top: 0,
             left: 0,
             width: "100%",
+            height: "4px",
             background: "limegreen",
             animation: "scan 2s linear infinite",
           }}
         />
 
         {qrResult ? (
-          < p style={{ marginTop: "20px" }}>
-             QR Code: <b>{qrResult}</b>
+          <p style={{ marginTop: "20px" }}>
+            QR Code: <b>{qrResult}</b>
           </p>
         ) : (
           <p style={{ marginTop: "20px" }}>📷 Scan your QR code here</p>
         )}
       </div>
+
+      {/* Upload button */}
+      <div style={{ textAlign: "center", marginTop: "20px" }}>
+        <label
+          style={{
+            display: "inline-block",
+            padding: "10px 20px",
+            background: "rgba(241, 218, 102, 1)",
+            borderRadius: "8px",
+            cursor: "pointer",
+            fontWeight: "bold",
+          }}
+        >
+          Upload QR from device
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleFileUpload}
+            style={{ display: "none" }}
+          />
+        </label>
+      </div>
     </div>
   );
-
 }
