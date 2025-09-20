@@ -94,13 +94,40 @@ describe("Settings", () => {
     expect(await screen.findByText(/aabbccdd/i)).toBeInTheDocument();
   });
 
-  /* 
-  it("successfully updates user email", () => {
-    render(<Settings />);
-    expect(screen.getByText(/User email/i)).toBeInTheDocument();
-  });
 
-  it("successfully updates password", () => {
+  it("successfully updates user email", async () => {
+    const { default: Settings } = await import("./Settings");
+
+    // 1. 渲染组件
+    render(<Settings />);
+
+    // 2. 等待初始邮箱显示
+    const emailRow = await screen.findByText(/Email:/i);
+
+    // 3. 点击 Edit
+    const rowDiv = emailRow.closest("div");
+    if (!rowDiv) throw new Error("Could not find row container for email");
+    const editBtn = within(rowDiv).getByRole("button", { name: /Edit/i });
+    await userEvent.click(editBtn);
+
+    // 4. 修改邮箱
+    const input = await screen.findByLabelText(/Email:/i);
+    await userEvent.clear(input);
+    await userEvent.type(input, "aabbccdd@gmail.com");
+
+    // 5. 点击 Save
+    await userEvent.click(screen.getByRole("button", { name: /Save/i }));
+
+    // 6. 断言 API PATCH 被调用
+    expect(mockPatch).toHaveBeenCalledWith("/setting/me", {
+      email: "aabbccdd@gmail.com",
+    });
+
+  // 7. 断言 UI 更新
+  expect(await screen.findByText(/aabbccdd@gmail.com/i)).toBeInTheDocument();
+});
+
+  /*it("successfully updates password", () => {
     render(<Settings />);
     expect(screen.getByText(/password/i)).toBeInTheDocument();
   });
