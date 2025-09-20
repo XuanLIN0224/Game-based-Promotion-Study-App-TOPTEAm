@@ -1,4 +1,4 @@
-import { defineConfig, mergeConfig } from 'vite'
+import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import vitestConfig from './vitest.config.js'
 
@@ -9,10 +9,7 @@ import vitestConfig from './vitest.config.js'
 //   //base: '/',
 // })
 
-export default mergeConfig(
-  defineConfig({
-    plugins: [react()],
-    base: '/Game-based-Promotion-Study-App-TOPTEAm/'
-  }),
-  vitestConfig
-)
+export default defineConfig({
+  plugins: [react()], 
+  base: '/Game-based-Promotion-Study-App-TOPTEAm/',
+})
