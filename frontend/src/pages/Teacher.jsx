@@ -97,18 +97,14 @@ export default function Teacher() {
   return (
     <div className="page">
       <div className="leftside">
-        <div className="pagelinkicon" onClick={()=>nav('/')}>
-          <img src="icons/home.png" className="icon" alt="Home"/>
-          <p className="iconcaption">Home</p>
+        <div style={{ margin: '8px 0 16px 0', display: 'flex', gap: 8 }}>
+          <button className="btn" onClick={() => nav('/teacher/events')}>
+            Open Events (Cats vs Dogs)
+          </button>
         </div>
       </div>
 
       <h1 className="title">Teacher Console</h1>
-      <div style={{ margin: '8px 0 16px 0', display: 'flex', gap: 8 }}>
-        <button className="btn" onClick={() => nav('/teacher/events')}>
-          Open Events (Cats vs Dogs)
-        </button>
-      </div>
 
       <div className="content" style={{maxWidth: 980}}>
         {msg && <div className="auth-ok" style={{marginBottom:10}}>{msg}</div>}

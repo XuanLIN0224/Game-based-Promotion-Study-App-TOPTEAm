@@ -33,7 +33,7 @@ async function computeTeamStats() {
 /** Create event */
 router.post('/', requireAuth, requireTeacher, async (req, res) => {
   try {
-    const { name, startAt, endAt, hints } = req.body;
+    const { name, startAt, endAt, hints, rewardScore } = req.body;
     if (!name || !startAt || !endAt) return res.status(400).json({ error: 'name/startAt/endAt required' });
 
     const ev = await Event.create({
@@ -41,6 +41,7 @@ router.post('/', requireAuth, requireTeacher, async (req, res) => {
       startAt: new Date(startAt),
       endAt: new Date(endAt),
       hints: Array.isArray(hints) && hints.length ? hints : undefined,
+      rewardScore: (typeof rewardScore === 'number' ? rewardScore : undefined),
       createdBy: req.user._id
     });
     res.json(ev);
@@ -53,12 +54,13 @@ router.post('/', requireAuth, requireTeacher, async (req, res) => {
 /** Update event (name, times, hints) */
 router.put('/:id', requireAuth, requireTeacher, async (req, res) => {
   try {
-    const { name, startAt, endAt, hints } = req.body;
+    const { name, startAt, endAt, hints, rewardScore } = req.body;
     const update = {};
     if (name !== undefined) update.name = name;
     if (startAt !== undefined) update.startAt = new Date(startAt);
     if (endAt !== undefined) update.endAt = new Date(endAt);
     if (Array.isArray(hints)) update.hints = hints;
+    if (typeof rewardScore === 'number') update.rewardScore = rewardScore;
 
     const ev = await Event.findByIdAndUpdate(req.params.id, { $set: update }, { new: true });
     if (!ev) return res.status(404).json({ error: 'not found' });
@@ -111,7 +113,8 @@ router.get('/:id/status', requireAuth, requireTeacher, async (req, res) => {
     stats,
     unlockedByTeam,
     winner: ev.winner || null,
-    settledAt: ev.settledAt || null
+    settledAt: ev.settledAt || null,
+    final: ev.final || null
   });
 });
 

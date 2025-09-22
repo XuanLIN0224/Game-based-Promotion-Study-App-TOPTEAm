@@ -20,6 +20,17 @@ const EventSchema = new mongoose.Schema({
       { threshold: 400, title: 'Hint 3', content: '' },
     ]
   },
+  // 在 hints 后面加：
+    rewardScore: { type: Number, default: 200 },
+
+    // 在 settledAt 后面加：
+    final: {
+    cat:   { type: Number, default: 0 },
+    dog:   { type: Number, default: 0 },
+    total: { type: Number, default: 0 },
+    pctCat:{ type: Number, default: 0 },
+    pctDog:{ type: Number, default: 0 },
+    },
 
   // bookkeeping
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },

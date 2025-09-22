@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import { EventsAPI } from '../api/events';
+import "./Home.css";
 
 function fmtDuration(ms) {
   if (ms <= 0) return 'Ended';
@@ -42,6 +43,7 @@ export default function TeacherEvents() {
       { threshold: 200, title: 'Hint 2', content: '' },
       { threshold: 400, title: 'Hint 3', content: '' },
     ],
+    rewardScore: 200,
   }),[]);
 
   useEffect(() => {
@@ -73,7 +75,8 @@ export default function TeacherEvents() {
       name: ev.name,
       startAt: new Date(ev.startAt).toISOString().slice(0,16),
       endAt: new Date(ev.endAt).toISOString().slice(0,16),
-      hints: ev.hints?.length ? ev.hints : blank.hints
+      hints: ev.hints?.length ? ev.hints : blank.hints,
+      rewardScore: ev.rewardScore ?? 200,
     });
   }
 
@@ -84,6 +87,7 @@ export default function TeacherEvents() {
       startAt: new Date(editing.startAt),
       endAt: new Date(editing.endAt),
       hints: editing.hints,
+      rewardScore: (typeof editing.rewardScore === 'number' ? editing.rewardScore : 200),
     };
     if (editing._id) {
       const up = await EventsAPI.update(editing._id, payload);
@@ -103,6 +107,13 @@ export default function TeacherEvents() {
 
   return (
     <div style={{padding:'1rem'}}>
+      <div className="leftside">
+        <div style={{ margin: '8px 0 16px 0', display: 'flex', gap: 8 }}>
+            <button className="btn" onClick={() => nav('/teacher')}>
+            Back to weekly quizzes
+            </button>
+        </div>
+      </div>
       <h2>Teacher Events</h2>
       <button onClick={openNew}>+ New Event</button>
 
@@ -112,8 +123,8 @@ export default function TeacherEvents() {
           const st = statusById[ev._id];
           const running = st ? (st.now >= ev.startAt && st.now <= ev.endAt) : null;
           return (
-            <div key={ev._id} style={{border:'1px solid #ddd', borderRadius:8, padding:12}}>
-              <div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+            <div key={ev._id} style={{border:'1px solid #ddd', borderRadius:8, padding:12, minWidth:0}}>
+              <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', gap:8, flexWrap:'wrap'}}>
                 <strong>{ev.name}</strong>
                 <div>
                   <button onClick={()=>openEdit(ev)}>Edit</button>{' '}
@@ -128,20 +139,34 @@ export default function TeacherEvents() {
               </div>
 
               {st && (
-                <>
-                  <div style={{marginTop:8}}>
-                    <PercentBar pctCat={st.stats.pctCat} pctDog={st.stats.pctDog} />
-                    <div style={{display:'flex', gap:12, fontSize:13, marginTop:4}}>
-                      <span>Cat: {st.stats.cat} petfood ({st.stats.pctCat}%)</span>
-                      <span>Dog: {st.stats.dog} petfood ({st.stats.pctDog}%)</span>
-                      <span>Total: {st.stats.total}</span>
-                    </div>
-                  </div>
-                  <div style={{marginTop:8, fontSize:13}}>
-                    <div><b>Unlocked</b> — Cat: {st.unlockedByTeam.cat.join(', ') || '-'}</div>
-                    <div><b>Unlocked</b> — Dog: {st.unlockedByTeam.dog.join(', ') || '-'}</div>
-                  </div>
-                </>
+                <div style={{marginTop:8}}>
+                  {st.winner ? (
+                    <>
+                      <PercentBar pctCat={st.final?.pctCat ?? 0} pctDog={st.final?.pctDog ?? 0} />
+                      <div style={{display:'flex', gap:12, fontSize:13, marginTop:4}}>
+                        <span>Cat (final): {st.final?.cat ?? 0} petfood ({st.final?.pctCat ?? 0}%)</span>
+                        <span>Dog (final): {st.final?.dog ?? 0} petfood ({st.final?.pctDog ?? 0}%)</span>
+                        <span>Total: {st.final?.total ?? 0}</span>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <PercentBar pctCat={st.stats.pctCat} pctDog={st.stats.pctDog} />
+                      <div style={{display:'flex', gap:12, fontSize:13, marginTop:4}}>
+                        <span>Cat: {st.stats.cat} petfood ({st.stats.pctCat}%)</span>
+                        <span>Dog: {st.stats.dog} petfood ({st.stats.pctDog}%)</span>
+                        <span>Total: {st.stats.total}</span>
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
+
+              {st && (
+                <div style={{marginTop:8, fontSize:13}}>
+                  <div><b>Unlocked</b> — Cat: {(st.unlockedByTeam?.cat ?? []).join(', ') || '-'}</div>
+                  <div><b>Unlocked</b> — Dog: {(st.unlockedByTeam?.dog ?? []).join(', ') || '-'}</div>
+                </div>
               )}
             </div>
           );
@@ -150,125 +175,219 @@ export default function TeacherEvents() {
 
       {/* editor */}
       {editing && (
-        <div style={{position:'fixed', inset:0, background:'rgba(0,0,0,0.6)'}}>
-          <div style={{
-            maxWidth: 640,
-            margin: '5vh auto',
-            background: 'rgba(10,10,14,0.75)',
-            border: '1px solid rgba(255,255,255,0.12)',
-            backdropFilter: 'blur(10px)',
-            WebkitBackdropFilter: 'blur(10px)',
-            borderRadius: 16,
-            padding: 16,
-            boxShadow: '0 10px 30px rgba(0,0,0,0.6)',
-            color: '#eaeaea'
-          }}>
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.6)',
+            display: 'grid',
+            placeItems: 'start center',
+            padding: '24px'
+          }}
+        >
+          <div
+            style={{
+              width: 'min(640px, calc(100vw - 32px))',
+              maxHeight: '90vh',
+              overflowY: 'auto',
+              margin: 0,
+              background: 'rgba(10,10,14,0.75)',
+              border: '1px solid rgba(255,255,255,0.12)',
+              backdropFilter: 'blur(10px)',
+              WebkitBackdropFilter: 'blur(10px)',
+              borderRadius: 16,
+              padding: 16,
+              boxShadow: '0 10px 30px rgba(0,0,0,0.6)',
+              color: '#eaeaea'
+            }}
+          >
             <h3>{editing._id ? 'Edit Event' : 'New Event'}</h3>
-            <label>Name<br/>
-              <input value={editing.name} onChange={e=>setEditing({...editing, name:e.target.value})} style={{
-                width: '100%',
-                background: 'rgba(255,255,255,0.06)',
-                border: '1px solid rgba(255,255,255,0.12)',
-                borderRadius: 10,
-                padding: '10px 12px',
-                color: '#eaeaea'
-              }}/>
-            </label>
-            <div style={{display:'flex', gap:12, marginTop:8}}>
-              <label style={{flex:1}}>Start<br/>
-                <input type="datetime-local" value={editing.startAt}
-                  onChange={e=>setEditing({...editing, startAt:e.target.value})} style={{
+            <div style={{ display:'grid', gap:12 }}>
+              <label>Name<br/>
+                <input
+                  value={editing.name}
+                  onChange={e => setEditing({ ...editing, name: e.target.value })}
+                  style={{
                     width: '100%',
+                    maxWidth: '100%',
+                    minWidth: 0,
+                    boxSizing: 'border-box',
                     background: 'rgba(255,255,255,0.06)',
                     border: '1px solid rgba(255,255,255,0.12)',
                     borderRadius: 10,
                     padding: '10px 12px',
                     color: '#eaeaea'
-                  }}/>
+                  }}
+                />
               </label>
-              <label style={{flex:1}}>End<br/>
-                <input type="datetime-local" value={editing.endAt}
-                  onChange={e=>setEditing({...editing, endAt:e.target.value})} style={{
+              <label style={{ display: 'block' }}>Reward Score (per winner)<br/>
+                <input
+                  type="number"
+                  value={editing.rewardScore ?? 200}
+                  onChange={e => setEditing({ ...editing, rewardScore: parseInt(e.target.value || '0', 10) })}
+                  style={{
                     width: '100%',
+                    maxWidth: '100%',
+                    minWidth: 0,
+                    boxSizing: 'border-box',
                     background: 'rgba(255,255,255,0.06)',
                     border: '1px solid rgba(255,255,255,0.12)',
                     borderRadius: 10,
                     padding: '10px 12px',
                     color: '#eaeaea'
-                  }}/>
+                  }}
+                />
               </label>
-            </div>
+              <div style={{ display: 'flex', gap: 12 }}>
+                <label style={{ flex: 1 }}>Start<br/>
+                  <input
+                    type="datetime-local"
+                    value={editing.startAt}
+                    onChange={e => setEditing({ ...editing, startAt: e.target.value })}
+                    style={{
+                      width: '100%',
+                      maxWidth: '100%',
+                      minWidth: 0,
+                      boxSizing: 'border-box',
+                      background: 'rgba(255,255,255,0.06)',
+                      border: '1px solid rgba(255,255,255,0.12)',
+                      borderRadius: 10,
+                      padding: '10px 12px',
+                      color: '#eaeaea'
+                    }}
+                  />
+                </label>
+                <label style={{ flex: 1 }}>End<br/>
+                  <input
+                    type="datetime-local"
+                    value={editing.endAt}
+                    onChange={e => setEditing({ ...editing, endAt: e.target.value })}
+                    style={{
+                      width: '100%',
+                      maxWidth: '100%',
+                      minWidth: 0,
+                      boxSizing: 'border-box',
+                      background: 'rgba(255,255,255,0.06)',
+                      border: '1px solid rgba(255,255,255,0.12)',
+                      borderRadius: 10,
+                      padding: '10px 12px',
+                      color: '#eaeaea'
+                    }}
+                  />
+                </label>
+              </div>
 
-            <div style={{marginTop:12}}>
-              <h4>Hints</h4>
-              {editing.hints.map((h, idx) => (
-                <div key={idx} style={{display:'grid', gridTemplateColumns:'100px 1fr', gap:8, alignItems:'center', marginBottom:8}}>
-                  <label>Threshold
-                    <input type="number" value={h.threshold}
-                      onChange={e=>{
-                        const v = parseInt(e.target.value||'0',10);
-                        const hints = editing.hints.slice();
-                        hints[idx] = {...h, threshold:v};
-                        setEditing({...editing, hints});
-                      }} style={{
-                        width: '100%',
-                        background: 'rgba(255,255,255,0.06)',
-                        border: '1px solid rgba(255,255,255,0.12)',
-                        borderRadius: 10,
-                        padding: '10px 12px',
-                        color: '#eaeaea'
-                      }}/>
-                  </label>
-                  <div>
-                    <input placeholder="Title" value={h.title}
-                      onChange={e=>{
-                        const hints = editing.hints.slice();
-                        hints[idx] = {...h, title:e.target.value};
-                        setEditing({...editing, hints});
-                      }} style={{
-                        width: '100%',
-                        background: 'rgba(255,255,255,0.06)',
-                        border: '1px solid rgba(255,255,255,0.12)',
-                        borderRadius: 10,
-                        padding: '10px 12px',
-                        color: '#eaeaea',
-                        marginBottom:6
-                      }}/>
-                    <textarea placeholder="Content (shown to unlocked team)"
-                      value={h.content} rows={3}
-                      onChange={e=>{
-                        const hints = editing.hints.slice();
-                        hints[idx] = {...h, content:e.target.value};
-                        setEditing({...editing, hints});
-                      }} style={{
-                        width: '100%',
-                        background: 'rgba(255,255,255,0.06)',
-                        border: '1px solid rgba(255,255,255,0.12)',
-                        borderRadius: 10,
-                        padding: '10px 12px',
-                        color: '#eaeaea'
-                      }}/>
+              <div>
+                <h4>Hints</h4>
+                {editing.hints.map((h, idx) => (
+                  <div
+                    key={idx}
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: '120px 1fr',
+                      gap: 8,
+                      alignItems: 'center',
+                      marginBottom: 8,
+                      minWidth: 0
+                    }}
+                  >
+                    <label>Threshold
+                      <input
+                        type="number"
+                        value={h.threshold}
+                        onChange={e => {
+                          const v = parseInt(e.target.value || '0', 10);
+                          const hints = editing.hints.slice();
+                          hints[idx] = { ...h, threshold: v };
+                          setEditing({ ...editing, hints });
+                        }}
+                        style={{
+                          width: '100%',
+                          maxWidth: '100%',
+                          minWidth: 0,
+                          boxSizing: 'border-box',
+                          background: 'rgba(255,255,255,0.06)',
+                          border: '1px solid rgba(255,255,255,0.12)',
+                          borderRadius: 10,
+                          padding: '10px 12px',
+                          color: '#eaeaea'
+                        }}
+                      />
+                    </label>
+                    <div>
+                      <input
+                        placeholder="Title"
+                        value={h.title}
+                        onChange={e => {
+                          const hints = editing.hints.slice();
+                          hints[idx] = { ...h, title: e.target.value };
+                          setEditing({ ...editing, hints });
+                        }}
+                        style={{
+                          width: '100%',
+                          maxWidth: '100%',
+                          minWidth: 0,
+                          boxSizing: 'border-box',
+                          background: 'rgba(255,255,255,0.06)',
+                          border: '1px solid rgba(255,255,255,0.12)',
+                          borderRadius: 10,
+                          padding: '10px 12px',
+                          color: '#eaeaea',
+                          marginBottom: 6
+                        }}
+                      />
+                      <textarea
+                        placeholder="Content (shown to unlocked team)"
+                        value={h.content}
+                        rows={3}
+                        onChange={e => {
+                          const hints = editing.hints.slice();
+                          hints[idx] = { ...h, content: e.target.value };
+                          setEditing({ ...editing, hints });
+                        }}
+                        style={{
+                          width: '100%',
+                          maxWidth: '100%',
+                          minWidth: 0,
+                          boxSizing: 'border-box',
+                          background: 'rgba(255,255,255,0.06)',
+                          border: '1px solid rgba(255,255,255,0.12)',
+                          borderRadius: 10,
+                          padding: '10px 12px',
+                          color: '#eaeaea'
+                        }}
+                      />
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-
-            <div style={{marginTop:12, display:'flex', justifyContent:'flex-end', gap:8}}>
-              <button onClick={()=>setEditing(null)} style={{
-                background:'rgba(255,255,255,0.06)',
-                border:'1px solid rgba(255,255,255,0.12)',
-                borderRadius:10,
-                padding:'10px 14px',
-                color:'#eaeaea'
-              }}>Cancel</button>
-              <button onClick={save} style={{
-                background:'rgba(255,255,255,0.12)',
-                border:'1px solid rgba(255,255,255,0.18)',
-                borderRadius:10,
-                padding:'10px 14px',
-                color:'#eaeaea',
-                fontWeight:600
-              }}>Save</button>
+            <div style={{marginTop:12, display:'flex', justifyContent:'flex-end', gap:8, flexWrap:'wrap'}}>
+              <button
+                onClick={() => setEditing(null)}
+                style={{
+                  background: 'rgba(255,255,255,0.06)',
+                  border: '1px solid rgba(255,255,255,0.12)',
+                  borderRadius: 10,
+                  padding: '10px 14px',
+                  color: '#eaeaea',
+                  whiteSpace: 'nowrap',
+                  minWidth: 'auto'
+                }}
+              >Cancel</button>
+              <button
+                onClick={save}
+                style={{
+                  background: 'rgba(255,255,255,0.12)',
+                  border: '1px solid rgba(255,255,255,0.18)',
+                  borderRadius: 10,
+                  padding: '10px 14px',
+                  color: '#eaeaea',
+                  fontWeight: 600,
+                  whiteSpace: 'nowrap',
+                  minWidth: 'auto'
+                }}
+              >Save</button>
             </div>
           </div>
         </div>
