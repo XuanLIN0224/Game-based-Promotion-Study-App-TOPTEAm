@@ -48,6 +48,15 @@ const shopRoutes = require('./routes/shop');
 const settingRoutes = require('./routes/setting');
 const rankRoutes = require('./routes/rank')
 
+const eventRoutes = require('./routes/events');
+const teacherEventRoutes = require('./routes/teacherEvents');
+
+const attachUser = require('./middleware/attachUser'); // 例子名字
+app.use(attachUser); // 放在挂载任何受保护路由之前
+
+app.use('/api/events', eventRoutes);
+app.use('/api/teacher/events', teacherEventRoutes);
+
 app.use('/api/inventory', inventoryRoutes);
 app.use('/api/shop', shopRoutes);
 app.use('/api/setting', settingRoutes);
@@ -119,5 +128,60 @@ cron.schedule('5 0 * * *', async () => {
     console.log('[cron] generated quiz for', date, 'week', weekIndex);
   } catch (e) {
     console.error('[cron] generation error', e);
+  }
+});
+
+// 这两行如果上面没引入，就加上
+const Event = require('./models/Event');
+const User = require('./models/User');
+
+// 每 5 分钟扫描“已结束但未结算”的 event
+cron.schedule('*/* * * * *', async () => {
+  try {
+    const now = new Date();
+
+    // 找出需要结算的活动：已结束且还没写 settledAt
+    const toSettle = await Event.find({
+      endAt: { $lt: now },
+      settledAt: { $exists: false }
+    }).limit(20);
+
+    for (const ev of toSettle) {
+      // 汇总当前两队 petfood（全量；如果要按时间窗口，就改成聚合增量日志）
+      const agg = await User.aggregate([
+        { $group: { _id: '$group', totalPetFood: { $sum: '$numPetFood' } } }
+      ]);
+
+      let cat = 0, dog = 0;
+      for (const r of agg) {
+        if (r._id === 'cat') cat = r.totalPetFood || 0;
+        if (r._id === 'dog') dog = r.totalPetFood || 0;
+      }
+
+      const total = cat + dog;
+      const pctCat = total ? Math.round((cat / total) * 1000) / 10 : 0; // 一位小数
+      const pctDog = total ? Math.round((dog / total) * 1000) / 10 : 0;
+
+      // 判定胜负
+      let winner = 'draw';
+      if (cat > dog) winner = 'cat';
+      else if (dog > cat) winner = 'dog';
+
+      // 给胜利队伍发放奖励（按每个 event 的 rewardScore，默认为 200）
+      const reward = ev.rewardScore || 200;
+      if (winner !== 'draw' && reward > 0) {
+        await User.updateMany({ group: winner }, { $inc: { score: reward } });
+      }
+
+      // 冻结最终数据，写 winner/settledAt
+      ev.final = { cat, dog, total, pctCat, pctDog };
+      ev.winner = winner;
+      ev.settledAt = new Date();
+      await ev.save();
+
+      console.log('[events] settled', ev._id.toString(), 'winner=', winner, 'reward=', reward);
+    }
+  } catch (e) {
+    console.error('[events] settle error', e);
   }
 });

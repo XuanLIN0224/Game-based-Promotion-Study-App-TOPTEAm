@@ -28,6 +28,14 @@ export function clearToken() {
 
 // Frontend request wrapper--so that backend apis could be triggered
 export async function api(path, { method = 'GET', body, headers = {} } = {}) {
+  if (!path || typeof path !== 'string') {
+    const err = new Error(`api(): path is required, got ${String(path)}`);
+    try { console.error('[api] Missing path', { path, stack: err.stack }); } catch {}
+    throw err;
+  }
+  // ensure leading slash to avoid accidental concatenation like .../apiendpoint
+  if (path[0] !== '/') path = `/${path}`;
+
   const token = getToken();
   const res = await fetch(`${API_BASE}${path}`, {
     method,
