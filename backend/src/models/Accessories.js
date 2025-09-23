@@ -35,7 +35,7 @@ const AccessoryItemSchema = new mongoose.Schema({
   // The position (transformation) of the current item
   transform: { type: TransformSchema, default: () => ({}) },
   // Control whether render the item or not
-  equipped: { type: Boolean, default: true }
+  equipped: { type: Boolean, default: true },
 
   // Keep track of the current item created/updated dates
   createdAt: { type: Date, default: Date.now },

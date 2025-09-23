@@ -67,7 +67,7 @@ router.get('/items', auth, async (req, res) => {
   });
 
   res.json(list);
-}
+});
 
 /* F2: Store a new accessory item (new document) to the data base */
 // POST /api/accessories/purchase { itemName, transform }
