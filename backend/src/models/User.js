@@ -19,10 +19,20 @@ const UserSchema = new mongoose.Schema({
   // 可选：审计
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
+
+  // An array to keep track of the power-ups owning (has already been bought) by the user
   inventory: {
     type: [{ key: { type: String }, qty: { type: Number, default: 0 } }],
     default: []
   },
+
+  // An array to keep track of the accessories owning by the user
+  accessories: {
+    type: [{ key: { type: String } }],
+    default: []
+  },
+  //, qty: { type: Number, default: 0 }
+
   boosterExpiresAt: { type: Date }, // for quiz_booster_today
   isStudent: { type: Boolean, default: true },
 },

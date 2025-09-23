@@ -8,7 +8,7 @@ const PurchaseSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
-// ensure one doc won’t accidentally duplicate counting if you upsert later (optional)
+// Ensure one doc won’t accidentally duplicate counting for later updates
 PurchaseSchema.index({ userId: 1, itemKey: 1, weekStartISO: 1, createdAt: 1 });
 
 module.exports = mongoose.model('Purchase', PurchaseSchema);

@@ -48,6 +48,7 @@ export default function Settings() {
   const [emailInput, setEmailInput] = useState("");
   // FUNC 2:
   const [performReset, setPerformReset] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);  // Enable the feature of showing passwords typed in by the user
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [newConfirmPassword, setNewConfirmPassword] = useState("");
@@ -261,12 +262,12 @@ export default function Settings() {
                   /* spacing */
                   margin-right: 30px;
               }
-              .page-settings .btn: hover { filter:brightness(0.98); }
-              .page-settings .btn: focus-visible { outline:2px solid #111; outline-offset:2px; }
+              .page-settings .btn:hover { filter:brightness(0.98); }
+              .page-settings .btn:focus-visible { outline:2px solid #111; outline-offset:2px; }
 
               /* Buttons with strong/primary action (e.g., "Log out") */
               .page-settings .btn.primary { background:#3c97b5; color:#fff; }
-              .page-settings .btn.primary: hover { opacity:.95; }
+              .page-settings .btn.primary:hover { opacity:.95; }
 
 
 
@@ -296,6 +297,22 @@ export default function Settings() {
                 font-size: 1rem;
                 width: 600px;
                 justify-self: start;
+              }
+
+              /* Checkbox */
+              .page-settings .line_hide input[type="checkbox"] {
+                width: auto !important;
+                flex: 0 0 auto !important;
+                margin: 0;
+                transform: scale(1.3);
+                accent-color: #3c97b5;
+              }
+
+              .page-settings .checkbox-row {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                white-space: nowrap;
               }
 
               /* Text navigating to the home page */
@@ -373,6 +390,11 @@ export default function Settings() {
                   /* Let the input box be full width on its own line */
                   .page-settings .line_hide input{
                     flex: 0 0 80%;
+                  }
+
+                  /* Let the checkbox be smaller */
+                  .page-settings .line_hide input[type="checkbox"] {
+                     transform: scale(1.1); /* smaller checkbox on phones */
                   }
 
               }
@@ -521,29 +543,43 @@ export default function Settings() {
                 <label htmlFor="oldPassword"><strong>Old Password:</strong></label>
                 <input
                   id="oldPassword"
-                  type="password"
+                  type={showPassword ? "text":"password"}
                   value={oldPassword}
                   onChange={(e) => {setOldPassword(e.target.value); setErr(""); setMsg(""); }}
                   disabled={busyField === "password"}
                 />
 
                 <label htmlFor="newPassword"><strong>New Password:</strong></label>
-                <input
-                  id="newPassword"
-                  type="password"
-                  value={newPassword}
-                  onChange={(e) => {setNewPassword(e.target.value); setErr(""); setMsg(""); }}
-                  disabled={busyField === "password"}
-                />
+                  <input
+                    id="newPassword"
+                    type={showPassword ? "text":"password"}
+                    value={newPassword}
+                    onChange={(e) => {setNewPassword(e.target.value); setErr(""); setMsg(""); }}
+                    disabled={busyField === "password"}
+                  />
 
                 <label htmlFor="newConfirmPassword"><strong>Confirm New Password:</strong></label>
-                <input
-                  id="newConfirmPassword"
-                  type="password"
-                  value={newConfirmPassword}
-                  onChange={(e) => {setNewConfirmPassword(e.target.value); setErr(""); setMsg(""); }}
-                  disabled={busyField === "password"}
-                />
+                  <input
+                    id="newConfirmPassword"
+                    type={showPassword ? "text":"password"}
+                    value={newConfirmPassword}
+                    onChange={(e) => {setNewConfirmPassword(e.target.value); setErr(""); setMsg(""); }}
+                    disabled={busyField === "password"}
+                  />
+
+                  {/* Show password row (separate class, NOT line_hide) */}
+                  <div className="checkbox-row">
+                    <input
+                      id="showPwd"
+                      type="checkbox"
+                      checked={showPassword}
+                      onChange={(e) => setShowPassword(e.target.checked)}
+                    />
+                    <label htmlFor="showPwd" className="no-wrap" style={{ color: "#3c97b5", fontWeight: 600 }}>
+                      Show password
+                    </label>
+                  </div>
+
 
                 <div style={{ display: "flex", gap: 8 }}>
                   {/* Save button */}
@@ -559,6 +595,7 @@ export default function Settings() {
                       setOldPassword("");
                       setNewPassword("");
                       setNewConfirmPassword("");
+                      setErr(""); setMsg("");
                     }}
                     disabled={busyField === "password"}
                   >

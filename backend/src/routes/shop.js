@@ -6,12 +6,12 @@ const Purchase = require('../models/Purchase');
 
 /**
  * Catalog (MVP hard-coded)
- * price：用 user.score 作为货币进行扣费
- * weeklyLimit：每周购买上限
- * type：
- *   - inventory：加入用户 inventory
- *   - counter：直接修改数值（如 numPetFood）
- *   - booster：设置时效性增益（如 quiz_booster_today）
+ * price：regard the user's score as the currency and reduce the total score of the user when performing purchase
+ * weeklyLimit：the limit that a user is able to buy a specific item for a specific week
+ * types：
+ *   - inventory：added directly to the inventory list for a specific user
+ *   - counter：added directly to a field (e.g., pet_food) for a specific user
+ *   - booster：设置时效性增益（如 quiz_booster_today
  */
 const CATALOG = {
   extra_attempt:       { title: 'Extra Quiz Attempt',    weeklyLimit: 2,  type: 'inventory', price: 20 },
@@ -43,6 +43,7 @@ function endOfToday() {
 // === routes ===
 
 // GET /api/shop/catalog
+/* List out the total power-ups that have been already bought by the (specific) user and the user's remaining balance for the current week */
 // 列出当前用户本周的各道具购买剩余额度与价格
 router.get('/catalog', auth, async (req, res) => {
   const week = isoWeekKey();
