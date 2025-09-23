@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../api/client";
+import "./Shop.css";
 
 const BASE = import.meta.env.BASE_URL || '/';
 
@@ -74,7 +75,7 @@ export default function Shop () {
 
       <h1 className="title">Shop</h1>
 
-      <div className="content" style={{maxWidth: 820}}>
+      <div className="content">
         {err && <div className="auth-error">{err}</div>}
         {ok && <div className="auth-ok">{ok}</div>}
 
@@ -85,7 +86,7 @@ export default function Shop () {
         {catalog.length === 0 ? (
           <div>Loading catalog…</div>
         ) : (
-          <ul style={{listStyle:'none', padding:0, display:'grid', gap:12}}>
+          <ul className="catalog-list">
             {catalog.map(item => {
               const meta = LABELS[item.key] || { title: item.key, desc: '' };
               const remaining = item.remaining ?? item.weeklyLimit;
@@ -94,7 +95,7 @@ export default function Shop () {
               const insufficient = total > balance || remaining <= 0;
 
               return (
-                <li key={item.key} style={{display:'grid', gridTemplateColumns:'1fr auto auto auto', alignItems:'center', gap:12, padding:'12px 14px', border:'1px solid rgba(255,255,255,0.2)', borderRadius:12, background:'rgba(255,255,255,0.06)'}}>
+                <li key={item.key} >
                   <div>
                     <div style={{fontWeight:700}}>{meta.title}</div>
                     <div style={{opacity:0.85, fontSize:13}}>{meta.desc}</div>
@@ -103,27 +104,30 @@ export default function Shop () {
                     </div>
                   </div>
 
-                  <div style={{display:'flex', alignItems:'center', gap:8}}>
-                    <input
-                      type="number"
-                      min={1}
-                      max={remaining || 99}
-                      value={qty}
-                      onChange={(e)=>setQty(item.key, e.target.value)}
-                      style={{width:70, height:34, borderRadius:8, padding:'0 8px'}}
-                    />
-                  </div>
+                  <div className="textbar">
+                    {/* Number Input By User */}
+                    <div style={{display:'flex', alignItems:'center', gap:8}}>
+                      <input
+                        type="number"
+                        min={1}
+                        max={remaining || 99}
+                        value={qty}
+                        onChange={(e)=>setQty(item.key, e.target.value)}
+                        style={{width:70, height:34, borderRadius:8, padding:'0 8px'}}
+                      />
+                    </div>
 
-                  <div style={{minWidth:120, textAlign:'right', opacity: insufficient ? 0.85 : 1}}>
-                    Total: <b>{total}</b>
-                    {insufficient && <div style={{fontSize:12, color:'#ffb3b3'}}>Unable to buy</div>}
+                    <div className={`item-total ${insufficient ? 'insufficient' : 'sufficient'}`}>
+                      Total: <b>{total}</b>
+                      {insufficient && <div className="item-unable">Unable to buy</div>}
+                    </div>
                   </div>
 
                   <button
                     className="btn primary"
                     onClick={()=>buy(item.key)}
                     disabled={busyKey === item.key || insufficient}
-                    style={{height:36}}
+                    // style={{height:36}}
                   >
                     {busyKey === item.key ? 'Purchasing…' : 'Buy'}
                   </button>
