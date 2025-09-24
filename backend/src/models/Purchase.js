@@ -8,7 +8,7 @@ const PurchaseSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', index: true, required: true },
   itemKey: { type: String, required: true, index: true },
   qty: { type: Number, required: true },
-  weekStartISO: { type: String, required: true, index: true }, // e.g., "2025-W35"
+  weekStartISO: { type: String, required: true, index: true },
   createdAt: { type: Date, default: Date.now }
 });
 

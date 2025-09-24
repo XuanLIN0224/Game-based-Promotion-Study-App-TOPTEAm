@@ -10,7 +10,7 @@ const QuizWeekConfigSchema = new mongoose.Schema({
   title: { type: String, default: '' },
   notes: { type: String, default: '' },
   pdfName: { type: String },
-  pdfText: { type: String },           // parsed PDF text (truncated)
+  pdfText: { type: String },    // parsed PDF text (truncated)
   pdfUpdatedAt: { type: Date }
 }, { timestamps: true });
 

@@ -1,15 +1,18 @@
 /**
  * This file is a schema for the line item for an event, related to the teach's portal.
+ * It allows teacher to modify the related event information (e.g., hint)
  */
 
 const mongoose = require('mongoose');
 
+/** A sub-schema for the hint for an event */
 const HintSchema = new mongoose.Schema({
   threshold: { type: Number, required: true }, // e.g. 100, 200, 400
-  title: { type: String, default: '' },        // e.g. "Hint 1"
-  content: { type: String, default: '' },      // teacher-editable content
+  title: { type: String, default: '' }, // e.g. "Hint 1"
+  content: { type: String, default: '' },   // teacher-editable content
 }, { _id: false });
 
+/** A main schema for each event */
 const EventSchema = new mongoose.Schema({
   name: { type: String, required: true, trim: true, maxlength: 80 },
   startAt: { type: Date, required: true },
@@ -24,10 +27,10 @@ const EventSchema = new mongoose.Schema({
       { threshold: 400, title: 'Hint 3', content: '' },
     ]
   },
-  // 在 hints 后面加：
+    // Each event has its own reward score
     rewardScore: { type: Number, default: 200 },
 
-    // 在 settledAt 后面加：
+    // Mark the event is settled
     final: {
     cat:   { type: Number, default: 0 },
     dog:   { type: Number, default: 0 },
@@ -36,7 +39,7 @@ const EventSchema = new mongoose.Schema({
     pctDog:{ type: Number, default: 0 },
     },
 
-  // bookkeeping
+  // Bookkeeping
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   winner: { type: String, enum: ['cat', 'dog', 'draw', null], default: null },
   settledAt: { type: Date }, // when rewards were granted

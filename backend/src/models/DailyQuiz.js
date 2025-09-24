@@ -6,7 +6,7 @@
 const mongoose = require('mongoose');
 
 const DailyQuizSchema = new mongoose.Schema({
-  date: { type: String, required: true, unique: true }, // YYYY-MM-DD
+  date: { type: String, required: true, unique: true },
   weekIndex: { type: Number, min: 1, max: 12, required: true },
   questions: [{
     stem: { type: String, required: true },
