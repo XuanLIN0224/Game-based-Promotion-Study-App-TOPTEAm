@@ -1,3 +1,7 @@
+/**
+ * This file is a schema for the line item for breed, related to the user's character's information.
+ */
+
 const mongoose = require('mongoose');
 
 const BreedSchema = new mongoose.Schema({

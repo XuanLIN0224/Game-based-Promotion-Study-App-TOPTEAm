@@ -1,3 +1,7 @@
+/**
+ * This file is a schema for the line item for items in shop, related with the "Shop" feature.
+ */
+
 const mongoose = require('mongoose');
 
 const PurchaseSchema = new mongoose.Schema({

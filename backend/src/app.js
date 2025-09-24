@@ -1,3 +1,11 @@
+/**
+ * This file implements the entrypoint of the backend server.
+ * It wires middleware, mounts all APIs, connects to the MongoDB, and starts the HTTP server.
+ * It also runs two cron jobs:
+ * 1. Auto-generation of daily quiz
+ * 2. Settle finished events and award points
+ */
+
 const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
@@ -5,22 +13,29 @@ const helmet = require('helmet');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 
+
+/** Part1: Bootstrap and Security */
 dotenv.config();
 
-// // 为了连接
+// For connection
 // const dns = require('dns');
-// dns.setServers(['8.8.8.8', '1.1.1.1']);    // 强制使用稳定 DNS
+// dns.setServers(['8.8.8.8', '1.1.1.1']);    // Enforce using the stable DNS
 // require('dns').setDefaultResultOrder('ipv4first');
 
+// Create the application
 const app = express();
+// Set the proxy to client so client IPs work correctly behind it
 app.set('trust proxy', 1); // behind Render/Proxy, needed for accurate req.ip in rate-limit
+// Install security headers
 app.use(helmet());
+// Install JSON bode parsing--for input and output
 app.use(express.json());
+// Configure CORS--limit which frontend origins can call this backend (server)
 const corsOptions = {
   origin: ['http://localhost:5173', 'http://127.0.0.1:5173', 'https://xuanlin0224.github.io'],
   methods: ['GET','POST','PUT','PATCH','DELETE','OPTIONS'],
   allowedHeaders: ['Content-Type','Authorization'],
-  credentials: true, // 如需携带 cookie 时使用；纯 Bearer 也可保留
+  credentials: true, // Used when needing to carry cookies
 };
 app.use(cors(corsOptions));
 app.options(/.*/, cors(corsOptions));
@@ -30,15 +45,17 @@ const quizRoutes = require('./routes/quiz');
 app.use('/api/teacher', teacherRoutes);
 app.use('/api/quiz', quizRoutes);
 
-// 安全限流（对认证与邮件相关接口）
+// Set up a rate limiter
 const authLimiter = rateLimit({
-  windowMs: 60 * 1000,
-  max: 20,
+  windowMs: 60 * 1000,  // 1 minute window
+  max: 20,  // Allow at most 20 requests per IP per minute
   skip: (req) => req.method === 'OPTIONS',
 });
+// Protect sensitive routes from abuse/brute force
 app.use(['/api/auth', '/api/user', '/api/game'], authLimiter);
 
-// 路由
+
+/** Part2: Routes and Middleware */
 const authRoutes = require('./routes/auth');
 const breedRoutes = require('./routes/breeds');
 const userRoutes = require('./routes/user');
@@ -51,8 +68,8 @@ const rankRoutes = require('./routes/rank')
 const eventRoutes = require('./routes/events');
 const teacherEventRoutes = require('./routes/teacherEvents');
 
-const attachUser = require('./middleware/attachUser'); // 例子名字
-app.use(attachUser); // 放在挂载任何受保护路由之前
+const attachUser = require('./middleware/attachUser');  // Sample name
+app.use(attachUser);    // Should be put in front of any protected routes
 
 app.use('/api/events', eventRoutes);
 app.use('/api/teacher/events', teacherEventRoutes);
@@ -73,10 +90,11 @@ console.log('[BOOT] app mounting /api/setting');
 app.use((req,res,next)=>{ console.log(`[REQ] ${req.method} ${req.path}`); next(); });
 
 
-// DB & 启动
+/** Part3: Start the Database and Backend Server */
 mongoose.connect(process.env.MONGO_URI, { dbName: 'topteam' })
   .then(() => {
     console.log('MongoDB connected');
+    // Start the server on port 5001
     app.listen(process.env.PORT || 5001, () =>
       console.log(`Server running on ${process.env.PORT || 5001}`)
     );
@@ -86,7 +104,9 @@ mongoose.connect(process.env.MONGO_URI, { dbName: 'topteam' })
     process.exit(1);
   });
 
-  // daily auto generation of DailyQuiz
+
+/** Part4: Two Cron jobs */
+// Job1: DailyQuiz auto generation
 const CourseSettings = require('./models/CourseSettings');
 const QuizWeekConfig = require('./models/QuizWeekConfig');
 const DailyQuiz = require('./models/DailyQuiz');
@@ -131,49 +151,51 @@ cron.schedule('5 0 * * *', async () => {
   }
 });
 
-// 这两行如果上面没引入，就加上
+// Job2: Event settlement
 const Event = require('./models/Event');
 const User = require('./models/User');
 
-// 每 5 分钟扫描“已结束但未结算”的 event
+// This job will wake up and scan the evens that are "finished but not settled"
+// '*/5 * * * *'
 cron.schedule('*/* * * * *', async () => {
   try {
     const now = new Date();
 
-    // 找出需要结算的活动：已结束且还没写 settledAt
+    // Find out the events from the database which have finished but not yet settles-- looking at "settledAt"
     const toSettle = await Event.find({
       endAt: { $lt: now },
       settledAt: { $exists: false }
     }).limit(20);
 
     for (const ev of toSettle) {
-      // 汇总当前两队 petfood（全量；如果要按时间窗口，就改成聚合增量日志）
+      // Aggregate total pet food for each team
       const agg = await User.aggregate([
         { $group: { _id: '$group', totalPetFood: { $sum: '$numPetFood' } } }
       ]);
-
+      // Extract the values for each team--cat vs dog
       let cat = 0, dog = 0;
       for (const r of agg) {
         if (r._id === 'cat') cat = r.totalPetFood || 0;
         if (r._id === 'dog') dog = r.totalPetFood || 0;
       }
 
+      // Compute totals and percentages
       const total = cat + dog;
-      const pctCat = total ? Math.round((cat / total) * 1000) / 10 : 0; // 一位小数
+      const pctCat = total ? Math.round((cat / total) * 1000) / 10 : 0;
       const pctDog = total ? Math.round((dog / total) * 1000) / 10 : 0;
 
-      // 判定胜负
+      // Divide the winner
       let winner = 'draw';
       if (cat > dog) winner = 'cat';
       else if (dog > cat) winner = 'dog';
 
-      // 给胜利队伍发放奖励（按每个 event 的 rewardScore，默认为 200）
+      // Reward the winning team (each event has a "rewardScore", default score: 200 if missing)
       const reward = ev.rewardScore || 200;
       if (winner !== 'draw' && reward > 0) {
         await User.updateMany({ group: winner }, { $inc: { score: reward } });
       }
 
-      // 冻结最终数据，写 winner/settledAt
+      // Freeze the final results into winner/settledAt
       ev.final = { cat, dog, total, pctCat, pctDog };
       ev.winner = winner;
       ev.settledAt = new Date();

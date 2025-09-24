@@ -1,12 +1,12 @@
 /**
- * This file includes APIs (routes) used for the realization of the "Customize" phase/feature
+ * This file includes APIs (routes) used for the realization of the "Customize" phase/feature.
  * Three functions:
  * F1: The user would like to see the accessories they are owning
  * F2: The user would like to buy/purchase a new accessory for their character
  * F3: The user would like to change the place/position of the accessory item on the character
  * F4: The user would like to remove/add back an already owned accessory from the character (picture)
  *
-*/
+ */
 const express = require('express');
 const router = express.Router();
 
@@ -29,7 +29,7 @@ const Purchase = require('../models/Accessories');
    hairband:        { title: 'hairband',        price: 3, imageUrl: '/assets/.png',    limit: 1 },
  };
 
-/* F0: Return all catalogs for rendering */
+/** F0: Return all catalogs for rendering */
 router.get('/', auth, async (req, res) => {
   // Turn catalog object into a list
   const list = Object.entries(CATALOG).map(([key, meta]) => ({
@@ -40,7 +40,7 @@ router.get('/', auth, async (req, res) => {
   res.json(list);
 });
 
-/* F1: Return a list of the user’s current accessory items */
+/** F1: Return a list of the user’s current accessory items */
 // GET /api/accessories/items
 router.get('/items', auth, async (req, res) => {
   // s1: Get the requesting user's id
@@ -69,7 +69,7 @@ router.get('/items', auth, async (req, res) => {
   res.json(list);
 });
 
-/* F2: Store a new accessory item (new document) to the data base */
+/** F2: Store a new accessory item (new document) to the data base */
 // POST /api/accessories/purchase { itemName, transform }
 router.post('/purchase', auth, async (req, res) => {
   // Step1: Preparation
@@ -127,7 +127,7 @@ router.post('/purchase', auth, async (req, res) => {
   }
 });
 
-/* F3: Update the new transform of an accessory item that is already owned by the user */
+/** F3: Update the new transform of an accessory item that is already owned by the user */
 // PATCH /api/accessories/adjust { itemName, newTransform }
 router.patch('/adjust', auth, async (req, res) => {
   // Step1: Preparation
@@ -168,7 +168,7 @@ router.patch('/adjust', auth, async (req, res) => {
 });
 
 
-/* F4: Change this specific accessory of the user to 'unequipped'/'equipped'--disappear/reappear on the UI */
+/** F4: Change this specific accessory of the user to 'unequipped'/'equipped'--disappear/reappear on the UI */
 // PATCH /api/accessories/remove { itemName }
 router.patch('/remove', auth, async (req, res) => {
   // Step1: Preparation

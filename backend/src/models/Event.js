@@ -1,3 +1,7 @@
+/**
+ * This file is a schema for the line item for an event, related to the teach's portal.
+ */
+
 const mongoose = require('mongoose');
 
 const HintSchema = new mongoose.Schema({

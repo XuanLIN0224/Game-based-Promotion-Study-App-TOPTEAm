@@ -1,3 +1,8 @@
+/**
+ * This file is a schema for a user.
+ * It stores all the information of a specific user.
+ */
+
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 

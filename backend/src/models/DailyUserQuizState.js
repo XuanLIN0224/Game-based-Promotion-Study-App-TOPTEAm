@@ -1,3 +1,7 @@
+/**
+ * This file is a schema for the line item for the state of a daily quiz, related to the "Quiz" feature.
+ */
+
 const mongoose = require('mongoose');
 
 const DailyUserQuizStateSchema = new mongoose.Schema({

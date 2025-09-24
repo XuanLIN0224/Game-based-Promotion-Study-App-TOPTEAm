@@ -106,7 +106,7 @@ function Home() {
     <main className="page">
       {/* User summary */}
       <div>
-        <p className="iconcaption">User: {username || '—'}</p>  {/* The css is in the 'index.css' */}
+        <p className="iconcaption">User: {username || '—'}</p>  {/* The css is in the 'main.css' */}
         <p className="iconcaption">Group: {group || '—'}</p>
         <p className="iconcaption">Breed: {breed || '—'}</p>
       </div>

@@ -1,3 +1,7 @@
+/**
+ * This file is a schema for the line item for the verification code, related with "resetPassword" function.
+ */
+
 const mongoose = require('mongoose');
 
 const PasswordResetCodeSchema = new mongoose.Schema({
