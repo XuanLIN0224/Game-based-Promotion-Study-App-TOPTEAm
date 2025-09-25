@@ -12,7 +12,7 @@ const router = express.Router();
 
 const auth = require('../middleware/auth');
 
-const Purchase = require('../models/Accessories');
+const AccessoryItem = require('../models/Accessories');
 
 /**
  * Catalog (MVP hard-coded)
@@ -22,12 +22,10 @@ const Purchase = require('../models/Accessories');
  * types: they should all be the same type
  */
  const CATALOG = {
-   hat:             { title: 'Hat',             price: 7, imageUrl: '/assets/hat.png', limit: 1 },
-   glasses:         { title: 'Glasses',         price: 5, imageUrl: '/assets/.png',    limit: 1 },
-   scarf:           { title: 'Scarf',           price: 4, imageUrl: '/assets/.png',    limit: 1 },
-   book:            { title: 'Book',            price: 3, imageUrl: '/assets/.png',    limit: 1 },
-   hairband:        { title: 'hairband',        price: 3, imageUrl: '/assets/.png',    limit: 1 },
- };
+   bear_ear:             { title: 'BearEar',        imageUrl: '/customise/bear_ear.png',       price: 7,  limit: 1 },
+   cat_ear:              { title: 'CatEar',         imageUrl: '/customise/cat_ear.png',        price: 5,  limit: 1 },
+};
+ // imageUrl: '/assets/hat.png',
 
 /** F0: Return all catalogs for rendering */
 router.get('/', auth, async (req, res) => {
@@ -51,7 +49,7 @@ router.get('/items', auth, async (req, res) => {
   // s2.1.2: Trim unnecessary fields, just get the fields we are interested--the itemName and its transformation
   // s2.1.3: Sort according to the 'zIndex'--decide which item's image shows on the top
   const items = await AccessoryItem.find({userId})
-                .select('itemName transform')
+                .select('itemName transform equipped')
                 .sort({'transform.zIndex': 1, _id: 1})
                 .lean();
 
@@ -62,7 +60,7 @@ router.get('/items', auth, async (req, res) => {
   // s3: Build a clean list for return for each catalog
   const list = Object.entries(CATALOG).map(([key, meta]) => {
     // Return back the transformation if the user is owning the current catalog (accessory item)
-    const owned = ownedMap[key] || null;    // OR ??
+    const owned = ownedMap[key] ?? null;    // OR ??
     return { key, ...meta, owned };
   });
 
@@ -167,7 +165,7 @@ router.post('/purchase/still', auth, async (req, res) => {
 
   try {
     // S4s1: Create a new document for the current user and the new item (user, item) (Accessories schema)
-    await AccessoryItem.create({ userId, itemName, {} });
+    await AccessoryItem.create({ userId, itemName, transform: {} });
     // S4s2: Update the (User schema)
     // S4s2.1: Add the new item name to the accessory array in the user schema
     accessoriesOwned.push({ key: itemName });
@@ -331,8 +329,7 @@ router.patch('/equip', auth, async (req, res) => {
     return res.status(404).json({ message: '[REMOVE] Accessory not found for this user--Fatal' });
   }
   // S2s2: Replace the old transform with the empty object--need to discuss
-  if (equip) correspondItemDoc.equipped = true;
-  if (equip) correspondItemDoc.equipped = false;
+  correspondItemDoc.equipped = !!equip;
 
   await correspondItemDoc.save();
 
@@ -345,3 +342,6 @@ router.patch('/equip', auth, async (req, res) => {
                     owned: correspondItemDoc.transform
   });
 });
+
+module.exports = router;
+

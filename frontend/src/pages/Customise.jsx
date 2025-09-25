@@ -3,6 +3,15 @@ import { useEffect, useState } from "react";
 import { api } from "../api/client";  
 import "./Home.css";
 
+const BASE_URL = (import.meta?.env?.BASE_URL ?? "/");
+
+function toPublicUrl(raw) {
+  if (!raw) return null;
+  // remove leading slash and join with BASE_URL
+  const relative = raw.replace(/^\//, "");
+  return `${BASE_URL}${relative}`;
+}
+
 export default function Customise() {
   const navigate = useNavigate();
   const BASE = import.meta.env.BASE_URL || "/";
@@ -10,7 +19,8 @@ export default function Customise() {
   const [group, setGroup] = useState("");
   const [breed, setBreed] = useState("");
   const [score, setScore] = useState(0);       
-  const [numPetfood, setPetfood] = useState(0); 
+  const [numPetfood, setPetfood] = useState(0);
+  const [accessoryItemImage, setAccessoryItemImage] = useState("");
 
   useEffect(() => {
     api("/auth/me")
@@ -21,6 +31,21 @@ export default function Customise() {
         setBreed(data?.breed?.name || "");
       })
       .catch((err) => console.error("Failed to fetch /auth/me:", err));
+  }, []);
+
+  useEffect(() => {
+    api("/accessories/items")
+      .then((data) => {
+        console.log("Accessories API response:", data);      // full array
+        console.log("First element:", data[0]);              // first object
+        console.log("First key:", data[0]?.key || "none");   // key value safely
+
+        setAccessoryItemImage(toPublicUrl(data[0].imageUrl));
+
+        // If you want just the first key in state:
+        //setAccessories(data[0]?.key || 0);
+      })
+      .catch((err) => console.error("Failed to fetch /accessories/items:", err));
   }, []);
 
   // breedImages logic from Home.jsx
@@ -80,6 +105,21 @@ export default function Customise() {
           />
           <p className="iconcaption">Home</p>
         </div>
+
+
+        <div>
+            <h2>First Accessory</h2>
+              {accessoryItemImage ? (
+                <img
+                  src={accessoryItemImage}
+                  alt="Accessory"
+                  style={{ width: "150px", height: "auto" }}
+                />
+              ) : (
+                <p>Loading accessory...</p>
+              )}
+        </div>
+
 
         {/* Score + Petfood */}
         <div className="scorePad">

@@ -63,6 +63,7 @@ const gameRoutes = require('./routes/game');
 const inventoryRoutes = require('./routes/inventory');
 const shopRoutes = require('./routes/shop');
 const settingRoutes = require('./routes/setting');
+const accessoriesRoutes = require('./routes/accessories');
 const rankRoutes = require('./routes/rank')
 
 const eventRoutes = require('./routes/events');
@@ -77,6 +78,7 @@ app.use('/api/teacher/events', teacherEventRoutes);
 app.use('/api/inventory', inventoryRoutes);
 app.use('/api/shop', shopRoutes);
 app.use('/api/setting', settingRoutes);
+app.use('/api/accessories', accessoriesRoutes);
 app.get('/', (req, res) => res.send('TOPTEAM API OK'));
 app.use('/api/auth', authRoutes);
 app.use('/api/breeds', breedRoutes);
