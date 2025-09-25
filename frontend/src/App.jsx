@@ -1,3 +1,8 @@
+/**
+ * This file defines the system's top-level React component, holding
+ * the structure of the entire application.
+ */
+
 /* Start point of the React */
 import { BrowserRouter, Routes, Route, NavLink, Navigate, Outlet } from 'react-router-dom';
 import Home from './pages/Home';

@@ -1,3 +1,8 @@
+/**
+ * This file is a schema for the line item for a quiz's file, related to the teacher's portal.
+ * It enables the teacher to upload a file so as to generate a quiz, rather than using AI generated quiz (default in our system).
+ */
+
 const mongoose = require('mongoose');
 
 const QuizWeekConfigSchema = new mongoose.Schema({
@@ -5,7 +10,7 @@ const QuizWeekConfigSchema = new mongoose.Schema({
   title: { type: String, default: '' },
   notes: { type: String, default: '' },
   pdfName: { type: String },
-  pdfText: { type: String },           // parsed PDF text (truncated)
+  pdfText: { type: String },    // parsed PDF text (truncated)
   pdfUpdatedAt: { type: Date }
 }, { timestamps: true });
 

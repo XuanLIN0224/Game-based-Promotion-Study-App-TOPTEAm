@@ -1,3 +1,7 @@
+/**
+ * This file is a schema for the accessory line item, related to the 'Customise' feature.
+ */
+
 const mongoose = require('mongoose');
 
 /* A schema for the position of an accessory item--how an accessory item would be displayed on the UI */

@@ -1,22 +1,27 @@
+/**
+ * This file is a schema for a user.
+ * It stores all the information of a specific user.
+ */
+
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 
 const UserSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true, maxlength: 50, trim: true },
   username: { type: String, required: true, maxlength: 50, trim: true },
-  password: { type: String, required: true }, // 存哈希
+  password: { type: String, required: true },   // Hash for the password safety
   group: { type: String, enum: ['dog', 'cat'], required: true },
-  breed: { type: mongoose.Schema.Types.ObjectId, ref: 'Breed' }, // Step2 绑定
+  breed: { type: mongoose.Schema.Types.ObjectId, ref: 'Breed' },
   score: { type: Number, default: 0 },
-  scannedCodes: { type: [String], default: [] },// for scanning QR code to gain score
+  scannedCodes: { type: [String], default: [] },    // For scanning QR code to gain score
   numPetFood: { type: Number, default: 0 },
   clothingConfig: { type: Object, default: {} },
 
-  // 单会话可选（阻止多设备同时登录）
+  // Not allowing multi-device logging-in
   activeToken: { type: String },
   tokenExpiresAt: { type: Date },
 
-  // 可选：审计
+  // Audit
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 

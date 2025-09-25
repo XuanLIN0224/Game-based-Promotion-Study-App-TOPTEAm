@@ -1,4 +1,8 @@
-/* Token middleware--for system safety--security gate */
+/**
+ * This file implements the token middleware.
+ * It is built for system safety, acting like a security gate.
+ */
+
 const jwt = require('jsonwebtoken');    // The library to sign/verify token
 const User = require('../models/User');
 

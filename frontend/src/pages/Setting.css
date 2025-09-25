@@ -1,0 +1,190 @@
+/* General Font */
+.page-settings h1{ font-size: 48px; line-height: 1.2; }
+.page-settings p{ font-size: 22px; }
+/* Line spacing */
+.page-settings li {
+  line-height: 2;
+}
+
+.user-info{
+  display: grid;
+  gap: 8px;
+  max-width: 640px;
+}
+
+/* Each row becomes a 2-column grid: label/value | button */
+.user-info > div{
+  display: grid;
+  grid-template-columns: 1fr max-content; /* left fills, right hugs */
+  align-items: center;
+  column-gap: 12px;
+  /* optional: stop children from stretching horizontally */
+  justify-items: start;
+}
+
+
+/* Buttons */
+.page-settings .btn {
+  /* STOP stretching (works in grid or flex parents) */
+  justify-self: start;         /* grid: align to start, don't stretch */
+  flex: 0 0 auto;              /* flex: don't grow/shrink */
+
+  /* Compact, content-based box */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: max-content;          /* <-- key: hug text in grid/flex */
+  white-space: nowrap;         /* keep label on one line */
+  line-height: 1;              /* tighter height */
+  padding: 2px 8px;            /* smaller frame */
+  min-height: 0;               /* remove tall constraint */
+
+  /* Visuals */
+  font-size: 1.2em;            /* keep or tweak */
+  font-weight: 600;
+  font-family: "SuperShiny", sans-serif;
+  background: #c0e5d6;
+  color: #888;
+  border: 1px solid rgba(0,0,0,.18);
+  border-radius: 6px;
+
+  /* spacing */
+  margin-right: 30px;
+}
+.page-settings .btn:hover { filter:brightness(0.98); }
+.page-settings .btn:focus-visible { outline:2px solid #111; outline-offset:2px; }
+
+/* Buttons with strong/primary action (e.g., "Log out") */
+.page-settings .btn.primary { background:#3c97b5; color:#fff; }
+.page-settings .btn.primary:hover { opacity:.95; }
+
+
+
+/* Text (aligned with the css from the home page) */
+/* Text in View Mode */
+.line {
+  font-family: "SuperShiny", sans-serif;
+  margin: 0 0 0 0;
+  font-size: 1.8em;
+}
+
+/* Text in Edit Mode */
+.line_hide {
+/* try */
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;    /* allow wrapping when space is tight */
+  font-family: "SuperShiny", sans-serif;
+  margin: 0 0 0 0;
+  font-size: 1.5em;
+  color: #9dc9b7;
+}
+
+.page-settings .line_hide input{
+  flex: 0 0 auto;
+  justify-self: start;
+  font-size: 1rem;
+  width: 600px;
+  justify-self: start;
+}
+
+/* Checkbox */
+.page-settings .line_hide input[type="checkbox"] {
+  width: auto !important;
+  flex: 0 0 auto !important;
+  margin: 0;
+  transform: scale(1.3);
+  accent-color: #3c97b5;
+}
+
+.page-settings .checkbox-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+/* Text navigating to the home page */
+.line_nev_back {
+  font-family: "SuperShiny", sans-serif;
+  margin: 0 0 0 0;
+  font-size: 1.5em;
+  color: #3c97b5;
+}
+
+/* Text popping up as a successful message */
+.line_msg {
+  /* Text styles */
+  font-family: "SuperShiny", sans-serif;
+  margin: 0;
+  font-size: 1.4em;
+  color: #8cf72f;
+
+  /* Let the frame hug the text instead of full width */
+  display: inline-block;
+  width: fit-content;
+
+  /* Frame */
+  padding: 8px 12px;
+  border: 2px solid #8cf72f;  /* the “frame” */
+  border-radius: 10px;    /* rounded corners */
+  background: rgba(140, 247, 47, 0.08);   /* subtle glow behind text */
+}
+
+/* Text popping up as a warning message */
+.line_err {
+  font-family: "SuperShiny", sans-serif;
+  margin: 0 0 0 0;
+  font-size: 1.4em;
+  color: #ff6e42;
+
+  display: inline-block;
+  width: fit-content;
+
+  padding: 8px 12px;
+  border: 2px solid #ff6e42;
+  border-radius: 10px;
+  background: rgba(140, 247, 47, 0.08);
+}
+
+
+/* Mobile View Adjustment */
+@media (max-width: 650px){
+  /* let buttons size to their content */
+  .page-settings p{ font-size: 15px; }
+  .page-settings .btn{
+    font-size: 15px;
+    width: fit-content;
+    justify-self: start;    /* prevent grid from stretching this item */
+  }
+
+    /* Solve the problem of out-side width when editing */
+   .page-settings .user-info{
+     max-width: 360px !important;
+     width: 80%;
+     margin: 0 auto;
+     justify-items: start;
+  }
+
+  .page-settings .line_hide{
+     /* Set spacing between elements */
+     font-size: 15.5px;
+     gap: 8px 6px;
+  }
+
+    /* Let the label ("username/email" in our case) on its own line--above the input box */
+  .page-settings .line_hide label{
+    flex: 0 0 100%;
+  }
+
+  /* Let the input box be full width on its own line */
+  .page-settings .line_hide input{
+    flex: 0 0 80%;
+  }
+
+  /* Let the checkbox be smaller */
+  .page-settings .line_hide input[type="checkbox"] {
+    transform: scale(1.1); /* smaller checkbox on phones */
+  }
+
+}

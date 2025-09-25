@@ -1,12 +1,12 @@
 /**
- * This file includes APIs (routes) used for the realization of the "Customize" phase/feature
+ * This file includes APIs (routes) used for the realization of the "Customize" phase/feature.
  * Three functions:
  * F1: The user would like to see the accessories they are owning
  * F2: The user would like to buy/purchase a new accessory for their character
  * F3: The user would like to change the place/position of the accessory item on the character
  * F4: The user would like to remove/add back an already owned accessory from the character (picture)
  *
-*/
+ */
 const express = require('express');
 const router = express.Router();
 
@@ -29,7 +29,7 @@ const Purchase = require('../models/Accessories');
    hairband:        { title: 'hairband',        price: 3, imageUrl: '/assets/.png',    limit: 1 },
  };
 
-/* F0: Return all catalogs for rendering */
+/** F0: Return all catalogs for rendering */
 router.get('/', auth, async (req, res) => {
   // Turn catalog object into a list
   const list = Object.entries(CATALOG).map(([key, meta]) => ({
@@ -40,7 +40,7 @@ router.get('/', auth, async (req, res) => {
   res.json(list);
 });
 
-/* F1: Return a list of the user’s current accessory items */
+/** F1: Return a list of the user’s current accessory items */
 // GET /api/accessories/items
 router.get('/items', auth, async (req, res) => {
   // s1: Get the requesting user's id
@@ -69,7 +69,7 @@ router.get('/items', auth, async (req, res) => {
   res.json(list);
 });
 
-/* F2: Store a new accessory item (new document) to the data base */
+/** F2: Store a new accessory item (new document) to the data base */
 // POST /api/accessories/purchase { itemName, transform }
 router.post('/purchase', auth, async (req, res) => {
   // Step1: Preparation
@@ -127,7 +127,65 @@ router.post('/purchase', auth, async (req, res) => {
   }
 });
 
-/* F3: Update the new transform of an accessory item that is already owned by the user */
+// Basic: without transform
+// POST /api/accessories/purchase/still { itemName }
+router.post('/purchase/still', auth, async (req, res) => {
+  // Step1: Preparation
+  // Get the requesting user's id
+  const userId = req.user._id;
+  // Strip the request body to get the newly bought accessory item
+  const { itemName } = req.body || {};
+  // [Defensive Check]
+  if (!itemName) {
+    return res.status(400).json({ message: '[PURCHASE] Invalid itemName' });
+  }
+
+  // Get the corresponding catalog--the catalog property values
+  const itemRequestingBuy = CATALOG[itemName];
+  // [Defensive Check]
+  if (!itemRequestingBuy) return res.status(400).json({ message: '[PURCHASE] Unknown accessory item' });
+
+  // Step2: Check whether the requesting-to-be-bought of the user item has already been owned by the user
+  const accessoriesOwned = req.user.accessories || [];
+  // S2C1: The item has already been owned by the user
+  const alreadyOwned = accessoriesOwned.some(a => a.key === itemName);
+  if (alreadyOwned) {
+    return res.status(400).json({ message: 'You already has the accessory. Explore other interesting accessories!' });
+  }
+  // S2C2: The item is not yet owned by the user
+  // Step3: Check whether the current (requesting-buying) user has enough money to buy the current item
+  const price = Number(itemRequestingBuy.price);
+  const userScore = Number(req.user.score) || 0;
+  const hasEnough = userScore >= price;
+  // S3C1: Not have enough money to buy the current accessory item
+  if (!hasEnough) {
+    return res.status(400).json({ message: 'Ops! Seems we are not there yet. Explore other interesting accessories and win more scores!' });
+  }
+
+  // S3C2: Have enough money to buy the current new (for the specific user) accessory item
+  // Step4: Perform the buying process
+
+  try {
+    // S4s1: Create a new document for the current user and the new item (user, item) (Accessories schema)
+    await AccessoryItem.create({ userId, itemName, {} });
+    // S4s2: Update the (User schema)
+    // S4s2.1: Add the new item name to the accessory array in the user schema
+    accessoriesOwned.push({ key: itemName });
+    req.user.accessories = accessoriesOwned;
+    // S4s2.2: Reduce the price of the item (the score amount) from the total score of the user
+    req.user.score = req.user.score - itemRequestingBuy.price
+
+    await req.user.save();
+
+    // Pass back the newly bought accessory item
+    return res.status(201).json({ message: 'Purchase Successful!', score: req.user.score });
+  } catch (err) {
+    console.error('Purchase error:', err);
+    return res.status(500).json({ message: 'Failed to complete purchase', error: err.message });
+  }
+});
+
+/** F3: Update the new transform of an accessory item that is already owned by the user */
 // PATCH /api/accessories/adjust { itemName, newTransform }
 router.patch('/adjust', auth, async (req, res) => {
   // Step1: Preparation
@@ -168,7 +226,7 @@ router.patch('/adjust', auth, async (req, res) => {
 });
 
 
-/* F4: Change this specific accessory of the user to 'unequipped'/'equipped'--disappear/reappear on the UI */
+/** F4: Change this specific accessory of the user to 'unequipped'/'equipped'--disappear/reappear on the UI */
 // PATCH /api/accessories/remove { itemName }
 router.patch('/remove', auth, async (req, res) => {
   // Step1: Preparation
