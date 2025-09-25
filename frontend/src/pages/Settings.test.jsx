@@ -1,3 +1,11 @@
+/* 
+  This test file covers the main functions of the Settings page:
+   1. Update username
+   2. Update email
+   3. Update password
+   4. Log out and redirect to the login page
+*/
+
 // @vitest-environment jsdom
 import React from "react";
 import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
