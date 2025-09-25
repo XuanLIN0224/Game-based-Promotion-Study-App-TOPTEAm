@@ -1,0 +1,155 @@
+/* 左侧按钮（主页图标） */
+/* .pagelinkicon {
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+} */
+
+/* .iconcaption {
+  font-size: 14px;
+  margin-top: 4px;
+} */
+
+/* 页面标题 */
+/* .title {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 20px 0;
+} */
+
+/* 主体内容区域 */
+/* .content {
+  max-width: 820px;
+} */
+
+/* 提示信息 */
+.auth-error {
+  color: #ff4d4d;
+  margin-bottom: 10px;
+}
+.auth-ok {
+  color: #4dff88;
+  margin-bottom: 10px;
+}
+
+/* 余额说明 */
+.balance-info {
+  margin: 6px 0 14px 0;
+  opacity: 0.9;
+}
+
+/* 商品列表 */
+ul.catalog-list {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+
+/* 单个商品项 */
+ul.catalog-list > li {
+  display: grid;
+  /* grid-template-columns: 1fr auto auto auto; */
+  align-items: center;
+  /* gap: 12px; */
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* 商品信息 */
+.item-title {
+  font-weight: 700;
+}
+.item-desc {
+  opacity: 0.85;
+  font-size: 13px;
+}
+.item-meta {
+  opacity: 0.75;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.textbar{
+    display: flex;
+    align-items: center;
+    margin: 8px 0 8px 0;
+}
+
+/* 输入框区域 */
+.qty-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.qty-input {
+  width: 70px;
+  height: 34px;
+  border-radius: 8px;
+  padding: 0 8px;
+}
+
+/* 总价 */
+.textbar .item-total {
+  /* min-width: 120px; */
+  margin-left: auto;
+  text-align: right;
+}
+.item-total.insufficient {
+  opacity: 0.85;
+}
+.item-total.sufficient {
+  opacity: 1;
+}
+.item-unable {
+  font-size: 12px;
+  color: #ffb3b3;
+}
+
+/* 按钮 */
+.btn.primary {
+    width: 100%;
+    height: 36px;
+}
+
+
+/* Laptop View */
+@media (min-width: 768px) {
+
+    ul.catalog-list > li {
+        display: grid;
+        grid-template-columns: 1fr auto auto auto;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 14px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.06);
+    }
+
+    .btn.primary {
+        height: 36px;
+    }
+
+    ul.catalog-list {
+        list-style: none;
+        padding: 0;
+        display: grid;
+        gap: 12px;
+    }
+
+
+    /* 主体内容区域 */
+    .content {
+        max-width: 820px;
+    }
+
+    .item-total {
+        min-width: 120px;
+        text-align: right;
+    }
+
+}
