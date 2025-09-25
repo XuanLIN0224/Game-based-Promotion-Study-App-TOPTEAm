@@ -17,6 +17,8 @@ import Customise from './pages/Customise';
 // import StarBackground from "./background/StarBackground";
 import Teacher from './pages/Teacher';
 import TeacherEvents from './pages/TeacherEvents';
+import TeacherQuizEditor from './pages/TeacherQuizEditor';
+import StudentQuizArchive from './pages/StudentQuizArchive';
 // import './styles.css';
 
 // Auth pages
@@ -98,6 +100,8 @@ function App() {
               <Route path="settings" element={<Settings />} />
               <Route path="teacher" element={<Teacher />} />
               <Route path="teacher/events" element={<TeacherEvents />} />
+              <Route path="/teacher/quizzes" element={<TeacherQuizEditor/>} />
+              <Route path="/student/archive" element={<StudentQuizArchive/>} />
             </Route>
 
             {/* Fallback */}

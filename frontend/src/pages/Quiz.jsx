@@ -79,6 +79,7 @@ export default function Quiz () {
       </div>
 
       <h1 className="title">Quiz</h1>
+      <button className="btn" onClick={() => nav('/student/archive')}>Student Quiz Archive</button>
 
       <div className="content" style={{maxWidth: 900}}>
         {msg && <div className="auth-ok" style={{marginBottom:10}}>{msg}</div>}

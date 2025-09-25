@@ -2,12 +2,6 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../api/client";
 
-function fmt(d) {
-  const pad = n => String(n).padStart(2,'0');
-  const dt = new Date(d);
-  return `${dt.getFullYear()}-${pad(dt.getMonth()+1)}-${pad(dt.getDate())}`;
-}
-
 export default function Teacher() {
   const nav = useNavigate();
   const [startDate, setStartDate] = useState('');
@@ -16,6 +10,7 @@ export default function Teacher() {
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState('');
   const [autoGen, setAutoGen] = useState(false);
+  const [difficultyByWeek, setDifficultyByWeek] = useState({}); // {1:'easy', 2:'medium', ...}
 
   async function load() {
     const cfg = await api('/teacher/quiz-config');
@@ -41,9 +36,8 @@ export default function Teacher() {
       const r = await api('/teacher/quiz-config/start-date', { method: 'PATCH', body: { startDate }});
       setStartDate(r.startDate);
       setMsg('Start date saved.');
-    } catch (e) {
-      setMsg(e.message);
-    } finally { setBusy(false); }
+    } catch (e) { setMsg(e.message); }
+    finally { setBusy(false); }
   }
 
   async function saveAutoGen(next) {
@@ -52,9 +46,8 @@ export default function Teacher() {
       const r = await api('/teacher/quiz-config/auto-generate', { method: 'PATCH', body: { autoGenerate: next }});
       setAutoGen(!!r.autoGenerate);
       setMsg(`Auto-generate ${r.autoGenerate ? 'enabled' : 'disabled'}.`);
-    } catch (e) {
-      setMsg(e.message);
-    } finally { setBusy(false); }
+    } catch (e) { setMsg(e.message); }
+    finally { setBusy(false); }
   }
 
   async function saveMeta(weekIndex) {
@@ -88,19 +81,22 @@ export default function Teacher() {
   async function generate(weekIndex) {
     setBusy(true); setMsg('');
     try {
-      const r = await api(`/teacher/quiz-config/${weekIndex}/generate`, { method:'POST', body:{ /* date: optional, numQuestions:5 */ }});
-      setMsg(`Generated quiz for ${r.date} (week ${weekIndex})`);
+      const difficulty = difficultyByWeek[weekIndex] || 'medium';
+      const r = await api(`/teacher/quiz-config/${weekIndex}/generate`, {
+        method:'POST',
+        body:{ /* date: optional, numQuestions:5 */ difficulty }
+      });
+      setMsg(`Generated quiz for ${r.date} (week ${weekIndex}) [${difficulty}]`);
     } catch (e) { setMsg(e.message); }
     finally { setBusy(false); }
   }
 
   return (
-    <div className="page">
+    <div className="page teacher-page">
       <div className="leftside">
-        <div style={{ margin: '8px 0 16px 0', display: 'flex', gap: 8 }}>
-          <button className="btn" onClick={() => nav('/teacher/events')}>
-            Open Events (Cats vs Dogs)
-          </button>
+        <div style={{ margin: '8px 0 16px 0', display: 'flex', gap: 8, flexWrap:'wrap' }}>
+          <button className="btn" onClick={() => nav('/teacher/events')}>Open Events (Cats vs Dogs)</button>
+          <button className="btn" onClick={() => nav('/teacher/quizzes')}>Edit Quizzes</button>
         </div>
       </div>
 
@@ -109,14 +105,14 @@ export default function Teacher() {
       <div className="content" style={{maxWidth: 980}}>
         {msg && <div className="auth-ok" style={{marginBottom:10}}>{msg}</div>}
 
-        <div style={{display:'flex', alignItems:'center', gap:10, marginBottom:16}}>
+        <div className="teacher-row" style={{display:'flex', alignItems:'center', gap:10, marginBottom:16}}>
           <label><b>Start Date (YYYY-MM-DD):</b></label>
           <input value={startDate || ''} onChange={e=>setStartDate(e.target.value)} placeholder="2025-03-03"
-                 style={{height:34, borderRadius:8, padding:'0 8px'}} />
+                 className="teacher-field" style={{height:34, borderRadius:8, padding:'0 8px'}} />
           <button className="btn primary" onClick={saveStart} disabled={busy}>Save</button>
         </div>
 
-        <div style={{display:'flex', alignItems:'center', gap:10, marginBottom:16}}>
+        <div className="teacher-row" style={{display:'flex', alignItems:'center', gap:10, marginBottom:16}}>
           <label><b>Auto-generate (Mon–Fri):</b></label>
           <input type="checkbox" checked={autoGen} onChange={e => saveAutoGen(e.target.checked)} />
           <span style={{opacity:0.8}}>Generate daily quiz automatically based on Start Date and uploaded PDFs</span>
@@ -124,25 +120,36 @@ export default function Teacher() {
 
         <div style={{display:'grid', gap:12}}>
           {[...Array(12)].map((_,i)=> {
-            const w = weeks.find(x => x.weekIndex === i+1) || {};
-            const m = meta[i+1] || { title:'', notes:'' };
+            const weekIdx = i+1;
+            const w = weeks.find(x => x.weekIndex === weekIdx) || {};
+            const m = meta[weekIdx] || { title:'', notes:'' };
             return (
-              <div key={i+1} style={{border:'1px solid rgba(255,255,255,0.2)', borderRadius:12, padding:12, background:'rgba(255,255,255,0.06)'}}>
-                <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:8}}>
-                  <div><b>Week {i+1}</b> {w.pdfName ? <span style={{opacity:0.8}}> · PDF: {w.pdfName}</span> : <span style={{opacity:0.6}}> · No PDF</span>}</div>
-                  <div style={{display:'flex', gap:8}}>
-                    <button className="btn" onClick={()=>saveMeta(i+1)} disabled={busy}>Save Meta</button>
-                    <button className="btn primary" onClick={()=>generate(i+1)} disabled={busy}>Generate Quiz</button>
+              <div key={weekIdx} className="teacher-card" style={{border:'1px solid rgba(255,255,255,0.2)', borderRadius:12, padding:12, background:'rgba(255,255,255,0.06)'}}>
+                <div className="teacher-card__head" style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:8}}>
+                  <div><b>Week {weekIdx}</b> {w.pdfName ? <span style={{opacity:0.8}}> · PDF: {w.pdfName}</span> : <span style={{opacity:0.6}}> · No PDF</span>}</div>
+                  <div style={{display:'flex', gap:8, flexWrap:'wrap', alignItems:'center'}}>
+                    <select
+                      value={difficultyByWeek[weekIdx] || 'medium'}
+                      onChange={e=>setDifficultyByWeek(s => ({ ...s, [weekIdx]: e.target.value }))}
+                      className="btn"
+                      style={{ padding:'6px 8px' }}
+                    >
+                      <option value="easy">easy</option>
+                      <option value="medium">medium</option>
+                      <option value="difficult">difficult</option>
+                    </select>
+                    <button className="btn" onClick={()=>saveMeta(weekIdx)} disabled={busy}>Save Meta</button>
+                    <button className="btn primary" onClick={()=>generate(weekIdx)} disabled={busy}>Generate Quiz</button>
                   </div>
                 </div>
                 <div style={{display:'grid', gap:8}}>
-                  <input placeholder="Title" value={m.title} onChange={e=>setMeta(s=>({ ...s, [i+1]: { ...s[i+1], title:e.target.value }}))}
-                         style={{height:34, borderRadius:8, padding:'0 8px'}} />
+                  <input placeholder="Title" value={m.title} onChange={e=>setMeta(s=>({ ...s, [weekIdx]: { ...s[weekIdx], title:e.target.value }}))}
+                         className="teacher-field" style={{height:34, borderRadius:8, padding:'0 8px'}} />
                   <textarea placeholder="Teacher notes to guide Gemini (optional)" rows={3}
-                            value={m.notes} onChange={e=>setMeta(s=>({ ...s, [i+1]: { ...s[i+1], notes:e.target.value }}))}
-                            style={{borderRadius:8, padding:'8px'}} />
+                            value={m.notes} onChange={e=>setMeta(s=>({ ...s, [weekIdx]: { ...s[weekIdx], notes:e.target.value }}))}
+                            className="teacher-field" style={{borderRadius:8, padding:'8px'}} />
                   <div>
-                    <input type="file" accept="application/pdf" onChange={e=>uploadPDF(i+1, e.target.files?.[0])} />
+                    <input type="file" accept="application/pdf" onChange={e=>uploadPDF(weekIdx, e.target.files?.[0])} />
                   </div>
                 </div>
               </div>
