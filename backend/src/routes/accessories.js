@@ -167,7 +167,7 @@ router.post('/purchase/still', auth, async (req, res) => {
 
   try {
     // S4s1: Create a new document for the current user and the new item (user, item) (Accessories schema)
-    await AccessoryItem.create({ userId, itemName, {} });
+    await AccessoryItem.create({ userId, itemName, transform: {} });
     // S4s2: Update the (User schema)
     // S4s2.1: Add the new item name to the accessory array in the user schema
     accessoriesOwned.push({ key: itemName });
