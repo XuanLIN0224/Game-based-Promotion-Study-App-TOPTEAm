@@ -28,7 +28,7 @@ const TransformSchema = new mongoose.Schema({
 /* A schema for each accessory item--then keeps an array of the each item's quantity in the user schema */
 const AccessoryItemSchema = new mongoose.Schema({
   // Each item has one unique id--the current item's unique id
-  _id: { type: Schema.Types.ObjectId, auto: true },
+  _id: { type: mongoose.Schema.Types.ObjectId, auto: true },
 
   // Each item belongs to a specific user--the user that current item belongs to
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', index: true, required: true },
@@ -55,4 +55,4 @@ AccessoryItemSchema.index({ userId: 1, itemName: 1}, { unique: true });
 
 
 
-module.exports = mongoose.model('Purchase', PurchaseSchema);
+module.exports = mongoose.model('Accessories', AccessoryItemSchema);
