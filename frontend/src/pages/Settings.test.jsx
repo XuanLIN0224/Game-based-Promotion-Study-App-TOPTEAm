@@ -10,9 +10,10 @@ vi.mock("react-router-dom", () => ({
 }));
 
 // Use vi.hoisted to declare mocks before module hoisting
-const { mockGet, mockPatch, apiMock } = vi.hoisted(() => {
+const { mockGet, mockPatch, apiMock, clearTokenMock } = vi.hoisted(() => {
   const mockGet = vi.fn();
   const mockPatch = vi.fn();
+  const clearTokenMock = vi.fn();
 
   const apiMock = vi.fn((arg1, arg2) => {
     if (typeof arg1 === "string") {
@@ -43,13 +44,13 @@ const { mockGet, mockPatch, apiMock } = vi.hoisted(() => {
     };
   });
 
-  return { mockGet, mockPatch, apiMock };
+  return { mockGet, mockPatch, apiMock, clearTokenMock };
 });
 
 // Mock API client module with hoisted apiMock
 vi.mock("../api/client", () => ({
   api: apiMock,
-  clearToken: vi.fn(),
+  clearToken: clearTokenMock,
 }));
 
 // Import testing utilities
@@ -95,7 +96,6 @@ describe("Settings", () => {
     expect(mockPatch).toHaveBeenCalledWith("/setting/me", { username: "aabbccdd" });
     expect(await screen.findByText(/aabbccdd/i)).toBeInTheDocument();
   });
-
 
   it("successfully updates user email", async () => {
     const { default: Settings } = await import("./Settings");
@@ -186,9 +186,22 @@ describe("Settings", () => {
       );
     }
   });
-  /*it("log out successfully", () => {
-    render(<Settings />);
-    expect(screen.getByText(/Log out/i)).toBeInTheDocument();
+
+  it("log out successfully", async () => {
+  const { default: Settings } = await import("./Settings");
+  render(<Settings />);
+
+  // Find the "Log out" button 
+  const logoutBtn = await screen.findByRole("button", { name: /log\s*out/i });
+  expect(logoutBtn).toBeInTheDocument();
+
+  // Click the button
+  await userEvent.click(logoutBtn);
+
+  // Assert that the token clear function was called
+  expect(clearTokenMock).toHaveBeenCalled();
+
+  // Assert that navigation redirected to /login
+  expect(mockNavigate).toHaveBeenCalledWith("/auth/Login");
   });
-  */
 });
