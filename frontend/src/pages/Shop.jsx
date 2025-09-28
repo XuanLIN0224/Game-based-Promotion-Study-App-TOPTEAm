@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../api/client";
-import "./Shop.css";
+import s from "./Shop.module.css";
 
 const BASE = import.meta.env.BASE_URL || '/';
 
@@ -79,14 +79,14 @@ export default function Shop () {
         {err && <div className="auth-error">{err}</div>}
         {ok && <div className="auth-ok">{ok}</div>}
 
-        <div style={{margin:'6px 0 14px 0', opacity:0.9}}>
+        <div className={s.balanceInfo}>
           <strong>Balance (Score):</strong> {balance}
         </div>
 
         {catalog.length === 0 ? (
           <div>Loading catalog…</div>
         ) : (
-          <ul className="catalog-list">
+          <ul className={s.catalogList}>
             {catalog.map(item => {
               const meta = LABELS[item.key] || { title: item.key, desc: '' };
               const remaining = item.remaining ?? item.weeklyLimit;
@@ -96,35 +96,39 @@ export default function Shop () {
 
               return (
                 <li key={item.key} >
+                  {/* Item Descrption */}
                   <div>
-                    <div style={{fontWeight:700}}>{meta.title}</div>
-                    <div style={{opacity:0.85, fontSize:13}}>{meta.desc}</div>
-                    <div style={{opacity:0.75, fontSize:12, marginTop:4}}>
+                    <div className={s.itemTitle}>{meta.title}</div>
+                    <div className={s.itemDesc}>{meta.desc}</div>
+                    <div className={s.itemInfo}>
                       Price: <b>{item.price}</b> · Weekly limit: {item.weeklyLimit} · Used: {item.used} · Remaining: <b>{remaining}</b>
                     </div>
                   </div>
 
-                  <div className="textbar">
+                  {/* User Input Area */}
+                  <div className={s.textbar}>
                     {/* Number Input By User */}
-                    <div style={{display:'flex', alignItems:'center', gap:8}}>
+                    <div className={s.qtyBox}>
                       <input
+                        className={s.qtyInput}
                         type="number"
                         min={1}
                         max={remaining || 99}
                         value={qty}
                         onChange={(e)=>setQty(item.key, e.target.value)}
-                        style={{width:70, height:34, borderRadius:8, padding:'0 8px'}}
                       />
                     </div>
 
-                    <div className={`item-total ${insufficient ? 'insufficient' : 'sufficient'}`}>
+                    {/* Extra Info */}
+                    <div className={`${s.itemTotal} ${insufficient ? s.insufficient : s.sufficient}`}>
                       Total: <b>{total}</b>
-                      {insufficient && <div className="item-unable">Unable to buy</div>}
+                      {insufficient && <div className={s.itemUnable}>Unable to buy</div>}
                     </div>
                   </div>
 
+                  {/* Purchase Button */}
                   <button
-                    className="btn primary"
+                    className={`btn secondary ${s.btnRow}`}
                     onClick={()=>buy(item.key)}
                     disabled={busyKey === item.key || insufficient}
                     // style={{height:36}}

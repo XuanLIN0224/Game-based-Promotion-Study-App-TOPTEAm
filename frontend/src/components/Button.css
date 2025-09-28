@@ -1,0 +1,151 @@
+/** 
+  * Button.css
+  * 
+  * Shared button styles for the application.
+  * 
+  * This file defines base styles for buttons and specific variants like
+  * primary, secondary, and ghost buttons. It also includes responsive
+  * design considerations and hover/focus states.
+  * 
+  * Button types：
+  * 1. Primary Button -- home page: quiz/shop/customise
+  * 2. Secondary Button -- settings page
+  * 3. Ghost Button -- login/signup in auth page
+  * 
+  * Usage:
+  * - Apply the `btn` class to any button element to get base styles.
+  * - Add `primary`, `secondary`, or `ghost` classes for specific styles.
+  * 
+  * Example:
+  * <button className="btn primary">Primary Button</button>
+  * <button className="btn secondary">Secondary Button</button>
+  * <button className="btn ghost">Ghost Button</button>
+  *
+  */
+
+
+
+
+/* Default styles for all buttons */
+button, .btn {
+  font-family: "SuperShiny", sans-serif;
+	cursor: pointer;
+  /* font-size: clamp(14px, 4vw, 16px); */
+  /* font-weight: 600; */
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+
+	border-radius: 10px;
+	border: 2.5px solid transparent;
+	transition: border-color 0.25s;
+}
+button:hover {
+  /* border-color: #646cff; */
+  border-width: 2.5px;
+  border-style: solid;
+  border-color: #00000030;
+}
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+@media (prefers-color-scheme: light) {
+  button, .btn {
+    background-color: #f9f9f9;
+  }
+}
+
+.btn.primary {
+	/* Primary Button */
+	display: flex;
+	min-width: 200px;
+	/* width: clamp(200px, 10vw, 250px); */
+	/* height: clamp(55px, 7vh, 92px); */
+	height: auto;
+	border-radius: 10px;
+	gap: 0.2rem;
+
+	overflow: hidden;
+}
+
+
+.btn.secondary {
+	/* Secondary Button */
+	font-family: sans-serif;
+  height: 42px;
+  padding: 0 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+  font-size: clamp(14px, 4vw, 16px);
+  font-weight: 600;
+	grid-column: 1 / -1;
+	width: 100%;
+	background: linear-gradient(90deg, #49b, #5cd);
+  border: none;
+}
+.btn.secondary:disabled { opacity: .7; cursor: not-allowed; }
+
+/* Ghost Button */
+.btn.ghost {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.25);
+}
+
+.buttoncaption {
+  flex: 1;
+  font-family: "SuperShiny", sans-serif;
+  font-size: clamp(30px, 5vw, 50px);
+  align-content: center;
+}
+
+/* Responsive adjustments for buttons */
+@media (min-width: 768px) {
+
+.btn.secondary{
+	grid-column: 3 / 4; 		/* align to col 3 */
+}
+
+
+}
+
+
+/** This section below need to be further refactored and moved to respective CSS files **/
+
+/* In Setting.css */
+.page-settings .btn {
+  /* STOP stretching (works in grid or flex parents) */
+  justify-self: start;         /* grid: align to start, don't stretch */
+  flex: 0 0 auto;              /* flex: don't grow/shrink */
+
+  /* Compact, content-based box */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: max-content;          /* <-- key: hug text in grid/flex */
+  white-space: nowrap;         /* keep label on one line */
+  line-height: 1;              /* tighter height */
+  padding: 2px 8px;            /* smaller frame */
+  min-height: 0;               /* remove tall constraint */
+
+  /* Visuals */
+  font-size: 1.2em;            /* keep or tweak */
+  font-weight: 600;
+  font-family: "SuperShiny", sans-serif;
+  background: #c0e5d6;
+  color: #888;
+  border: 1px solid rgba(0,0,0,.18);
+  border-radius: 6px;
+
+  /* spacing */
+  margin-right: 30px;
+}
+.page-settings .btn:hover { filter:brightness(0.98); }
+.page-settings .btn:focus-visible { outline:2px solid #111; outline-offset:2px; }
+
+/* Buttons with strong/primary action (e.g., "Log out") */
+.page-settings .btn.primary { background:#3c97b5; color:#fff; }
+.page-settings .btn.primary:hover { opacity:.95; }

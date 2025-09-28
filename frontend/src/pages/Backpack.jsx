@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../api/client";
-// import "./Backpack.css";
+import b from "./Backpack.module.css";
 
 const BASE = import.meta.env.BASE_URL || '/';
 
@@ -73,31 +73,35 @@ export default function Backpack () {
       <div className="content">
         {err && <div className="auth-error" style={{maxWidth: 520}}>{err}</div>}
 
-        <div style={{marginBottom: 12}}>
+        {/* Feed Info */}
+        <div className={b.feedInfo}>
           <strong>Pet Food:</strong> {totalPetFood}
         </div>
 
         {inventory.length === 0 ? (
           <div>No items yet. Visit the <span className="linklike" onClick={()=>navigate('/shop')}>Shop</span> to get some.</div>
         ) : (
-          <ul style={{listStyle: 'none', padding: '12px', maxWidth: 640, display: 'grid', gap: 10}}>
+          // Backpack Listing
+          <ul className={b.backpackList}>
             {inventory.map((it) => {
               const meta = LABELS[it.key] || { title: it.key, hint: "" };
               const canUse = it.key === 'extra_attempt' || it.key === 'lecture_qr' || it.key === 'lollies_voucher' || it.key === 'pet_food' || it.key === 'quiz_booster_today';
               return (
-                <li key={it.key} style={{display:'flex', alignItems:'center', justifyContent:'space-between', padding:'10px 12px', border:'1px solid rgba(255,255,255,0.2)', borderRadius:12, background:'rgba(255,255,255,0.06)'}}>
-                  <div style={{minWidth:'90px'}}>
-                    <div style={{fontWeight:700, fontSize:'clamp(12px, 3.5vw, 14px)'}}>{meta.title}</div>
-                    <div style={{opacity:0.8, fontSize:'clamp(10px, 3vw, 13px)'}}>{meta.hint}</div>
+                // Item Info
+                <li key={it.key} >
+                  <div className={b.itemInfo}>
+                    <div className={b.itemTitle}>{meta.title}</div>
+                    <div className={b.itemHint}>{meta.hint}</div>
                   </div>
-                  <div style={{display:'flex', alignItems:'center', gap:10}}>
-                    <div style={{fontSize:'clamp(10px, 3vw, 13px)'}}>Qty: <b>{it.qty}</b></div>
+
+                  {/* Quantity Info and Use Button */}
+                  <div className={b.itemAction}>
+                    <div className={b.itemQty}>Qty: <b>{it.qty}</b></div>
                     {canUse && it.qty > 0 && (
                         <button
-                          className="btn primary"
+                          className="btn secondary"
                           onClick={()=>useItem(it.key, 1)}
                           disabled={busyKey === it.key}
-                          // style={{height:34}}
                         >
                           {busyKey === it.key ? 'Using…' : 'Use'}
                         </button>

@@ -1,0 +1,84 @@
+/** 
+ * Backpack.module.css
+ * Styles for the Backpack page
+ * Mobile view first, then laptop view
+ */
+
+ /* Feed Info */
+.feedInfo{
+  margin-bottom: 12;
+}
+
+
+/* Backpack List */
+ul.backpackList {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+  width: clamp(320px,80vw, 500px);
+}
+
+/* Single Backpack Item */
+ul.backpackList > li {
+  display: grid;
+  grid-template-columns: 1fr 120px;
+  align-items: center;
+  /* gap: 12px; */
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06)
+}
+
+/* Item Details */
+.itemInfo {
+  min-width: 90px;
+}
+.itemTitle {
+  font-weight: 700;
+  font-size: clamp(12px, 3.5vw, 14px)
+}
+.itemHint {
+  opacity: 0.85;
+  font-size: clamp(10px, 3vw, 13px);
+}
+
+/* Quantity Info and Use Button */
+.itemAction {
+  display: flex;
+  align-items: center;
+	white-space: nowrap;
+  gap: 20px
+	/* !important; outline: 1px solid red; */
+}
+.itemQty {
+	font-size: clamp(10px, 3vw, 13px);
+	align-items: center
+	/* !important; outline: 1px solid green; */
+}
+
+
+/* Laptop view */
+@media (min-width: 768px) {
+    
+  ul.backpackList > li {
+    list-style: none;
+    display: grid;
+    grid-template-columns: 1fr 260px;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+	.itemAction {
+		gap: 55px;
+		width: 100%;
+		justify-self: start
+		!important; outline: 1px solid red;
+	}
+
+}

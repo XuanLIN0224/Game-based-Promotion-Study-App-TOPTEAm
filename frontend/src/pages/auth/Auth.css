@@ -109,7 +109,7 @@
 }
 
 /* 按钮 */
-.btn {
+/* .btn {
   height: 42px;
   padding: 0 16px;
   border-radius: 10px;
@@ -132,7 +132,7 @@
 .btn.ghost {
   background: transparent;
   border: 1px solid rgba(255,255,255,0.25);
-}
+} */
 
 /* 下部链接 */
 .auth-actions {

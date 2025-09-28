@@ -1,8 +1,7 @@
-/* .page {
-  display: flex;
-  flex-direction: column;
-  height: 100dvh;     
-} */
+/**
+ * Home.module.css
+ * Styles for the Home component
+ */
 
 .title-wrap {
   position: relative;
@@ -78,23 +77,6 @@
   /* margin: 0; */
 }
 
-.downpad button {
-  flex: 0 0 auto;
-  margin: 0 0.5rem;   
-  font-size: 1.5em;
-}
-
-button {
-  display: flex;
-  min-width: 200px;
-  width: clamp(200px, 10vw, 250px);
-  height: clamp(55px, 7vh, 92px);
-  border-radius: 10px;
-  border: 3px solid transparent;
-  gap: 0.2rem;
-  /* width: auto; */
-  /* padding: 0rem 1rem; */
-}
 
 
 /* Laptop View */
@@ -102,23 +84,7 @@ button {
 
   .downpad {
     flex-direction: row;
-    /* gap: 30px; */
-  }
-
-  .downpad button {
-    flex: 0 0 auto;
-    margin: 0 0.5rem;   
-    font-size: 2.8em;     
-  }
-
-  button {
-    width: clamp(180px, 30vw, 250px);
-    height: clamp(50px, 9.5vh, 92px);
-    border-radius: 10px;
-    border: 3px solid transparent;
-    gap: 0.2rem;
-    width: auto;
-    padding: 0rem 1rem;
+    gap: 30px;
   }
 
   .scorePad {

@@ -7,10 +7,9 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-
 import { api, clearToken } from "../api/client";
 
-import "./Setting.css"
+import "./Setting.module.css"
 
 const BASE = import.meta.env.BASE_URL || '/';
 
@@ -395,7 +394,7 @@ export default function Settings() {
                   </button>
                   {/* Cancel button */}
                   <button
-                    type="button"
+                    // type="button"
                     className="btn"
                     onClick={() => {
                       setPerformReset(false);

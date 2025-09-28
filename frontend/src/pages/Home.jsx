@@ -36,7 +36,7 @@ function Home() {
   const boosterUntil = boosterActive ? new Date(boosterExpiresAt).toLocaleTimeString() : null;
 
 
-  {/* Home Page Breed Images */}
+  /* Home Page Breed Images */
   const breedImages = {
 
     // Dog Breeds
@@ -58,7 +58,7 @@ function Home() {
     }
   };
 
-  {/* Group Icons */}
+  /* Group Icons */
   const groupIcons = {
 
     default: {
@@ -104,7 +104,7 @@ function Home() {
 
   return (
     <main className="page">
-      {/* User summary */}
+      {/* User summary (Delete later, For Testing only) */}
       <div>
         <p className="iconcaption">User: {username || '—'}</p>  {/* The css is in the 'main.css' */}
         <p className="iconcaption">Group: {group || '—'}</p>
@@ -120,7 +120,7 @@ function Home() {
         )}
       </div>
 
-      
+      {/* Top left icons */}
       <div className="leftside">
         {/* Backpack */}
         <div className="pagelinkicon">
@@ -158,6 +158,7 @@ function Home() {
         </div>
       </div>
 
+      {/* Top right icons */}
       <div className="rightside">
         {/* Scan */}
         <div className="pagelinkicon">
@@ -193,17 +194,19 @@ function Home() {
         </div>
       </div>
 
-      {/* Main Image */}
+      {/* Middle Content */}
       <section 
         className="content" 
         style={{textAlign: "center"}} 
         onClick={() => navigate("/game")}
       >
+        {/* Title of the Project */}
         <div className="title-wrap">
           <h1 className="title1">PowerUp</h1>
           <h1 className="title2">O O S D</h1>
         </div>
 
+        {/* Main Image */}
         <img
           src={
             (breedImages[group] && breedImages[group][breed]) ||
@@ -217,9 +220,12 @@ function Home() {
         <p className="line">Click or tap anywhere to play...</p>
       </section>
 
+      {/* Bottom Buttons */}
       <div className="downpad">
         {/* Quiz */}
-        <button onClick={() => navigate("/quiz")}>
+        <button 
+          className="btn primary"
+          onClick={() => navigate("/quiz")}>
           <img
             src={ icons.quiz }
             className="icon"
@@ -229,7 +235,9 @@ function Home() {
         </button>
         
         {/* Shop */}
-        <button onClick={() => navigate("/shop")}>
+        <button 
+          className="btn primary"
+          onClick={() => navigate("/shop")}>
           <img
             src={ icons.shop }
             className="icon"
@@ -240,7 +248,9 @@ function Home() {
         </button>
 
         {/* Customise */}
-        <button onClick={() => navigate("/customise")}>
+        <button 
+          className="btn primary"
+          onClick={() => navigate("/customise")}>
           <img
             src={ icons.customise }
             className="icon"
@@ -248,6 +258,7 @@ function Home() {
           />
           <div className="buttoncaption">Customise</div>
         </button>
+
       </div>
     </main>
   );

@@ -1,0 +1,144 @@
+/** 
+  * Shop.module.css
+  * Styles for the Shop page
+  * Mobile view first, then laptop view
+  */
+
+/* Warning */
+.auth-error {
+  color: #ff4d4d;
+  margin-bottom: 10px;
+}
+.auth-ok {
+  color: #4dff88;
+  margin-bottom: 10px;
+}
+
+/* Balance Info */
+.balanceInfo {
+  margin: 6px 0 14px 0;
+  opacity: 0.9;
+}
+
+li {
+  list-style: none;
+}
+
+/* Shop List */
+ul.catalogList {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+  width: clamp(350px,80vw, 820px);
+}
+
+/* Single Shop Item */
+ul.catalogList > li {
+  display: grid;
+  grid-template-columns: 1fr;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* Item Details */
+.itemTitle {
+  font-weight: 700;
+}
+.itemDesc {
+  opacity: 0.85;
+  font-size: 13px;
+}
+.itemInfo {
+  opacity: 0.75;
+  font-size: 12px;
+  margin-top: 4px
+}
+
+.textbar{
+  display: flex;
+  align-items: center;
+  margin: 8px 0 8px 0;
+  grid-column: 1 / -1;
+  justify-content: flex-end
+  /* !important; outline: 1px solid red; */
+}
+
+/* User Input */
+.qtyBox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.qtyInput {
+  width: 50px;
+  height: 34px;
+  border-radius: 8px;
+  padding: 0 8px;
+}
+
+/* Total Amount */
+.textbar .itemTotal {
+  font-size: 14px;
+  margin-left: auto;
+  text-align: right;
+}
+.insufficient {
+  opacity: 0.50;
+}
+.sufficient {
+  opacity: 1;
+}
+.itemUnable {
+  font-size: 12px;
+  color: #f97575;
+}
+
+/* Button Row */
+.btnRow {
+  grid-column: 1 / -1;
+  width: 100%;
+}
+
+/* Laptop View */
+@media (min-width: 768px) {
+
+  ul.catalogList > li {
+    list-style: none;
+    display: grid;
+    grid-template-columns: 1fr 165px 180px;
+    align-items: center;
+    gap: 20px;
+    padding: 12px 14px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  .itemDesc {
+    opacity: 0.85;
+    font-size: 13px;
+  }
+  .itemInfo {
+    opacity: 0.75;
+    font-size: 10px;
+    margin-top: 4px;
+  }
+
+  .textbar{
+    grid-column: 2 / 3;
+    gap: 16px;
+  }
+
+  .btnRow {
+    grid-column: 3 / 4;      
+    width: auto;
+    justify-self: end;      
+  }
+
+
+}

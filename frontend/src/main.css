@@ -1,6 +1,7 @@
 /**
  * This file defines the global resets and true global rules
  * for the whole system.
+ * 
  */
 
 :root {
@@ -10,7 +11,6 @@
 
   color-scheme: light dark;
   color: rgba(242, 242, 242, 0.932);
-  /* background-color: #242424; */
   background-color: #32292F;
 
   font-synthesis: none;
@@ -19,17 +19,13 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* For testing */
-/* *{outline:1px solid red} */
-
 a {
   font-weight: 500;
-  /* color: #646cff; */
   color: inherit;
   text-decoration: inherit;
 }
 a:hover {
-  color: #535bf2;
+  color: inherit
 }
 
 body {
@@ -59,7 +55,6 @@ h1 {
   display: flex;
   flex-direction: column;
   align-items: center;
-  /* height: 100svh; */
 }
 
 .content {
@@ -75,7 +70,6 @@ h1 {
   flex: 0 0 auto;
   text-align: center;
   padding: 1px;
-  /* background: #080808; */
   color: #555;
 }
 
@@ -110,25 +104,14 @@ h1, .title {
   display: flex;
   flex-direction: column;
   align-items: center;
-  /* gap: 6px; */
   cursor: pointer;
   transition: transform .15s ease;
 }
 
 .icon {
-  /* width: 72px;
-  height: 72px; */
   width: clamp(40px, 14vw, 72px);
   height: auto;
   cursor: pointer;
-  transition: transform .15s ease;
-}
-
-.defaultIcon {
-  width: 40px;
-  height: 40px;
-  cursor: pointer;
-  margin: 8px;
   transition: transform .15s ease;
 }
 
@@ -150,11 +133,9 @@ h1, .title {
 }
 
 
-button {
-  /* height: 65px; */
+/* button {
   border-radius: 4px;
   border: 0.5px solid transparent;
-  /* padding: 0.3em 0.6em; */
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -164,8 +145,9 @@ button {
   transition: border-color 0.25s;
 }
 button:hover {
-  /* border-color: #646cff; */
-  border-color: #f9f9f9;
+  border-width: 2.5px;
+  border-style: solid;
+  border-color: #00000030;
 }
 button:focus,
 button:focus-visible {
@@ -175,9 +157,8 @@ button:focus-visible {
 .buttoncaption {
   flex: 1;
   font-family: "SuperShiny", sans-serif;
-  /* font-size: 2.5em; */
   align-content: center;
-}
+} */
 
 
 /* Laptop View */
@@ -186,12 +167,6 @@ button:focus-visible {
   .icon {
     width: 70px;
     height: 70px;
-    /* margin: 8px; */
-  }
-
-  .defaultIcon {
-    width: 60px;
-    height: 60px;
   }
 
   .iconcaption {
@@ -200,6 +175,7 @@ button:focus-visible {
 
 }
 
+/* Dark mode by default, light mode if user prefers */
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
@@ -208,9 +184,9 @@ button:focus-visible {
   a:hover {
     color: #747bff;
   }
-  button {
+  /* button {
     background-color: #f9f9f9;
-  }
+  } */
 }
 
 @font-face {

@@ -14,7 +14,6 @@ import Settings from './pages/Settings';
 import Quiz from './pages/Quiz';
 import Shop from './pages/Shop';
 import Customise from './pages/Customise';
-// import StarBackground from "./background/StarBackground";
 import Teacher from './pages/Teacher';
 import TeacherEvents from './pages/TeacherEvents';
 import TeacherQuizEditor from './pages/TeacherQuizEditor';
@@ -27,6 +26,12 @@ import RegisterStep1 from './pages/auth/RegisterStep1';
 import RegisterStep2 from './pages/auth/RegisterStep2';
 import ForgotPassword from './pages/auth/ForgotPassword';
 import ResetPassword from './pages/auth/ResetPassword';
+
+// Global unifications
+import './components/Button.css';
+
+// Global unifications
+import './components/Button.css';
 
 import { useEffect } from 'react';
 import { setOnUnauthorized } from './api/client';
@@ -55,29 +60,12 @@ function RequireAuth() {
   return token ? <Outlet /> : <Navigate to="/login" replace />;
 }
 
-function NavBar() {
-  return (
-    <nav className="nav">
-      <NavLink to="/">Home</NavLink>
-      <NavLink to="/game">Game</NavLink>
-      <NavLink to="/backpack">Backpack</NavLink>
-      <NavLink to="/scan">Scan</NavLink>
-      <NavLink to="/rank">Rank</NavLink>
-      <NavLink to="/quiz">Quiz</NavLink>
-      <NavLink to="/shop">Shop</NavLink>
-      <NavLink to="/customise">Customise</NavLink>
-      <NavLink to="/settings">Settings</NavLink>
-    </nav>
-  );
-}
 
 function App() {
   return (
     <BrowserRouter basename="/Game-based-Promotion-Study-App-TOPTEAm">
       <AuthEvents /> 
-      {/* <NavBar /> */}
       <div className="app">
-        {/* <StarBackground count={120} />  */}
         <main className='page'>
           <Routes>
             {/* Public auth routes */}
