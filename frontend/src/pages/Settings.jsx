@@ -253,7 +253,7 @@ export default function Settings() {
             ) : (
               // C2: "editingUsername == true"--allow editing--Edit MODE
               // <form> here: When the user clicks "Save" or presses Enter, call my saveUsername function
-              <form className={styles.lineHide} onSubmit={saveUsername} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <form className={styles.lineHide} onSubmit={saveUsername}>
                 <label htmlFor="username" style={{ minWidth: 100 }}><strong>User Name:</strong></label>
                 {/* Expected input */}
                 <input
