@@ -6,14 +6,14 @@
   line-height: 2;
 }
 
-.user-info{
+.userInfo{
   display: grid;
   gap: 8px;
   max-width: 640px;
 }
 
 /* Each row becomes a 2-column grid: label/value | button */
-.user-info > div{
+.userInfo > div{
   display: grid;
   grid-template-columns: 1fr max-content; /* left fills, right hugs */
   align-items: center;
@@ -50,6 +50,8 @@
 
   /* spacing */
   margin-right: 30px;
+  min-width: 80px;    /* pick a base size */
+  flex-shrink: 0;     /* don’t let text width shrink */
 }
 .page-settings .btn:hover { filter:brightness(0.98); }
 .page-settings .btn:focus-visible { outline:2px solid #111; outline-offset:2px; }
@@ -62,16 +64,17 @@
 
 /* Text (aligned with the css from the home page) */
 /* Text in View Mode */
-.line {
+.page-settings .line {
   font-family: "SuperShiny", sans-serif;
   margin: 0 0 0 0;
   font-size: 1.8em;
 }
 
 /* Text in Edit Mode */
-.line_hide {
+.page-settings .lineHide {
 /* try */
   display: flex;
+  flex-direction: column;
   align-items: center;
   flex-wrap: wrap;    /* allow wrapping when space is tight */
   font-family: "SuperShiny", sans-serif;
@@ -80,7 +83,7 @@
   color: #9dc9b7;
 }
 
-.page-settings .line_hide input{
+.page-settings .lineHide input{
   flex: 0 0 auto;
   justify-self: start;
   font-size: 1rem;
@@ -89,7 +92,7 @@
 }
 
 /* Checkbox */
-.page-settings .line_hide input[type="checkbox"] {
+.page-settings .lineHide input[type="checkbox"] {
   width: auto !important;
   flex: 0 0 auto !important;
   margin: 0;
@@ -105,7 +108,7 @@
 }
 
 /* Text navigating to the home page */
-.line_nev_back {
+.lineNevBack {
   font-family: "SuperShiny", sans-serif;
   margin: 0 0 0 0;
   font-size: 1.5em;
@@ -113,7 +116,7 @@
 }
 
 /* Text popping up as a successful message */
-.line_msg {
+.lineMsg {
   /* Text styles */
   font-family: "SuperShiny", sans-serif;
   margin: 0;
@@ -132,7 +135,7 @@
 }
 
 /* Text popping up as a warning message */
-.line_err {
+.lineErr {
   font-family: "SuperShiny", sans-serif;
   margin: 0 0 0 0;
   font-size: 1.4em;
@@ -149,42 +152,60 @@
 
 
 /* Mobile View Adjustment */
-@media (max-width: 650px){
-  /* let buttons size to their content */
-  .page-settings p{ font-size: 15px; }
-  .page-settings .btn{
+@media (max-width: 650px) {
+  .page-settings p {
     font-size: 15px;
-    width: fit-content;
-    justify-self: start;    /* prevent grid from stretching this item */
   }
 
-    /* Solve the problem of out-side width when editing */
-   .page-settings .user-info{
-     max-width: 360px !important;
-     width: 80%;
-     margin: 0 auto;
-     justify-items: start;
+  /* Buttons: full width, consistent look */
+  .page-settings .btn {
+    font-size: 15px;
+    width: 20%;              /* full width */
+    justify-content: center;  /* center the text inside */
+    margin: 4px 0;            /* spacing between stacked buttons */
   }
 
-  .page-settings .line_hide{
-     /* Set spacing between elements */
-     font-size: 15.5px;
-     gap: 8px 6px;
+  /* Contain user info panel */
+  .page-settings .userInfo {
+    max-width: 360px !important;
+    width: 90%;               /* use most of the screen width */
+    margin: 0 auto;
   }
 
-    /* Let the label ("username/email" in our case) on its own line--above the input box */
-  .page-settings .line_hide label{
-    flex: 0 0 100%;
+  /* Row layout becomes stacked layout */
+  .page-settings .lineHide {
+    flex-direction: column;   /* stack vertically */
+    align-items: stretch;     /* make children fill the width */
+    font-size: 15.5px;
+    gap: 6px;                 /* vertical spacing */
   }
 
-  /* Let the input box be full width on its own line */
-  .page-settings .line_hide input{
-    flex: 0 0 80%;
+  /* Labels: full width, above input */
+  .page-settings .lineHide label {
+    flex: 0 0 auto;
+    width: 100%;
+    text-align: left;         /* keep left aligned */
+    margin-bottom: 2px;
   }
 
-  /* Let the checkbox be smaller */
-  .page-settings .line_hide input[type="checkbox"] {
-    transform: scale(1.1); /* smaller checkbox on phones */
+  /* Inputs: full width */
+  .page-settings .lineHide input {
+    flex: 0 0 auto;
+    width: 100%;
+    box-sizing: border-box;   /* prevent overflow */
   }
 
+  /* Checkboxes: inline with their label text */
+  .page-settings .checkboxRow {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 15px;
+  }
+
+  .page-settings .lineHide input[type="checkbox"] {
+    transform: scale(1.1);
+    margin: 0;
+    width: auto;
+  }
 }

@@ -9,7 +9,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api, clearToken } from "../api/client";
 
-import "./Setting.module.css"
+import styles from "./Setting.module.css"
 
 const BASE = import.meta.env.BASE_URL || '/';
 
@@ -205,7 +205,7 @@ export default function Settings() {
 
   /** UI Part */
   return (
-    <section className="page page-settings">
+    <section className={styles["page-settings"]}>
 
       {/* Left side nav */}
       <div className="leftside">
@@ -229,22 +229,22 @@ export default function Settings() {
 
 
       {loading ? (
-        <p className="line_nev_back">Loading...</p>
+        <p className={styles.lineNevBack}>Loading...</p>
       ) : (
         <>
-          {err && <div className="line_err" style={{ maxWidth: 520 }}>{err}</div>}
-          {msg && <div className="line_msg" style={{ maxWidth: 520 }}>{msg}</div>}
+          {err && <div className={styles.lineErr} style={{ maxWidth: 520 }}>{err}</div>}
+          {msg && <div className={styles.lineMsg} style={{ maxWidth: 520 }}>{msg}</div>}
 
-          <div className="user-info">
+          <div className={styles.userInfo}>
             {/* Username row */}
             {!editingUsername ? (
               // C1: "editingUsername == false"--display the username--View MODE
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                 {/* Display the user's username */}
-                <p className="line" style={{ margin: 0 }}><strong>User Name:</strong> {username}</p>
+                <p className={styles.line} style={{ margin: 0 }}><strong>User Name:</strong> {username}</p>
                 {/* if the button "Change" is hit, switch to the Edit MODE */}
                 <button
-                  className="btn"
+                  className={styles.btn}
                   onClick={() => { setUsernameInput(username || ""); setEditingUsername(true); }}
                 >
                   Edit
@@ -253,7 +253,7 @@ export default function Settings() {
             ) : (
               // C2: "editingUsername == true"--allow editing--Edit MODE
               // <form> here: When the user clicks "Save" or presses Enter, call my saveUsername function
-              <form className="line_hide" onSubmit={saveUsername} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <form className={styles.lineHide} onSubmit={saveUsername} style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <label htmlFor="username" style={{ minWidth: 100 }}><strong>User Name:</strong></label>
                 {/* Expected input */}
                 <input
@@ -265,13 +265,13 @@ export default function Settings() {
                   disabled={busyField === "username"}
                 />
                 {/* the "Save" button */}
-                <button className="btn primary" disabled={busyField === "username"}>
+                <button className={`${styles.btn} ${styles.primary}`} disabled={busyField === "username"}>
                   {busyField === "username" ? "Saving…" : "Save"}
                 </button>
                 {/* the "Cancel" button */}
                 <button
                   type="button"
-                  className="btn"
+                  className={styles.btn}
                   onClick={() => { setEditingUsername(false); setUsernameInput(username || ""); }}
                   disabled={busyField === "username"}
                 >
@@ -283,16 +283,16 @@ export default function Settings() {
             {/* Email row */}
             {!editingEmail ? (
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                <p className="line" style={{ margin: 0 }}><strong>Email:</strong> {email}</p>
+                <p className={styles.line} style={{ margin: 0 }}><strong>Email:</strong> {email}</p>
                 <button
-                  className="btn"
+                  className={styles.btn}
                   onClick={() => { setEmailInput(email || ""); setEditingEmail(true); }}
                 >
                   Edit
                 </button>
               </div>
             ) : (
-              <form className="line_hide" onSubmit={saveEmail} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <form className={styles.lineHide} onSubmit={saveEmail} style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <label htmlFor="email" style={{ minWidth: 100 }}><strong>Email:</strong></label>
                 <input
                   id="email"
@@ -301,12 +301,12 @@ export default function Settings() {
                   onChange={(e) => setEmailInput(e.target.value)}
                   disabled={busyField === "email"}
                 />
-                <button className="btn primary" disabled={busyField === "email"}>
+                <button className={`${styles.btn} ${styles.primary}`} disabled={busyField === "email"}>
                   {busyField === "email" ? "Saving…" : "Save"}
                 </button>
                 <button
                   type="button"
-                  className="btn"
+                  className={styles.btn}
                   onClick={() => { setEditingEmail(false); setEmailInput(email || ""); }}
                   disabled={busyField === "email"}
                 >
@@ -316,12 +316,12 @@ export default function Settings() {
             )}
 
             {/* Read-only fields */}
-            <p className="line"><strong>Group:</strong> {group}</p>
-            <p className="line"><strong>Breed:</strong> {breed}</p>
-            <p className="line"><strong>Join Date:</strong> {createdAt ? new Date(createdAt).toLocaleString() : "-"}</p>
-            <p className="line"><strong>Last Update Date:</strong> {updatedAt ? new Date(updatedAt).toLocaleString() : "-"}</p>
-            <p className="line"><strong>Total Score:</strong> {score}</p>
-            <p className="line"><strong>Total Assets:</strong> {asset}</p>
+            <p className={styles.line}><strong>Group:</strong> {group}</p>
+            <p className={styles.line}><strong>Breed:</strong> {breed}</p>
+            <p className={styles.line}><strong>Join Date:</strong> {createdAt ? new Date(createdAt).toLocaleString() : "-"}</p>
+            <p className={styles.line}><strong>Last Update Date:</strong> {updatedAt ? new Date(updatedAt).toLocaleString() : "-"}</p>
+            <p className={styles.line}><strong>Total Score:</strong> {score}</p>
+            <p className={styles.line}><strong>Total Assets:</strong> {asset}</p>
 
 
             {/* Password row */}
@@ -329,10 +329,10 @@ export default function Settings() {
               // C1: "performReset == false" -- View MODE
               <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                 {/* Display masked password */}
-                <p className="line" style={{ margin: 0 }}><strong>Password:</strong> ••••••••</p>
+                <p className={styles.line} style={{ margin: 0 }}><strong>Password:</strong> ••••••••</p>
                 {/* if the button "Change" is hit, switch to the Edit MODE*/}
                 <button
-                  className="btn"
+                  className={styles.btn}
                   onClick={() => {
                     setOldPassword("");
                     setNewPassword("");
@@ -345,7 +345,7 @@ export default function Settings() {
               </div>
             ) : (
               // C2: "editingPassword == true" -- Edit MODE
-              <form className = "line_hide" onSubmit={resetPassword} style={{ display: "flex", gap: 8, maxWidth: 400 }}>
+              <form className = {styles.lineHide} onSubmit={resetPassword}>
                 <label htmlFor="oldPassword"><strong>Old Password:</strong></label>
                 <input
                   id="oldPassword"
@@ -373,8 +373,8 @@ export default function Settings() {
                     disabled={busyField === "password"}
                   />
 
-                  {/* Show password row (separate class, NOT line_hide) */}
-                  <div className="checkbox-row">
+                  {/* Show password row (separate class, NOT lineHide) */}
+                  <div className={styles.checkboxRow}>
                     <input
                       id="showPwd"
                       type="checkbox"
@@ -387,15 +387,15 @@ export default function Settings() {
                   </div>
 
 
-                <div style={{ display: "flex", gap: 8 }}>
+                <div className={styles.btnGroup} style={{ display: "flex", gap: 8 }}>
                   {/* Save button */}
-                  <button className="btn primary" disabled={busyField === "password"}>
+                  <button className={`${styles.btn} ${styles.primary}`} disabled={busyField === "password"}>
                     {busyField === "password" ? "Saving…" : "Save"}
                   </button>
                   {/* Cancel button */}
                   <button
                     // type="button"
-                    className="btn"
+                    className={styles.btn}
                     onClick={() => {
                       setPerformReset(false);
                       setOldPassword("");
@@ -420,8 +420,8 @@ export default function Settings() {
 
 
             {/* Logout */}
-            <button className="btn primary" onClick={handleLogout} style={{marginTop: 30, minWidth: 300}}>
-              <p className="line" ><strong>Log out</strong></p>
+            <button className={`${styles.btn} ${styles.primary}`} onClick={handleLogout} style={{marginTop: 30, minWidth: 300}}>
+              <p className={styles.line} ><strong>Log out</strong></p>
             </button>
 
           </div>
