@@ -239,7 +239,7 @@ export default function Settings() {
             {/* Username row */}
             {!editingUsername ? (
               // C1: "editingUsername == false"--display the username--View MODE
-              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <div>
                 {/* Display the user's username */}
                 <p className={styles.line} style={{ margin: 0 }}><strong>User Name:</strong> {username}</p>
                 {/* if the button "Change" is hit, switch to the Edit MODE */}
@@ -264,25 +264,27 @@ export default function Settings() {
                   // While “saving”, disable the input so the user can’t change it mid-save
                   disabled={busyField === "username"}
                 />
-                {/* the "Save" button */}
-                <button className={`${styles.btn} ${styles.primary}`} disabled={busyField === "username"}>
-                  {busyField === "username" ? "Saving…" : "Save"}
-                </button>
-                {/* the "Cancel" button */}
-                <button
-                  type="button"
-                  className={styles.btn}
-                  onClick={() => { setEditingUsername(false); setUsernameInput(username || ""); }}
-                  disabled={busyField === "username"}
-                >
-                  Cancel
-                </button>
+                <div className={styles.actions}>
+                  {/* the "Save" button */}
+                  <button className={`${styles.btn} ${styles.primary}`} disabled={busyField === "username"}>
+                    {busyField === "username" ? "Saving…" : "Save"}
+                  </button>
+                  {/* the "Cancel" button */}
+                  <button
+                    type="button"
+                    className={styles.btn}
+                    onClick={() => { setEditingUsername(false); setUsernameInput(username || ""); }}
+                    disabled={busyField === "username"}
+                  >
+                    Cancel
+                  </button>
+                </div>
               </form>
             )}
 
             {/* Email row */}
             {!editingEmail ? (
-              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <div>
                 <p className={styles.line} style={{ margin: 0 }}><strong>Email:</strong> {email}</p>
                 <button
                   className={styles.btn}
@@ -292,7 +294,7 @@ export default function Settings() {
                 </button>
               </div>
             ) : (
-              <form className={styles.lineHide} onSubmit={saveEmail} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <form className={styles.lineHide} onSubmit={saveEmail}>
                 <label htmlFor="email" style={{ minWidth: 100 }}><strong>Email:</strong></label>
                 <input
                   id="email"
@@ -301,17 +303,19 @@ export default function Settings() {
                   onChange={(e) => setEmailInput(e.target.value)}
                   disabled={busyField === "email"}
                 />
-                <button className={`${styles.btn} ${styles.primary}`} disabled={busyField === "email"}>
-                  {busyField === "email" ? "Saving…" : "Save"}
-                </button>
-                <button
-                  type="button"
-                  className={styles.btn}
-                  onClick={() => { setEditingEmail(false); setEmailInput(email || ""); }}
-                  disabled={busyField === "email"}
-                >
-                  Cancel
-                </button>
+                <div className={styles.actions}>
+                  <button className={`${styles.btn} ${styles.primary}`} disabled={busyField === "email"}>
+                    {busyField === "email" ? "Saving…" : "Save"}
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.btn}
+                    onClick={() => { setEditingEmail(false); setEmailInput(email || ""); }}
+                    disabled={busyField === "email"}
+                  >
+                    Cancel
+                  </button>
+                </div>
               </form>
             )}
 
@@ -327,7 +331,7 @@ export default function Settings() {
             {/* Password row */}
             {!performReset ? (
               // C1: "performReset == false" -- View MODE
-              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <div>
                 {/* Display masked password */}
                 <p className={styles.line} style={{ margin: 0 }}><strong>Password:</strong> ••••••••</p>
                 {/* if the button "Change" is hit, switch to the Edit MODE*/}
@@ -387,7 +391,7 @@ export default function Settings() {
                   </div>
 
 
-                <div className={styles.btnGroup} style={{ display: "flex", gap: 8 }}>
+                <div className={styles.actions} style={{ display: "flex", gap: 8 }}>
                   {/* Save button */}
                   <button className={`${styles.btn} ${styles.primary}`} disabled={busyField === "password"}>
                     {busyField === "password" ? "Saving…" : "Save"}
