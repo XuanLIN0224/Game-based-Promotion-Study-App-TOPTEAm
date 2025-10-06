@@ -57,6 +57,13 @@ router.get('/today', auth, async (req, res) => {
   });
 });
 
+// backend/src/routes/quiz.js (you already have this file mounted at /api/quiz)
+router.get('/archive', auth, async (req, res) => {
+  // students & teachers can both view; restrict size
+  const list = await DailyQuiz.find({}).sort({ date: -1 }).limit(50);
+  res.json(list);
+});
+
 // consume inventory "extra_attempt" and grant +1 attempt today
 router.post('/attempts/use-extra', auth, async (req, res) => {
   const date = isoDate();
