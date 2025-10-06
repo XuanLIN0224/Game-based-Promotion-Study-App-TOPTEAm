@@ -1,54 +1,81 @@
-import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { api } from "../api/client";  
-import "./Home.css";
+import { useNavigate } from "react-router-dom";
+import { api } from "../api/client";
+import s from "./Customise.module.css"; // accessory styling
+import "./Home.css"; // shared structure & title styling
 
-const BASE_URL = (import.meta?.env?.BASE_URL ?? "/");
+const BASE = import.meta.env.BASE_URL || "/";
 
-function toPublicUrl(raw) {
-  if (!raw) return null;
-  // remove leading slash and join with BASE_URL
-  const relative = raw.replace(/^\//, "");
-  return `${BASE_URL}${relative}`;
-}
-
-export default function Customise() {
-  const navigate = useNavigate();
-  const BASE = import.meta.env.BASE_URL || "/";
-
+function Customise() {
   const [group, setGroup] = useState("");
   const [breed, setBreed] = useState("");
-  const [score, setScore] = useState(0);       
+  const [username, setUsername] = useState("");
+  const [score, setScore] = useState(0);
   const [numPetfood, setPetfood] = useState(0);
-  const [accessoryItemImage, setAccessoryItemImage] = useState("");
+  const [accessories, setAccessories] = useState([]);
 
+  const navigate = useNavigate();
+
+  // Fetch user & accessories
   useEffect(() => {
     api("/auth/me")
       .then((data) => {
+        setGroup(data?.group || "");
+        setBreed(data?.breed?.name || "");
+        setUsername(data?.username || "");
         setScore(data?.score || 0);
         setPetfood(data?.numPetFood || 0);
-        setGroup(data?.group || "default");
-        setBreed(data?.breed?.name || "");
       })
       .catch((err) => console.error("Failed to fetch /auth/me:", err));
-  }, []);
 
-  useEffect(() => {
     api("/accessories/items")
-      .then((data) => {
-        console.log("Accessories API response:", data);      // full array
-        console.log("First element:", data[0]);              // first object
-        console.log("First key:", data[0]?.key || "none");   // key value safely
-
-        setAccessoryItemImage(toPublicUrl(data[0].imageUrl));
-
-        // If you want just the first key in state:
-        //setAccessories(data[0]?.key || 0);
-      })
+      .then(setAccessories)
       .catch((err) => console.error("Failed to fetch /accessories/items:", err));
   }, []);
 
-  // breedImages logic from Home.jsx
+  // Handle purchase
+  const handlePurchase = async (itemName) => {
+    try {
+      const res = await api("/accessories/purchase/still", {
+        method: "POST",
+        body: { itemName },
+      });
+
+      if (res.message === "Purchase Successful!") {
+        setScore(res.score);
+        setAccessories((prev) =>
+          prev.map((acc) =>
+            acc.key === itemName ? { ...acc, owned: true, equipped: false } : acc
+          )
+        );
+      } else {
+        alert(res.message || "Purchase failed");
+      }
+    } catch (err) {
+      console.error("Purchase error:", err);
+      alert("Error purchasing item");
+    }
+  };
+
+  // Handle wear/remove
+  const handleEquip = async (itemName, equip) => {
+    try {
+      await api("/accessories/equip", {
+        method: "PATCH",
+        body: { itemName, equip },
+      });
+      setAccessories((prev) =>
+        prev.map((acc) =>
+          acc.key === itemName ? { ...acc, equipped: !!equip } : acc
+        )
+      );
+    } catch (err) {
+      console.error("Equip error:", err);
+      alert("Error equipping item");
+    }
+  };
+
+  // Pet breed images
   const breedImages = {
     dog: {
       "Border Collie": `${BASE}icons/home/BorderCollie.gif`,
@@ -66,37 +93,44 @@ export default function Customise() {
     },
   };
 
-  // group-specific icons (score + feed)
+  // Group-specific icons
   const groupIcons = {
     default: {
       coin: `${BASE}icons/default/moneybag_icon.png`,
       feed: `${BASE}icons/default/feed.png`,
+      home: `${BASE}icons/home/home.png`,
     },
     dog: {
       coin: `${BASE}icons/dog/coin.png`,
       feed: `${BASE}icons/dog/bone.png`,
+      home: `${BASE}icons/home/home.png`,
     },
     cat: {
       coin: `${BASE}icons/cat/coin.png`,
       feed: `${BASE}icons/cat/fish.png`,
+      home: `${BASE}icons/home/home.png`,
     },
   };
+
   const icons = groupIcons[group] ?? groupIcons.default;
 
-  // example accessories (for testing)
-  //image size 1200 x 1200
-  const accessories = [
-    { key: "cat ear", title: "cat ear", imageUrl: `${BASE}customise/cat_ear.png`, price: 7, purchased: true },
-    { key: "bear ear", title: "bear ear", imageUrl: `${BASE}customise/bear_ear.png`, price: 7, purchased: false },
-  ];
+  const petImg =
+    (breedImages[group] && breedImages[group][breed]) ||
+    (breedImages[group] && breedImages[group].default) ||
+    `${BASE}icons/home/main.gif`;
+
+  const accessoryImages = {
+    bear_ear: `${BASE}accessory/bear/bear_ear.png`,
+    cat_ear: `${BASE}accessory/cat_ear/cat_ear.png`,
+  };
 
   return (
     <div className="page">
-      {/* Left nav + Score/Petfood */}
+      {/* Left nav and stats */}
       <div className="leftside">
         <div className="pagelinkicon" onClick={() => navigate("/")}>
           <img
-            src={`${BASE}icons/home/home.png`}
+            src={icons.home}
             className="icon"
             alt="Home"
             onError={(e) => {
@@ -106,30 +140,15 @@ export default function Customise() {
           <p className="iconcaption">Home</p>
         </div>
 
-
-        <div>
-            <h2>First Accessory</h2>
-              {accessoryItemImage ? (
-                <img
-                  src={accessoryItemImage}
-                  alt="Accessory"
-                  style={{ width: "150px", height: "auto" }}
-                />
-              ) : (
-                <p>Loading accessory...</p>
-              )}
-        </div>
-
-
-        {/* Score + Petfood */}
         <div className="scorePad">
           <div
             className="pagelinkicon"
             style={{ display: "flex", flexDirection: "row", gap: "10px" }}
           >
-            <img src={icons.coin} className="icon" alt="Score" />
+            <img src={icons.coin} className="icon" alt="Money" />
             <p className="iconcaption">{score}</p>
           </div>
+
           <div
             className="pagelinkicon"
             style={{ display: "flex", flexDirection: "row", gap: "10px" }}
@@ -140,68 +159,63 @@ export default function Customise() {
         </div>
       </div>
 
-      <h1 className="title">Customise</h1>
+      {/* Title */}
+      <h1 className={s.title}>Customise</h1>
 
       {/* Pet image */}
-      <div className="content" style={{ textAlign: "center", marginBottom: "30px" }}>
-        <img
-          src={
-            (breedImages[group] && breedImages[group][breed]) ||
-            (breedImages[group] && breedImages[group].default) ||
-            `${BASE}icons/home/main.gif`
-          }
-          alt={breed || group || "default"}
-          className="pic"
-          style={{ maxWidth: "300px" }}
-        />
+      <div className={s.petPreview}>
+        <img src={petImg} alt={breed || group || "default"} className={s.petImg} />
       </div>
 
-      {/* Accessories list */}
-      <div className="content" style={{ padding: "20px" }}>
-        <h2>Available Accessories</h2>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "20px", justifyContent: "center" }}>
-          {accessories.map((acc) => (
-          <div
-            key={acc.key}
-            style={{
-              border: "1px solid #ccc",
-              borderRadius: "8px",
-              padding: "10px",
-              width: "180px",
-              textAlign: "center",    
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",   
-            }}
-          >
-              <img src={acc.imageUrl} alt={acc.title} style={{ width: "100px", height: "100px" }} />
-              <h3 style={{ margin: "10px 0 5px" }}>{acc.title}</h3>
-              <p style={{ margin: "0 0 5px" }}>
-                <img src={icons.coin} alt="Price" style={{ width: "20px", verticalAlign: "middle" }} /> {acc.price}
-              </p>
-              <p style={{ margin: "0 0 10px" }}>
-                {acc.purchased ? "✅ Owned" : "❌ Not Owned"}
-              </p>
-              <button
-                disabled={!acc.purchased}
-                style={{
-                  display: "inline-block",    
-                  padding: "6px 16px",
-                  fontSize: "14px",
-                  borderRadius: "6px",
-                  border: "1px solid #ccc",
-                  background: acc.purchased ? "#f1da66" : "#ddd",
-                  cursor: acc.purchased ? "pointer" : "not-allowed",
-                  marginTop: "8px",
-                  marginBottom: "5px",        
-                }}
-              >
-                Wear
+      {/* Accessories grid */}
+      <section className={s.accessoryGrid}>
+        {accessories.map((item) => (
+          <div key={item.key} className={s.accessoryCard}>
+            <img
+              src={accessoryImages[item.key] || `${BASE}icons/default/missing.png`}
+              alt={item.title}
+              className={s.accessoryImg}
+            />
+            <h4>{item.title}</h4>
+            <p>
+              <img
+                src={icons.coin}
+                alt="Price"
+                style={{ width: "16px", verticalAlign: "middle" }}
+              />{" "}
+              {item.price}
+            </p>
+
+            {/* Purchase */}
+            {item.owned ? (
+              <button disabled className={s.disabledBtn}>
+                Purchased
               </button>
-            </div>
-          ))}
-        </div>
-      </div>
+            ) : (
+              <button className={s.purchaseBtn} onClick={() => handlePurchase(item.key)}>
+                Purchase
+              </button>
+            )}
+
+            {/* Wear */}
+            <button
+              disabled={!item.owned}
+              onClick={() => handleEquip(item.key, !item.equipped)}
+              className={`${s.wearBtn} ${
+                !item.owned
+                  ? s.wearDisabled
+                  : item.equipped
+                  ? s.removeActive
+                  : s.wearActive
+              }`}
+            >
+              {!item.owned ? "Wear" : item.equipped ? "Remove" : "Wear"}
+            </button>
+          </div>
+        ))}
+      </section>
     </div>
   );
 }
+
+export default Customise;
