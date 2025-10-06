@@ -10,10 +10,41 @@ function broadcastLogout(reason = 'unauthorized') {
   try { window.dispatchEvent(new CustomEvent('auth:logout', { detail: { reason } })); } catch {}
 }
 
+// ---- Auto logout timer from JWT exp ----
+function scheduleAutoLogoutFromToken(token) {
+  try {
+    const payload = JSON.parse(atob((token || '').split('.')[1] || ''));
+    const expSec = payload && payload.exp; // unix seconds
+    if (!expSec) return;
+    const ms = expSec * 1000 - Date.now();
+    if (ms <= 0) {
+      // token 已过期，立刻登出
+      clearToken();
+      // 若外部未注册回调，直接跳转登录页
+      if (typeof onUnauthorized === 'function') onUnauthorized();
+      else try { window.location.replace('/auth/Login'); } catch {}
+      return;
+    }
+    // 定时器：到期自动退出
+    if (window.__logoutTimer) clearTimeout(window.__logoutTimer);
+    window.__logoutTimer = setTimeout(() => {
+      clearToken();
+      if (typeof onUnauthorized === 'function') onUnauthorized();
+      else try { window.location.replace('/auth/Login'); } catch {}
+    }, ms);
+  } catch (e) {
+    // 无法解析则忽略
+  }
+}
+
 // Save the token when log-in successfully
 export function setToken(token) {
-  if (token) localStorage.setItem('token', token);  // Store the token locally
-  else localStorage.removeItem('token');
+  if (token) {
+    localStorage.setItem('token', token);  // Store the token locally
+    scheduleAutoLogoutFromToken(token);
+  } else {
+    clearToken();
+  }
 }
 // Retrieve the token later when making API calls
 export function getToken() {
@@ -23,8 +54,8 @@ export function getToken() {
 // Remove the token
 export function clearToken() {
   localStorage.removeItem('token');
+  if (window.__logoutTimer) try { clearTimeout(window.__logoutTimer); } catch {}
 }
-
 
 // Frontend request wrapper--so that backend apis could be triggered
 export async function api(path, { method = 'GET', body, headers = {} } = {}) {
@@ -37,20 +68,22 @@ export async function api(path, { method = 'GET', body, headers = {} } = {}) {
   if (path[0] !== '/') path = `/${path}`;
 
   const token = getToken();
+  const finalHeaders = { ...(headers || {}) };
+  const isFormData = (typeof FormData !== 'undefined') && (body instanceof FormData);
+  if (!isFormData) finalHeaders['Content-Type'] = finalHeaders['Content-Type'] || 'application/json';
+  if (token) finalHeaders.Authorization = `Bearer ${token}`;
+
   const res = await fetch(`${API_BASE}${path}`, {
     method,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...headers
-    },
-    body: body ? JSON.stringify(body) : undefined
+    headers: finalHeaders,
+    body: body ? (isFormData ? body : JSON.stringify(body)) : undefined
   });
 
-  // Auto-logout
+  // Auto-logout on 401
   if (res.status === 401) {
     clearToken();
     if (typeof onUnauthorized === 'function') onUnauthorized();
+    else try { window.location.replace('/auth/Login'); } catch {}
     broadcastLogout('401');
     throw new Error('Unauthorized, please log in again.');
   }
@@ -65,3 +98,9 @@ export async function api(path, { method = 'GET', body, headers = {} } = {}) {
 async function safeJson(res) {
   try { return await res.json(); } catch { return null; }
 }
+
+// ---- App bootstrap: schedule auto logout if token exists ----
+(() => {
+  const t = getToken();
+  if (t) scheduleAutoLogoutFromToken(t);
+})();
