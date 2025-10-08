@@ -200,9 +200,6 @@ export default function Settings() {
     }
   }
 
-  // For styling
-
-
   /** UI Part */
   return (
     <section className={styles["page-settings"]}>

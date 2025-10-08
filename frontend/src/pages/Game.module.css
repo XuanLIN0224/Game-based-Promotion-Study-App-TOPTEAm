@@ -1,0 +1,54 @@
+/* Event card */
+.card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  /* you had padding:12 and padding:20; keep one: */
+  padding: 20px;
+  margin-bottom: 12px;
+  margin-top: 100px;
+}
+
+/* Header row */
+.cardHeader { display: flex; justify-content: space-between; }
+
+/* Stats */
+.stats { margin-top: 8px; }
+.percentRow { display: flex; gap: 12px; font-size: 12px; margin-top: 4px; }
+
+/* Hints */
+.hints { margin-top: 12px; }
+.hintsTitle { font-weight: 700; }
+.hintsGrid { display: grid; gap: 8px; margin-top: 6px; }
+
+/* Hint card */
+.hintCard { border: 1px solid #eee; border-radius: 6px; padding: 8px; }
+.hintHeader { display: flex; justify-content: space-between; }
+.hintTitle {}
+.hintNeed { font-size: 12px; opacity: 0.7; }
+
+/* Hint content */
+.hintContent { margin-top: 6px; min-height: 18px; }
+.lockedBlur { filter: blur(4px); user-select: none; }
+.unlockedSelect { user-select: text; }
+
+.lockedNote { font-size: 12px; opacity: 0.7; margin-top: 4px; }
+
+@media (max-width: 650px) {
+  .card {
+    margin: 56px 12px 16px;    /* tighter horizontal margins on phones */
+    width: auto;               /* ignore 90% and max-width on small screens */
+    padding: 16px;             /* slightly less padding to fit content */
+    border-radius: 10px;
+  }
+  .cardHeader {
+    font-size: 0.95rem;
+  }
+
+  .percentRow {
+    font-size: 0.85rem;
+  }
+
+  .hintNeed {
+    font-size: 0.75rem;
+  }
+}
