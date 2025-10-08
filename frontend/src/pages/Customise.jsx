@@ -60,13 +60,17 @@ function Customise() {
   // Handle wear/remove
   const handleEquip = async (itemName, equip) => {
     try {
-      await api("/accessories/equip", {
+      const res = await api("/accessories/equip", {
         method: "PATCH",
         body: { itemName, equip },
       });
+
+      // Only one equipped at a time
       setAccessories((prev) =>
         prev.map((acc) =>
-          acc.key === itemName ? { ...acc, equipped: !!equip } : acc
+          acc.key === itemName
+            ? { ...acc, equipped: !!equip }
+            : { ...acc, equipped: false }
         )
       );
     } catch (err) {
@@ -92,6 +96,19 @@ function Customise() {
       default: `${BASE}icons/home/main.gif`,
     },
   };
+  // Accessory overlay GIFs per breed
+  const accessoryPetImages = {
+    cat_ear: {
+      Bombay: `${BASE}accessory/cat_ear/catEar_Bombay.gif`,
+      "Border Collie": `${BASE}accessory/cat_ear/catEar_BorderCollie.gif`,
+      Dachshund: `${BASE}accessory/cat_ear/catEar_Dachshund.gif`,
+      "Toy Poodle": `${BASE}accessory/cat_ear/catEar_Poodle.gif`,
+      "Golden British": `${BASE}accessory/cat_ear/catEar_golden_british.gif`,
+      Ragdoll: `${BASE}accessory/cat_ear/catEar_ragdoll.gif`,
+      Samoyed: `${BASE}accessory/cat_ear/catEar_Samoyed.gif`,
+      Siamese: `${BASE}accessory/cat_ear/catEar_Siamese.gif`,
+    },
+  };
 
   // Group-specific icons
   const groupIcons = {
@@ -114,10 +131,22 @@ function Customise() {
 
   const icons = groupIcons[group] ?? groupIcons.default;
 
-  const petImg =
-    (breedImages[group] && breedImages[group][breed]) ||
-    (breedImages[group] && breedImages[group].default) ||
-    `${BASE}icons/home/main.gif`;
+  // Find which accessory is currently equipped
+  const equipped = accessories.find((a) => a.equipped);
+
+  // Determine which pet image to show
+  let petImg;
+
+  if (equipped && accessoryPetImages[equipped.key]) {
+    petImg =
+      accessoryPetImages[equipped.key][breed] ||
+      `${BASE}icons/home/main.gif`;
+  } else {
+    petImg =
+      (breedImages[group] && breedImages[group][breed]) ||
+      (breedImages[group] && breedImages[group].default) ||
+      `${BASE}icons/home/main.gif`;
+  }
 
   const accessoryImages = {
     bear_ear: `${BASE}accessory/bear/bear_ear.png`,

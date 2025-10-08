@@ -22,8 +22,8 @@ const AccessoryItem = require('../models/Accessories');
  * types: they should all be the same type
  */
  const CATALOG = {
-   bear_ear:             { title: 'BearEar',        imageUrl: '/customise/bear_ear.png',       price: 7,  limit: 1 },
-   cat_ear:              { title: 'CatEar',         imageUrl: '/customise/cat_ear.png',        price: 5,  limit: 1 },
+   bear_ear:             { title: 'Bear Ear',        imageUrl: '/customise/bear_ear.png',       price: 7,  limit: 1 },
+   cat_ear:              { title: 'Cat Ear',         imageUrl: '/customise/cat_ear.png',        price: 5,  limit: 1 },
 };
  // imageUrl: '/assets/hat.png',
 
@@ -163,7 +163,7 @@ router.patch('/adjust', auth, async (req, res) => {
   });
 });
 
-/** F4: Change this specific accessory of the user to 'unequipped'/'equipped' */
+/** F4: Equip only one accessory at a time */
 router.patch('/equip', auth, async (req, res) => {
   const userId = req.user._id;
   const { itemName, equip } = req.body || {};
@@ -175,28 +175,26 @@ router.patch('/equip', auth, async (req, res) => {
   if (!itemMeta)
     return res.status(400).json({ message: '[EQUIP] Unknown accessory item' });
 
-  const correspondItemDoc = await AccessoryItem.findOne({ userId, itemName });
-  if (!correspondItemDoc) {
-    return res
-      .status(404)
-      .json({ message: '[EQUIP] Accessory not found for this user--Fatal' });
+  // Unequip all other accessories first
+  await AccessoryItem.updateMany({ userId }, { equipped: false });
+
+  // Equip the selected one (if equip=true)
+  if (equip) {
+    const itemDoc = await AccessoryItem.findOneAndUpdate(
+      { userId, itemName },
+      { equipped: true },
+      { new: true }
+    );
+    return res.json({
+      key: itemName,
+      equipped: true,
+      message: `Equipped ${itemMeta.title}`,
+    });
   }
-  // S2s2: Replace the old transform with the empty object--need to discuss
-  correspondItemDoc.equipped = !!equip;
 
-  correspondItemDoc.equipped = !!equip;
-  await correspondItemDoc.save();
-
-  return res.json({
-    key: itemName,
-    title: itemMeta.title,
-    price: itemMeta.price,
-    imageUrl: itemMeta.imageUrl,
-    limit: 1,
-    owned: correspondItemDoc.transform,
-    equipped: correspondItemDoc.equipped,
-  });
+  // If unequipping current
+  await AccessoryItem.updateOne({ userId, itemName }, { equipped: false });
+  return res.json({ key: itemName, equipped: false, message: 'Accessory removed' });
 });
-
 module.exports = router;
 
