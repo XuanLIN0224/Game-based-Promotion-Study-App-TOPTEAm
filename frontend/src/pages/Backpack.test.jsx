@@ -1,6 +1,6 @@
 import React from "react";
 import { it, expect, describe, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event"; // use to simulate events (e.g. click)
 import Backpack from "./Backpack.jsx";
 
@@ -16,7 +16,11 @@ vi.mock("./Backpack.module.css", () => ({ default: {} }), { virtual: true });
 let inventoryState;
 beforeEach(() => {
   // assume there is a 'quiz_booster_today' in the backpack
-  inventoryState = [{ key: "quiz_booster_today", qty: 1 }];
+  //inventoryState = [{ key: "quiz_booster_today", qty: 1 }];
+  inventoryState = [
+    { key: "quiz_booster_today", qty: 1 },
+    { key: "lollies_voucher", qty: 2 },
+  ];
 });
 
 // Mock the "../api/client" module so the real API won't be called
@@ -60,9 +64,12 @@ describe("Quiz Booster for today", () => {
 
     await screen.findByText("Quiz Booster for today");
 
-    const user = userEvent.setup();
-    const useItemButton = await screen.findByTestId("use-item-button");
+    //const useItemButton = await screen.findByTestId("use-item-button");
+    const boosterTitleEl = screen.getByText("Quiz Booster for today");
+    const boosterRow = boosterTitleEl.closest("li");
+    const useItemButton = await within(boosterRow).findByTestId("use-item-button");
 
+    const user = userEvent.setup();
     await user.click(useItemButton);
     expect(useItemButton).toBeDisabled();
     expect(useItemButton).toHaveTextContent(/Using…/i);
@@ -72,6 +79,23 @@ describe("Quiz Booster for today", () => {
       const itemRow = screen.getByText("Quiz Booster for today").closest("li");
       expect(itemRow.textContent).toMatch(/Qty:\s*0/i);
     });
+  });
+
+  it("shows lollies_voucher (qty=2) with Use button", async () => {
+     const utils = render(<Backpack />);
+  
+    inventoryState = [{ key: "lollies_voucher", qty: 2 }];
+    utils.unmount();
+    render(<Backpack />);
+  
+    await screen.findByText("Backpack");
+    expect(screen.queryByText("Quiz Booster for today")).toBeNull();
+  
+    const voucherRow = screen.getByText("Lollies Voucher").closest("li");
+    expect(voucherRow.textContent).toMatch(/Qty:\s*2/i);
+    const voucherUseBtn = within(voucherRow).getByTestId("use-item-button");
+    expect(voucherUseBtn).toBeInTheDocument();
+    expect(voucherUseBtn).not.toBeDisabled();
   });
 });  
 
