@@ -154,7 +154,7 @@ describe("Settings", () => {
     const confirmInput = await screen.findByLabelText(/^Confirm New Password:$/i, { selector: "input" });
   
     await userEvent.clear(oldInput);
-    await userEvent.type(oldInput, "old12345");
+    await userEvent.type(oldInput, "aabbcc");
   
     await userEvent.clear(newInput);
     await userEvent.type(newInput, "aabbccdd");
@@ -196,20 +196,20 @@ describe("Settings", () => {
   });
 
   it("log out successfully", async () => {
-  const { default: Settings } = await import("./Settings");
-  render(<Settings />);
+    const { default: Settings } = await import("./Settings");
+    render(<Settings />);
 
-  // Find the "Log out" button 
-  const logoutBtn = await screen.findByRole("button", { name: /log\s*out/i });
-  expect(logoutBtn).toBeInTheDocument();
+    // Find the "Log out" button 
+    const logoutBtn = await screen.findByRole("button", { name: /Log out/i });
+    expect(logoutBtn).toBeInTheDocument();
 
-  // Click the button
-  await userEvent.click(logoutBtn);
+    // Click the button
+    await userEvent.click(logoutBtn);
 
-  // Assert that the token clear function was called
-  expect(clearTokenMock).toHaveBeenCalled();
+    // Assert that the token clear function was called
+    expect(clearTokenMock).toHaveBeenCalled();
 
-  // Assert that navigation redirected to /login
-  expect(mockNavigate).toHaveBeenCalledWith("/auth/Login");
+    // Assert that navigation redirected to /login
+    expect(mockNavigate).toHaveBeenCalledWith("/auth/Login");
   });
 });
