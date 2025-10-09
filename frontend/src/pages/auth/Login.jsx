@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { api, setToken } from '../../api/client';
-import './Auth.css';
+import m from './Auth.module.css';
 
 export default function Login() {
   const nav = useNavigate();
@@ -37,18 +37,18 @@ export default function Login() {
   };
 
   return (
-    <div className="auth-page">
-      <div className="auth-card">
+    <div className={`page ${m.authPage}`}>
+      <div className={m.authCard}>
         <h2>Welcome back</h2>
-        <form onSubmit={onSubmit} className="auth-form">
-          <label>Email</label>
-          <input className="auth-input" type="email" value={email}
+        <form onSubmit={onSubmit} className={m.authForm}>
+          <label htmlFor="email">Email</label>
+          <input id="email" className={m.authInput} type="email" value={email}
                  onChange={e=>setEmail(e.target.value)} required maxLength={50}/>
-          <label>Password</label>
-          <input className="auth-input" type={showPassword ? "text" : "password"} value={password}
+          <label htmlFor="password">Password</label>
+          <input id="password" className={m.authInput} type={showPassword ? "text" : "password"} value={password}
                  onChange={e=>setPassword(e.target.value)} required/>
-          {err && <div className="auth-error">{err}</div>}
-          <label className="remember-row">
+          {err && <div className={m.authError}>{err}</div>}
+          <label className={m.rememberRow}>
             <input
               type="checkbox"
               checked={showPassword}
@@ -56,7 +56,7 @@ export default function Login() {
             />
             Show password
           </label>
-          <label className="remember-row">
+          <label className={m.rememberRow}>
             <input
               type="checkbox"
               checked={remember}
@@ -64,10 +64,10 @@ export default function Login() {
             />
             Keep me logged in for a week
           </label>
-          <button className="btn primary" disabled={busy}>{busy?'Logging in...':'Log in'}</button>
+          <button className="btn secondary" disabled={busy}>{busy?'Logging in...':'Log in'}</button>
         </form>
 
-        <div className="auth-actions">
+        <div className={m.authActions}>
           <Link to="/register/step1">Create account</Link>
           <Link to="/forgot">Forgot password?</Link>
         </div>

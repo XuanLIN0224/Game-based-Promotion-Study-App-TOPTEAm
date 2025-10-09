@@ -58,6 +58,12 @@ ul.backpackList > li {
 	/* !important; outline: 1px solid green; */
 }
 
+/* Button Row */
+.btnRow {
+  grid-column: 1 / -1;
+  width: 100%;
+}
+
 
 /* Laptop view */
 @media (min-width: 768px) {
@@ -80,5 +86,11 @@ ul.backpackList > li {
 		justify-self: start
 		!important; outline: 1px solid red;
 	}
+
+  .btnRow {
+    grid-column: 3 / 4;      
+    width: auto;
+    justify-self: end;      
+  }
 
 }

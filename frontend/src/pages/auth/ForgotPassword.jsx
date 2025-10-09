@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { api } from '../../api/client';
-import './Auth.css';
+import m from './Auth.module.css';
 
 export default function ForgotPassword() {
   const nav = useNavigate();
@@ -27,20 +27,20 @@ export default function ForgotPassword() {
   };
 
   return (
-    <div className="auth-page">
-      <div className="auth-card">
+    <div className={`page ${m.authPage}`}>
+      <div className={m.authCard}>
         <h2>Forgot Password</h2>
-        <form onSubmit={onSubmit} className="auth-form">
+        <form onSubmit={onSubmit} className={m.authForm}>
           <label>Email</label>
-          <input className="auth-input" type="email"
+          <input className={m.authInput} type="email"
                  value={email} onChange={e=>setEmail(e.target.value)} required/>
-          {err && <div className="auth-error">{err}</div>}
-          {msg && <div className="auth-info">{msg}</div>}
-          <button className="btn primary" disabled={busy}>
+          {err && <div className={m.authError}>{err}</div>}
+          {msg && <div className={m.authInfo}>{msg}</div>}
+          <button className="btn secondary" disabled={busy}>
             {busy?'Sending...':'Send code'}
           </button>
         </form>
-        <div className="auth-actions">
+        <div className={m.authActions}>
           <Link to="/login">Back to login</Link>
         </div>
       </div>

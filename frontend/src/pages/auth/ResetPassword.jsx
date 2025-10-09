@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../../api/client';
-import './Auth.css';
+import m from './Auth.module.css';
 
 export default function ResetPassword() {
   const nav = useNavigate();
@@ -36,7 +36,7 @@ export default function ResetPassword() {
   };
 
   return (
-    <div className="auth-page">
+    <div className={`page ${m.authPage}`}>
       <div className="auth-card">
         <h2>Reset Password</h2>
         <form onSubmit={onSubmit} className="auth-form">

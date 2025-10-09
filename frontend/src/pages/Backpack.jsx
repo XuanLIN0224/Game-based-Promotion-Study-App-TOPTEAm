@@ -98,6 +98,7 @@ export default function Backpack () {
                   <div className={b.itemAction}>
                     <div className={b.itemQty}>Qty: <b>{it.qty}</b></div>
                     {canUse && it.qty > 0 && (
+                      <div className={b.btnRow}>
                         <button
                           className="btn secondary"
                           onClick={()=>useItem(it.key, 1)}
@@ -105,6 +106,7 @@ export default function Backpack () {
                         >
                           {busyKey === it.key ? 'Using…' : 'Use'}
                         </button>
+                      </div>
                     )}
                   </div>
                 </li>

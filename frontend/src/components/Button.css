@@ -24,8 +24,6 @@
   */
 
 
-
-
 /* Default styles for all buttons */
 button, .btn {
   font-family: "SuperShiny", sans-serif;
@@ -105,9 +103,9 @@ button:focus-visible {
 /* Responsive adjustments for buttons */
 @media (min-width: 768px) {
 
-.btn.secondary{
-	grid-column: 3 / 4; 		/* align to col 3 */
-}
+  /* .btn.secondary{
+    grid-column: 3 / 4; 		
+  } */
 
 
 }
