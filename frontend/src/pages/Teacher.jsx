@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../api/client";
 
-import s from './Teacher.module.css';
+import s from './teacher.module.css';
 
 // --- Helper functions for date math ---
 function pad(n){ return String(n).padStart(2,'0'); }
