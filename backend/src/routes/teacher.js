@@ -52,6 +52,30 @@ router.get('/quiz-config', auth, requireTeacher, async (req, res) => {
   });
 });
 
+// ===== List recent quizzes (teacher) =====
+router.get('/quizzes', auth, requireTeacher, async (req, res) => {
+  const { limit = 50, cursor } = req.query; // optional pagination
+  const q = {};
+  if (cursor) q.date = { $lt: cursor }; // paging by date string 'YYYY-MM-DD'
+  const list = await DailyQuiz.find(q).sort({ date: -1 }).limit(Math.min(+limit || 50, 100));
+  res.json(list);
+});
+
+// ===== Update a quiz (questions & answers) =====
+router.patch('/quizzes/:id', auth, requireTeacher, async (req, res) => {
+  const { questions } = req.body || {};
+  if (!Array.isArray(questions)) {
+    return res.status(400).json({ message: 'questions[] required' });
+  }
+  const updated = await DailyQuiz.findByIdAndUpdate(
+    req.params.id,
+    { $set: { questions, updatedAt: new Date() } },
+    { new: true }
+  );
+  if (!updated) return res.status(404).json({ message: 'quiz not found' });
+  res.json(updated);
+});
+
 // ===== PATCH start date =====
 router.patch('/quiz-config/start-date', auth, requireTeacher, async (req, res) => {
   const { startDate } = req.body || {};
@@ -114,7 +138,11 @@ router.patch('/quiz-config/:weekIndex/meta', auth, requireTeacher, async (req, r
 // ===== Generate quiz from week for a given date (default today) =====
 router.post('/quiz-config/:weekIndex/generate', auth, requireTeacher, async (req, res) => {
   const weekIndex = Number(req.params.weekIndex);
-  const { date, numQuestions = 5 } = req.body || {};
+  const { date, numQuestions = 5, difficulty = 'medium' } = req.body || {};
+
+  const allowed = ['easy','medium','difficult'];
+  const level = allowed.includes(difficulty) ? difficulty : 'medium';
+
   if (!Number.isInteger(weekIndex) || weekIndex < 1 || weekIndex > 12) {
     return res.status(400).json({ message: 'Invalid weekIndex' });
   }
@@ -128,7 +156,8 @@ router.post('/quiz-config/:weekIndex/generate', auth, requireTeacher, async (req
     pdfText: cfg.pdfText,
     notes: cfg.notes,
     title: cfg.title,
-    numQuestions
+    numQuestions,
+    difficulty: level,
   });
 
   const doc = await DailyQuiz.findOneAndUpdate(

@@ -1,6 +1,8 @@
 // at top of Game.jsx
 import { useEffect, useState } from 'react';
 import { EventsAPI } from '../api/events';
+import { useNavigate } from "react-router-dom";
+import styles from "./Game.module.css";
 
 function PercentBar({ pctCat, pctDog }) {
   return (
@@ -13,6 +15,8 @@ function PercentBar({ pctCat, pctDog }) {
 
 function EventWidget() {
   const [data, setData] = useState(null);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     let mounted = true;
@@ -35,50 +39,69 @@ function EventWidget() {
 
   const ev = data.event;
 
+  /** UI Part */
   return (
-    <div style={{border:'1px solid #ddd', borderRadius:8, padding:12, marginBottom:12}}>
-      <div style={{display:'flex', justifyContent:'space-between'}}>
-        <b>{ev.name}</b>
-        <span>Ends: {new Date(ev.endAt).toLocaleString()}</span>
-      </div>
-
-      <div style={{marginTop:8}}>
-        <PercentBar pctCat={data.stats.pctCat} pctDog={data.stats.pctDog} />
-        <div style={{display:'flex', gap:12, fontSize:12, marginTop:4}}>
-          <span>Cat: {data.stats.cat} petfood ({data.stats.pctCat}%)</span>
-          <span>Dog: {data.stats.dog} petfood ({data.stats.pctDog}%)</span>
-          <span>Total: {data.stats.total}</span>
+    <>
+      {/* Left side nav */}
+      <div className="leftside">
+        <div className="pagelinkicon" onClick={() => navigate("/")}>
+          <img src={`icons/home/home.png` || `icons/default/home.png`} className="icon" alt="Home" />
+          <p className="iconcaption">Home</p>
         </div>
       </div>
 
-      <div style={{marginTop:12}}>
-        <b>Hints</b>
-        <div style={{display:'grid', gap:8, marginTop:6}}>
-          {data.hints.map((h, i) => (
-            <div key={i} style={{border:'1px solid #eee', borderRadius:6, padding:8}}>
-              <div style={{display:'flex', justifyContent:'space-between'}}>
-                <span>{h.title || `Hint ${i+1}`}</span>
-                <span style={{fontSize:12, opacity:0.7}}>Need {h.threshold} petfood</span>
-              </div>
-              <div style={{
-                marginTop:6,
-                filter: h.unlocked ? 'none' : 'blur(4px)',
-                userSelect: h.unlocked ? 'text' : 'none',
-                minHeight: 18
-              }}>
-                {h.unlocked ? (h.content || '(No content)') : 'Locked'}
-              </div>
-              {!h.unlocked && <div style={{fontSize:12, opacity:0.7, marginTop:4}}>(Your team has not reached this threshold.)</div>}
+      {/* The card */}
+      <div className={styles.card}>
+        {/* The evet header */}
+        <div className={styles.cardHeader}>
+          <b>{ev.name}</b>
+          <span>Ends: {new Date(ev.endAt).toLocaleString()}</span>
+        </div>
+
+        {/* The evet states--show the winning team */}
+        <div className={styles.stats}>
+          <PercentBar pctCat={data.stats.pctCat} pctDog={data.stats.pctDog} />
+            <div className={styles.percentRow}>
+              <span>Cat: {data.stats.cat} petfood ({data.stats.pctCat}%)</span>
+              <span>Dog: {data.stats.dog} petfood ({data.stats.pctDog}%)</span>
+              <span>Total: {data.stats.total}</span>
             </div>
-          ))}
+        </div>
+
+        {/* The evet hints for the winning team */}
+        <div className={styles.hints}>
+          <b className={styles.hintsTitle}>Hints</b>
+          <div className={styles.hintsGrid}>
+            {data.hints.map((h, i) => (
+              <div key={i} className={styles.hintCard}>
+                <div className={styles.hintHeader}>
+                  <span className={styles.hintTitle}>{h.title || `Hint ${i + 1}`}</span>
+                  <span className={styles.hintNeed}>Need {h.threshold} petfood</span>
+                </div>
+
+                <div
+                  className={[
+                    styles.hintContent,
+                    h.unlocked ? styles.unlockedSelect : styles.lockedBlur,
+                    ].join(" ")}
+                >
+                  {h.unlocked ? (h.content || "(No content)") : "Locked"}
+                </div>
+
+                {!h.unlocked && (
+                  <div className={styles.lockedNote}> (Your team has not reached this threshold.) </div>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 
 // then inside Game page component's JSX where you want it:
-{/* <EventWidget /> */}
+//<EventWidget />
 export default function Game() {
   return (
     <div style={{ maxWidth: 900, margin: '0 auto' }}>
