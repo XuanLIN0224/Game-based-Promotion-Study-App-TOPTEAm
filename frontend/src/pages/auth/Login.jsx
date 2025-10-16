@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { flushSync } from 'react-dom';
 import { Link, useNavigate } from 'react-router-dom';
 import { api, setToken } from '../../api/client';
 import './Auth.css';
@@ -15,8 +16,11 @@ export default function Login() {
   /* Triggered when the user clicks "Log in" button */
   const onSubmit = async (e) => {
     e.preventDefault();
-    setErr('');
-    setBusy(true);
+    let ok = false;
+    flushSync(() => {
+      setErr('');
+      setBusy(true);
+    });
     try {
       const resp = await api('/auth/login', {
         method: 'POST',
@@ -24,6 +28,7 @@ export default function Login() {
       });
       setToken(resp.token);
       const me = await api('/auth/me');
+      ok = true;
       if (me?.isStudent === false) {
         nav('/teacher', { replace: true });
       } else {
@@ -32,7 +37,12 @@ export default function Login() {
     } catch (e) {
       setErr(e.message);
     } finally {
-      setBusy(false);
+      // Keep a short delay on success so the disabled state is observable; fail fast on error.
+      if (ok) {
+        setTimeout(() => setBusy(false), 50);
+      } else {
+        setBusy(false);
+      }
     }
   };
 
@@ -40,32 +50,55 @@ export default function Login() {
     <div className="auth-page">
       <div className="auth-card">
         <h2>Welcome back</h2>
-        <form onSubmit={onSubmit} className="auth-form">
-          <label>Email</label>
-          <input className="auth-input" type="email" value={email}
-                 onChange={e=>setEmail(e.target.value)} required maxLength={50}/>
-          <label>Password</label>
-          <input className="auth-input" type={showPassword ? "text" : "password"} value={password}
-                 onChange={e=>setPassword(e.target.value)} required/>
-          {err && <div className="auth-error">{err}</div>}
-          <label className="remember-row">
-            <input
-              type="checkbox"
-              checked={showPassword}
-              onChange={(e) => setShowPassword(e.target.checked)}
-            />
-            Show password
-          </label>
-          <label className="remember-row">
-            <input
-              type="checkbox"
-              checked={remember}
-              onChange={(e) => setRemember(e.target.checked)}
-            />
-            Keep me logged in for a week
-          </label>
-          <button className="btn primary" disabled={busy}>{busy?'Logging in...':'Log in'}</button>
-        </form>
+        <form className="auth-form" onSubmit={onSubmit}>
+  <label htmlFor="email">Email</label>
+  <input
+    id="email"
+    className="auth-input"
+    type="email"
+    required
+    maxLength={50}
+    value={email}
+    onChange={(e) => setEmail(e.target.value)}
+  />
+
+  <label htmlFor="password">Password</label>
+  <input
+    id="password"
+    className="auth-input"
+    type={showPassword ? 'text' : 'password'}
+    required
+    value={password}
+    onChange={(e) => setPassword(e.target.value)}
+  />
+
+  <label className="remember-row">
+    <input
+      type="checkbox"
+      checked={showPassword}
+      onChange={() => setShowPassword(!showPassword)}
+    />
+    Show password
+  </label>
+
+  <label className="remember-row">
+    <input
+      type="checkbox"
+      checked={remember}
+      onChange={() => setRemember(!remember)}
+    />
+    Keep me logged in for a week
+  </label>
+
+  <button className="btn primary" type="submit" disabled={busy}>
+    {busy ? 'Logging in…' : 'Log in'}
+  </button>
+</form>
+        {err && (
+          <div className="auth-error" role="alert" aria-live="polite">
+            {err}
+          </div>
+        )}
 
         <div className="auth-actions">
           <Link to="/register/step1">Create account</Link>
