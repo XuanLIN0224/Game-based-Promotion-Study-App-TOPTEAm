@@ -2,6 +2,16 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../api/client";
 
+import s from './teacher.module.css';
+
+// --- Helper functions for date math ---
+function pad(n){ return String(n).padStart(2,'0'); }
+function addDays(dateStr, days){
+  const d = new Date(dateStr + 'T00:00:00');
+  d.setDate(d.getDate() + days);
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+}
+
 export default function Teacher() {
   const nav = useNavigate();
   const [startDate, setStartDate] = useState('');
@@ -10,7 +20,8 @@ export default function Teacher() {
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState('');
   const [autoGen, setAutoGen] = useState(false);
-  const [difficultyByWeek, setDifficultyByWeek] = useState({}); // {1:'easy', 2:'medium', ...}
+  const [difficultyByWeekDay, setDifficultyByWeekDay] = useState({}); // {1:{0:'medium',1:'medium',2:'medium',3:'medium',4:'medium'}}
+  const [selectedDayByWeek, setSelectedDayByWeek] = useState({}); // {1:0, 2:0, ...} 0..4 -> Mon..Fri
 
   async function load() {
     const cfg = await api('/teacher/quiz-config');
@@ -78,25 +89,44 @@ export default function Teacher() {
     finally { setBusy(false); }
   }
 
-  async function generate(weekIndex) {
+  async function generate(weekIndex, dayIndex) { // dayIndex: 0..4 for Mon..Fri
     setBusy(true); setMsg('');
     try {
-      const difficulty = difficultyByWeek[weekIndex] || 'medium';
+      const dayMap = difficultyByWeekDay[weekIndex] || {};
+      const difficulty = dayMap?.[dayIndex] || 'medium';
+
+      // If startDate is configured, compute the concrete date for this week/day
+      // startDate is the Monday of week 1 (as used by backend weekIndexForDate)
+      const date = startDate ? addDays(startDate, (weekIndex-1)*7 + dayIndex) : undefined;
+
       const r = await api(`/teacher/quiz-config/${weekIndex}/generate`, {
         method:'POST',
-        body:{ /* date: optional, numQuestions:5 */ difficulty }
+        body:{mode:'day', difficulty, ...(date ? { date } : {}) }
       });
-      setMsg(`Generated quiz for ${r.date} (week ${weekIndex}) [${difficulty}]`);
+      setMsg(`Generated quiz for ${r.date} (week ${weekIndex}, ${['Mon','Tue','Wed','Thu','Fri'][dayIndex]}) [${difficulty}]`);
+    } catch (e) { setMsg(e.message); }
+    finally { setBusy(false); }
+  }
+
+  // Generate quizzes for the whole week (Mon-Fri)
+  async function generateWeek(weekIndex) {
+    setBusy(true); setMsg('');
+    try {
+      const r = await api(`/teacher/quiz-config/${weekIndex}/generate`, {
+        method:'POST',
+        body:{ mode:'week', difficulty:'medium', numQuestions:5 }
+      });
+      setMsg(`Generated week ${weekIndex} quizzes for ${r.results?.length || 0} days.`);
     } catch (e) { setMsg(e.message); }
     finally { setBusy(false); }
   }
 
   return (
-    <div className="page teacher-page">
+    <div className={`page ${s.teacherPage}`}>
       <div className="leftside">
         <div style={{ margin: '8px 0 16px 0', display: 'flex', gap: 8, flexWrap:'wrap' }}>
-          <button className="btn" onClick={() => nav('/teacher/events')}>Open Events (Cats vs Dogs)</button>
-          <button className="btn" onClick={() => nav('/teacher/quizzes')}>Edit Quizzes</button>
+          <button className={s.btn} onClick={() => nav('/teacher/events')}>Open Events (Cats vs Dogs)</button>
+          <button className={s.btn} onClick={() => nav('/teacher/quizzes')}>Edit Quizzes</button>
         </div>
       </div>
 
@@ -105,14 +135,14 @@ export default function Teacher() {
       <div className="content" style={{maxWidth: 980}}>
         {msg && <div className="auth-ok" style={{marginBottom:10}}>{msg}</div>}
 
-        <div className="teacher-row" style={{display:'flex', alignItems:'center', gap:10, marginBottom:16}}>
+        <div className={s.teacherRow} style={{display:'flex', alignItems:'center', gap:10, marginBottom:16}}>
           <label><b>Start Date (YYYY-MM-DD):</b></label>
           <input value={startDate || ''} onChange={e=>setStartDate(e.target.value)} placeholder="2025-03-03"
-                 className="teacher-field" style={{height:34, borderRadius:8, padding:'0 8px'}} />
-          <button className="btn primary" onClick={saveStart} disabled={busy}>Save</button>
+                 className={s.teacherField} style={{height:34, borderRadius:8, padding:'0 8px'}} />
+          <button className={`${s.btn} ${s.primary}`} onClick={saveStart} disabled={busy}>Save</button>
         </div>
 
-        <div className="teacher-row" style={{display:'flex', alignItems:'center', gap:10, marginBottom:16}}>
+        <div className={s.teacherRow} style={{display:'flex', alignItems:'center', gap:10, marginBottom:16}}>
           <label><b>Auto-generate (Mon–Fri):</b></label>
           <input type="checkbox" checked={autoGen} onChange={e => saveAutoGen(e.target.checked)} />
           <span style={{opacity:0.8}}>Generate daily quiz automatically based on Start Date and uploaded PDFs</span>
@@ -124,30 +154,75 @@ export default function Teacher() {
             const w = weeks.find(x => x.weekIndex === weekIdx) || {};
             const m = meta[weekIdx] || { title:'', notes:'' };
             return (
-              <div key={weekIdx} className="teacher-card" style={{border:'1px solid rgba(255,255,255,0.2)', borderRadius:12, padding:12, background:'rgba(255,255,255,0.06)'}}>
-                <div className="teacher-card__head" style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:8}}>
+              <div key={weekIdx} className={s.teacherCard} style={{border:'1px solid rgba(255,255,255,0.2)', borderRadius:12, padding:12, background:'rgba(255,255,255,0.06)'}}>
+                <div className={s.teacherCard__head} style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:8}}>
                   <div><b>Week {weekIdx}</b> {w.pdfName ? <span style={{opacity:0.8}}> · PDF: {w.pdfName}</span> : <span style={{opacity:0.6}}> · No PDF</span>}</div>
                   <div style={{display:'flex', gap:8, flexWrap:'wrap', alignItems:'center'}}>
-                    <select
-                      value={difficultyByWeek[weekIdx] || 'medium'}
-                      onChange={e=>setDifficultyByWeek(s => ({ ...s, [weekIdx]: e.target.value }))}
-                      className="btn"
-                      style={{ padding:'6px 8px' }}
-                    >
-                      <option value="easy">easy</option>
-                      <option value="medium">medium</option>
-                      <option value="difficult">difficult</option>
-                    </select>
-                    <button className="btn" onClick={()=>saveMeta(weekIdx)} disabled={busy}>Save Meta</button>
-                    <button className="btn primary" onClick={()=>generate(weekIdx)} disabled={busy}>Generate Quiz</button>
+                    <div style={{ display:'flex', gap:8, alignItems:'center', flexWrap:'wrap' }}>
+                      {/* Weekday selector */}
+                      {/* <select
+                        value={(selectedDayByWeek[weekIdx] ?? 0)}
+                        onChange={e => setSelectedDayByWeek(prev => ({ ...prev, [weekIdx]: Number(e.target.value) }))}
+                        className={s.btn}
+                        style={{ padding:'4px 6px' }}
+                        aria-label="Select weekday"
+                      >
+                        <option value={0}>Mon</option>
+                        <option value={1}>Tue</option>
+                        <option value={2}>Wed</option>
+                        <option value={3}>Thu</option>
+                        <option value={4}>Fri</option>
+                      </select> */}
+
+                      {/* Difficulty selector for the chosen day */}
+                      <select
+                        value={(difficultyByWeekDay[weekIdx]?.[(selectedDayByWeek[weekIdx] ?? 0)]) || 'medium'}
+                        onChange={e => {
+                          const dIdx = selectedDayByWeek[weekIdx] ?? 0;
+                          setDifficultyByWeekDay(prev => ({
+                            ...prev,
+                            [weekIdx]: { ...(prev[weekIdx] || {}), [dIdx]: e.target.value }
+                          }));
+                        }}
+                        className={s.btn}
+                        style={{ padding:'4px 6px' }}
+                        aria-label="Select difficulty"
+                      >
+                        <option value="easy">easy</option>
+                        <option value="medium">medium</option>
+                        <option value="difficult">difficult</option>
+                      </select>
+
+                      {/* Single generate button */}
+                      {/* <button
+                        className={s.btn}
+                        onClick={() => generate(weekIdx, (selectedDayByWeek[weekIdx] ?? 0))}
+                        disabled={busy}
+                        title="Generate selected day's quiz"
+                        style={{ padding:'4px 10px', whiteSpace:'nowrap' }}
+                      >
+                        Generate
+                      </button> */}
+                      {/* Generate Week button */}
+                      <button
+                        className={s.btn}
+                        onClick={() => generateWeek(weekIdx)}
+                        disabled={busy}
+                        title="Generate all weekdays' quizzes"
+                        style={{ padding:'4px 10px', whiteSpace:'nowrap' }}
+                      >
+                        Generate Week
+                      </button>
+                    </div>
+                    <button className={s.btn} onClick={()=>saveMeta(weekIdx)} disabled={busy}>Save Meta</button>
                   </div>
                 </div>
                 <div style={{display:'grid', gap:8}}>
                   <input placeholder="Title" value={m.title} onChange={e=>setMeta(s=>({ ...s, [weekIdx]: { ...s[weekIdx], title:e.target.value }}))}
-                         className="teacher-field" style={{height:34, borderRadius:8, padding:'0 8px'}} />
+                         className={s.teacherField} style={{height:34, borderRadius:8, padding:'0 8px'}} />
                   <textarea placeholder="Teacher notes to guide Gemini (optional)" rows={3}
                             value={m.notes} onChange={e=>setMeta(s=>({ ...s, [weekIdx]: { ...s[weekIdx], notes:e.target.value }}))}
-                            className="teacher-field" style={{borderRadius:8, padding:'8px'}} />
+                            className={s.teacherField} style={{borderRadius:8, padding:'8px'}} />
                   <div>
                     <input type="file" accept="application/pdf" onChange={e=>uploadPDF(weekIdx, e.target.files?.[0])} />
                   </div>

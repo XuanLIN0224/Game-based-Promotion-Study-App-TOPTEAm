@@ -100,6 +100,7 @@ export default function Backpack () {
                     {canUse && it.qty > 0 && (
                         <button
                           className="btn secondary"
+                          data-testid="use-item-button"
                           onClick={()=>useItem(it.key, 1)}
                           disabled={busyKey === it.key}
                         >

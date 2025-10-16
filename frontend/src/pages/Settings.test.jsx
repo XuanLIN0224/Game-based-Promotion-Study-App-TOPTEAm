@@ -30,6 +30,10 @@ const { mockGet, mockPatch, apiMock, clearTokenMock } = vi.hoisted(() => {
       if (path === "/auth/me") {
         return Promise.resolve({ username: "aabbcc", email: "aabbcc@gmail.com" });
       }
+      if (path === "/auth/reset-password" && opts?.method === "PATCH") {
+        mockPatch(path, opts.body ?? opts.data ?? opts.json ?? {});
+        return Promise.resolve({ ok: true });
+      }
       if (path === "/setting/me" && opts?.method === "PATCH") {
         mockPatch(path, opts.body ?? opts.data ?? {});
         return Promise.resolve({ ok: true });
@@ -46,6 +50,7 @@ const { mockGet, mockPatch, apiMock, clearTokenMock } = vi.hoisted(() => {
       },
       patch: (path, body) => {
         mockPatch(path, body);
+        if (path === "/auth/reset-password") return Promise.resolve({ ok: true });
         if (path === "/setting/me") return Promise.resolve({ ok: true });
         return Promise.resolve({ ok: false });
       },
@@ -62,7 +67,7 @@ vi.mock("../api/client", () => ({
 }));
 
 // Import testing utilities
-import { render, screen, within, cleanup } from "@testing-library/react";
+import { render, screen, within, cleanup, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom/vitest";
 
@@ -154,11 +159,11 @@ describe("Settings", () => {
     const confirmInput = await screen.findByLabelText(/^Confirm New Password:$/i, { selector: "input" });
   
     await userEvent.clear(oldInput);
-    await userEvent.type(oldInput, "old12345");
+    await userEvent.type(oldInput, "aabbcc");
   
     await userEvent.clear(newInput);
     await userEvent.type(newInput, "aabbccdd");
-  
+    
     await userEvent.clear(confirmInput);
     await userEvent.type(confirmInput, "aabbccdd");
 
@@ -196,20 +201,20 @@ describe("Settings", () => {
   });
 
   it("log out successfully", async () => {
-  const { default: Settings } = await import("./Settings");
-  render(<Settings />);
+    const { default: Settings } = await import("./Settings");
+    render(<Settings />);
 
-  // Find the "Log out" button 
-  const logoutBtn = await screen.findByRole("button", { name: /log\s*out/i });
-  expect(logoutBtn).toBeInTheDocument();
+    // Find the "Log out" button 
+    const logoutBtn = await screen.findByRole("button", { name: /Log out/i });
+    expect(logoutBtn).toBeInTheDocument();
 
-  // Click the button
-  await userEvent.click(logoutBtn);
+    // Click the button
+    await userEvent.click(logoutBtn);
 
-  // Assert that the token clear function was called
-  expect(clearTokenMock).toHaveBeenCalled();
+    // Assert that the token clear function was called
+    expect(clearTokenMock).toHaveBeenCalled();
 
-  // Assert that navigation redirected to /login
-  expect(mockNavigate).toHaveBeenCalledWith("/auth/Login");
+    // Assert that navigation redirected to /login
+    expect(mockNavigate).toHaveBeenCalledWith("/auth/Login");
   });
 });
