@@ -109,6 +109,16 @@ function Customise() {
       Samoyed: `${BASE}accessory/cat_ear/catEar_Samoyed.gif`,
       Siamese: `${BASE}accessory/cat_ear/catEar_Siamese.gif`,
     },
+    bear_ear: {
+      Bombay: `${BASE}accessory/bear/bearEar_Bombay.gif`,
+      "Border Collie": `${BASE}accessory/bear/bearEar_BorderCollie.gif`,
+      Dachshund: `${BASE}accessory/bear/bearEar_dachshund.gif`,
+      "Golden British": `${BASE}accessory/bear/bearEar_golden_british.gif`,
+      "Toy Poodle": `${BASE}accessory/bear/bearEar_Poodle.gif`,
+      Ragdoll: `${BASE}accessory/bear/bearEar_ragdoll.gif`,
+      Samoyed: `${BASE}accessory/bear/bearEar_Samoyed.gif`,
+      Siamese: `${BASE}accessory/bear/bearEar_Siamese.gif`,
+    }
   };
 
   // Group-specific icons
@@ -150,8 +160,8 @@ function Customise() {
   }
 
   const accessoryImages = {
-    bear_ear: `${BASE}accessory/bear/bear_ear.png`,
-    cat_ear: `${BASE}accessory/cat_ear/cat_ear.png`,
+    bear_ear: `${BASE}accessory/bear/bear_ear.gif`,
+    cat_ear: `${BASE}accessory/cat_ear/cat_ear.GIF`,
   };
 
   return (

@@ -11,7 +11,7 @@
 }
 
 .petImg {
-  width: 250px;
+  width: 350px;
   height: auto;
 }
 
@@ -39,8 +39,8 @@
 }
 
 .accessoryImg {
-  width: 150px;
-  height: 150px;
+  width: 80px;
+  height: 80px;
   object-fit: contain;
   margin-bottom: 10px;
 }
