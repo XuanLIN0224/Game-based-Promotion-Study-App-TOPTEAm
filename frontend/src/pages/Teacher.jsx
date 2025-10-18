@@ -127,6 +127,7 @@ export default function Teacher() {
         <div style={{ margin: '8px 0 16px 0', display: 'flex', gap: 8, flexWrap:'wrap' }}>
           <button className={s.btn} onClick={() => nav('/teacher/events')}>Open Events (Cats vs Dogs)</button>
           <button className={s.btn} onClick={() => nav('/teacher/quizzes')}>Edit Quizzes</button>
+          <button className={s.btn} onClick={() => nav('/teacher/settings')}>Settings</button>
         </div>
       </div>
 

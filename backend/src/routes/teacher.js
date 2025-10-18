@@ -148,6 +148,27 @@ router.patch('/quiz-config/:weekIndex/meta', auth, requireTeacher, async (req, r
   res.json(cfg);
 });
 
+// ===== Delete all quizzes of a specific week =====
+// Example: DELETE /api/teacher/quizzes/week/3  -> remove all DailyQuiz docs where weekIndex=3
+router.delete('/quizzes/week/:weekIndex', auth, requireTeacher, async (req, res) => {
+  const weekIndex = Number(req.params.weekIndex);
+  if (!Number.isInteger(weekIndex) || weekIndex < 1 || weekIndex > 12) {
+    return res.status(400).json({ message: 'Invalid weekIndex' });
+  }
+
+  try {
+    const result = await DailyQuiz.deleteMany({ weekIndex });
+    return res.json({
+      message: 'Deleted week quizzes',
+      weekIndex,
+      deletedCount: result?.deletedCount || 0
+    });
+  } catch (err) {
+    console.error('[DELETE week] error:', err);
+    return res.status(500).json({ message: 'Failed to delete week quizzes' });
+  }
+});
+
 // ===== Generate quiz from week for a given date (支持按天/整周/指定天集三种模式) =====
 router.post('/quiz-config/:weekIndex/generate', auth, requireTeacher, async (req, res) => {
   const weekIndex = Number(req.params.weekIndex);

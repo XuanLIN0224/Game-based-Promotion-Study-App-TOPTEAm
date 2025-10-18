@@ -1,0 +1,433 @@
+/*There are three main functions in the Setting page:
+ 1. Change username and email
+ 2. Change password--basically the same process as resetting password
+ 3. Log out and redirect to log-in page
+ */
+
+import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { api, clearToken } from "../api/client";
+
+import styles from "./Setting.module.css"
+
+const BASE = import.meta.env.BASE_URL || '/';
+
+export const LABELS = {
+  user_name: { title: "User Name", prop: "Could be reset (countless times allowed)" },
+  group: { title: "Group", prop: "Could not be changed" },
+  join_date: { title: "Join Date", prop: "Could not be reset, done automatically" },
+  last_detail_update_date: { title: "Last Update Date", prop: "Could not be reset, done automatically" },
+  password: { title: "Password", prop: "Could be reset (countless times allowed), need to re-enter the correct old password?" },
+  score: { title: "Total Point/Score", prop: "Could not be reset, done automatically" },
+  asset: { title: "Total Assets", prop: "Could not be reset, done automatically" },
+  setting: { title: "Setting Preference", prop: "Could be reset (countless times allowed)" }
+};
+
+
+export default function Settings() {
+  const navigate = useNavigate();
+
+  // User info
+  const [username, setUsername] = useState(null);
+  const [email, setEmail] = useState("");
+
+  //const password = "**********";    // Not shown directly for security
+
+  const [createdAt, setCreatedAt] = useState(null);
+  const [updatedAt, setUpdatedAt] = useState(null);
+  const [score, setScore] = useState(0);
+  const [asset, setAsset] = useState(0);
+  const [breed, setBreed] = useState("");
+  const [group, setGroup] = useState("");
+
+  // Editing states
+  // FUNC 1:
+  const [editingUsername, setEditingUsername] = useState(false);
+  const [editingEmail, setEditingEmail] = useState(false);
+  const [usernameInput, setUsernameInput] = useState("");
+  const [emailInput, setEmailInput] = useState("");
+  // FUNC 2:
+  const [performReset, setPerformReset] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);  // Enable the feature of showing passwords typed in by the user
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [newConfirmPassword, setNewConfirmPassword] = useState("");
+
+  // UI states
+  const [busyField, setBusyField] = useState("");
+  const [err, setErr] = useState("");
+  const [msg, setMsg] = useState("");   // Active message shown on the UI
+  const [loading, setLoading] = useState(true);
+
+  // Read in the user info from the backend
+  useEffect(() => {
+    (async () => {
+      try {
+        const me = await api("/auth/me");
+        setUsername(me.username || null);
+        setEmail(me.email || "");
+        setCreatedAt(me.createdAt || null);
+        setUpdatedAt(me.updatedAt || null);
+        setGroup(me.group || "");
+        setBreed(me.breed?.name || "");
+        setScore(me.score || 0);
+        setAsset(me.numPetFood || 0); // or me.asset if backend sends it
+      } catch (e) {
+        setErr("Failed to load user data");
+        console.error("Load user failed:", e);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
+
+  /* PATCH helper--send request to the backend and update personal info */
+  // For personal info update
+  async function updateUser(field, value) {
+    return api("/setting/me", {
+      method: "PATCH",
+      body: { [field]: value },
+    });
+  }
+  // For password update
+  async function updatePassword(oldPwd, newPwd, newConfirmPwd) {
+    return api("/setting/password", {
+      method: "PATCH",
+      body: { oldPassword: oldPwd, newPassword: newPwd, newConfirmPassword: newConfirmPwd },
+    });
+  }
+
+  /* Handlers */
+  /* Handle username update */
+  async function saveUsername(e) {
+    // Stop the browser from reloading the page
+    e.preventDefault();
+    setErr(""); setMsg("");
+    // Read in the username
+    const value = (usernameInput ?? "").trim();
+    if (!value) { setErr("Username cannot be empty"); return; }
+    // Tell the UI the user personal info--username field is updating
+    setBusyField("username");
+    try {
+      // Update the backend
+      await updateUser("username", value);
+      // Update username shown on the UI
+      setUsername(value);
+      // Switch the status to false--not editing
+      setEditingUsername(false);
+      setMsg("Username updated successfully!");
+    } catch (e) {
+      setErr(e.message || "Failed to update username");
+    } finally {
+      setBusyField("");
+    }
+  }
+
+  /* Handle email update */
+  async function saveEmail(e) {
+    e.preventDefault();
+    setErr(""); setMsg("");
+    const value = (emailInput ?? "").trim();
+    // very light email check
+    if (!/^\S+@\S+\.\S+$/.test(value)) { setErr("Please enter a valid email"); return; }
+    setBusyField("email");
+    try {
+      await updateUser("email", value);
+      setEmail(value);
+      setEditingEmail(false);
+      setMsg("Email updated successfully!");
+    } catch (e) {
+      setErr(e.message || "Failed to update email");
+    } finally {
+      setBusyField("");
+    }
+  }
+
+  /* Handle password update */
+  async function resetPassword(e) {
+    e.preventDefault();
+    // Read in three passwords given by the user
+    const oldPwd = (oldPassword ?? "").trim();
+    const newPwd = (newPassword ?? "").trim();
+    const newConfirmPwd = (newConfirmPassword ?? "").trim();
+    if (!oldPwd || !newPwd || !newConfirmPwd) { setErr("Please enter valid passwords"); return; }
+    // Tell the UI the password field is updating
+    setBusyField("password");
+    try {
+      // Update the backend
+      const result = await updatePassword(oldPwd, newPwd, newConfirmPwd);
+      // Switch status
+      setPerformReset(false);
+      setMsg(result.message);
+      setOldPassword("");
+      setNewPassword("");
+      setNewConfirmPassword("");
+    } catch (e) {
+      setErr(e.message || "Failed to reset password");
+    } finally {
+      setBusyField("");
+    }
+  }
+
+  // FUNC 3:
+  /* Handle log-out */
+  async function handleLogout() {
+    try {
+      await api("/auth/logout", { method: "POST" });
+
+      // Remove the current token
+      clearToken();
+
+      // We are not using cookie--no need to clean
+
+      // Clear the info on the page
+      setUsername(null);
+      setEmail(null);
+      setCreatedAt(null);
+      setUpdatedAt(null);
+      setGroup(null);
+      setBreed(null);
+      setScore(null);
+      setAsset(null);
+
+      // Navigate back to login
+      console.log("HERE--reach");
+      navigate("/auth/Login");
+    } catch (err) {
+      console.error("Logout failed:", err);
+      setErr("Failed to logout. Please try again");
+    }
+  }
+
+  /** UI Part */
+  return (
+    <section className={styles["page-settings"]}>
+
+      {/* Left side nav */}
+      <div className="leftside">
+        <div className="pagelinkicon" onClick={() => navigate("/teacher")}>
+          <img src={`${BASE}icons/home/home.png` || `${BASE}icons/default/home.png`} className="icon" alt="Home" />
+          <p className="iconcaption">Home</p>
+        </div>
+      </div>
+
+
+      <h1
+        style={{
+          fontSize: 50,
+          margin: "0 0 16px",   // 16px below
+          lineHeight: 4,
+          textAlign: "center"
+        }}
+      >
+        Settings
+      </h1>
+
+
+      {loading ? (
+        <p className={styles.lineNevBack}>Loading...</p>
+      ) : (
+        <>
+          {err && <div className={styles.lineErr} style={{ maxWidth: 520 }}>{err}</div>}
+          {msg && <div className={styles.lineMsg} style={{ maxWidth: 520 }}>{msg}</div>}
+
+          <div className={styles.userInfo}>
+            {/* Username row */}
+            {!editingUsername ? (
+              // C1: "editingUsername == false"--display the username--View MODE
+              <div>
+                {/* Display the user's username */}
+                <p className={styles.line} style={{ margin: 0 }}><strong>User Name:</strong> {username}</p>
+                {/* if the button "Change" is hit, switch to the Edit MODE */}
+                <button
+                  className={styles.btn}
+                  onClick={() => { setUsernameInput(username || ""); setEditingUsername(true); }}
+                >
+                  Edit
+                </button>
+              </div>
+            ) : (
+              // C2: "editingUsername == true"--allow editing--Edit MODE
+              // <form> here: When the user clicks "Save" or presses Enter, call my saveUsername function
+              <form className={styles.lineHide} onSubmit={saveUsername}>
+                <label htmlFor="username" style={{ minWidth: 100 }}><strong>User Name:</strong></label>
+                {/* Expected input */}
+                <input
+                  id="username"
+                  value={usernameInput}
+                  // Auto-update during user typing-in
+                  onChange={(e) => setUsernameInput(e.target.value)}
+                  // While “saving”, disable the input so the user can’t change it mid-save
+                  disabled={busyField === "username"}
+                />
+                <div className={styles.actions}>
+                  {/* the "Save" button */}
+                  <button className={`${styles.btn} ${styles.primary}`} disabled={busyField === "username"}>
+                    {busyField === "username" ? "Saving…" : "Save"}
+                  </button>
+                  {/* the "Cancel" button */}
+                  <button
+                    type="button"
+                    className={styles.btn}
+                    onClick={() => { setEditingUsername(false); setUsernameInput(username || ""); }}
+                    disabled={busyField === "username"}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {/* Email row */}
+            {!editingEmail ? (
+              <div>
+                <p className={styles.line} style={{ margin: 0 }}><strong>Email:</strong> {email}</p>
+                <button
+                  className={styles.btn}
+                  onClick={() => { setEmailInput(email || ""); setEditingEmail(true); }}
+                >
+                  Edit
+                </button>
+              </div>
+            ) : (
+              <form className={styles.lineHide} onSubmit={saveEmail}>
+                <label htmlFor="email" style={{ minWidth: 100 }}><strong>Email:</strong></label>
+                <input
+                  id="email"
+                  type="email"
+                  value={emailInput}
+                  onChange={(e) => setEmailInput(e.target.value)}
+                  disabled={busyField === "email"}
+                />
+                <div className={styles.actions}>
+                  <button className={`${styles.btn} ${styles.primary}`} disabled={busyField === "email"}>
+                    {busyField === "email" ? "Saving…" : "Save"}
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.btn}
+                    onClick={() => { setEditingEmail(false); setEmailInput(email || ""); }}
+                    disabled={busyField === "email"}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {/* Read-only fields */}
+            <p className={styles.line}><strong>Group:</strong> {group}</p>
+            <p className={styles.line}><strong>Breed:</strong> {breed}</p>
+            <p className={styles.line}><strong>Join Date:</strong> {createdAt ? new Date(createdAt).toLocaleString() : "-"}</p>
+            <p className={styles.line}><strong>Last Update Date:</strong> {updatedAt ? new Date(updatedAt).toLocaleString() : "-"}</p>
+            <p className={styles.line}><strong>Total Score:</strong> {score}</p>
+            <p className={styles.line}><strong>Total Assets:</strong> {asset}</p>
+
+
+            {/* Password row */}
+            {!performReset ? (
+              // C1: "performReset == false" -- View MODE
+              <div>
+                {/* Display masked password */}
+                <p className={styles.line} style={{ margin: 0 }}><strong>Password:</strong> ••••••••</p>
+                {/* if the button "Change" is hit, switch to the Edit MODE*/}
+                <button
+                  className={styles.btn}
+                  onClick={() => {
+                    setOldPassword("");
+                    setNewPassword("");
+                    setNewConfirmPassword("");
+                    setPerformReset(true);
+                  }}
+                >
+                  Change
+                </button>
+              </div>
+            ) : (
+              // C2: "editingPassword == true" -- Edit MODE
+              <form className = {styles.lineHide} onSubmit={resetPassword}>
+                <label htmlFor="oldPassword"><strong>Old Password:</strong></label>
+                <input
+                  id="oldPassword"
+                  type={showPassword ? "text":"password"}
+                  value={oldPassword}
+                  onChange={(e) => {setOldPassword(e.target.value); setErr(""); setMsg(""); }}
+                  disabled={busyField === "password"}
+                />
+
+                <label htmlFor="newPassword"><strong>New Password:</strong></label>
+                  <input
+                    id="newPassword"
+                    type={showPassword ? "text":"password"}
+                    value={newPassword}
+                    onChange={(e) => {setNewPassword(e.target.value); setErr(""); setMsg(""); }}
+                    disabled={busyField === "password"}
+                  />
+
+                <label htmlFor="newConfirmPassword"><strong>Confirm New Password:</strong></label>
+                  <input
+                    id="newConfirmPassword"
+                    type={showPassword ? "text":"password"}
+                    value={newConfirmPassword}
+                    onChange={(e) => {setNewConfirmPassword(e.target.value); setErr(""); setMsg(""); }}
+                    disabled={busyField === "password"}
+                  />
+
+                  {/* Show password row (separate class, NOT lineHide) */}
+                  <div className={styles.checkboxRow}>
+                    <input
+                      id="showPwd"
+                      type="checkbox"
+                      checked={showPassword}
+                      onChange={(e) => setShowPassword(e.target.checked)}
+                    />
+                    <label htmlFor="showPwd" className="no-wrap" style={{ color: "#3c97b5", fontWeight: 600 }}>
+                      Show password
+                    </label>
+                  </div>
+
+
+                <div className={styles.actions} style={{ display: "flex", gap: 8 }}>
+                  {/* Save button */}
+                  <button className={`${styles.btn} ${styles.primary}`} disabled={busyField === "password"}>
+                    {busyField === "password" ? "Saving…" : "Save"}
+                  </button>
+                  {/* Cancel button */}
+                  <button
+                    // type="button"
+                    className={styles.btn}
+                    onClick={() => {
+                      setPerformReset(false);
+                      setOldPassword("");
+                      setNewPassword("");
+                      setNewConfirmPassword("");
+                      setErr(""); setMsg("");
+                    }}
+                    disabled={busyField === "password"}
+                  >
+                    Cancel
+                  </button>
+                </div>
+
+                {/* Forget password link */}
+                <Link to="/forgot" className="text-sm" style={{ color: "#3c97b5" }}>
+                Forgot password?
+                </Link>
+
+              </form>
+            )}
+
+
+
+            {/* Logout */}
+            <button className={`${styles.btn} ${styles.primary}`} onClick={handleLogout} style={{marginTop: 30, minWidth: 300}}>
+              <p className={styles.line} ><strong>Log out</strong></p>
+            </button>
+
+          </div>
+        </>
+      )}
+    </section>
+  );
+}

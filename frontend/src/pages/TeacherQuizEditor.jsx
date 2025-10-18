@@ -58,12 +58,11 @@ export default function TeacherQuizEditor() {
   }, []);
 
   async function fetchMore(reset=false) {
-    //const url = new URL(`${import.meta.env.VITE_API_BASE}/teacher/quizzes`);
-    if (!reset && cursor) url.searchParams.set('cursor', cursor);
-    const data = await api(`/teacher/quizzes${!reset && cursor ? `?cursor=${cursor}` : ''}`);
+    const qs = !reset && cursor ? `?cursor=${encodeURIComponent(cursor)}` : '';
+    const data = await api(`/teacher/quizzes${qs}`);
     if (reset) setList(data);
     else setList(prev => [...prev, ...data]);
-    if (data.length) setCursor(data[data.length-1].date);
+    if (Array.isArray(data) && data.length) setCursor(data[data.length - 1].date);
   }
 
   function openEdit(q) {
@@ -94,6 +93,15 @@ export default function TeacherQuizEditor() {
     setEditing(null);
   }
 
+  async function removeQuiz(quiz) {
+    if (!quiz) return;
+    const wk = quiz.weekIndex;
+    if (!window.confirm(`Delete ALL quizzes in week ${wk}? This cannot be undone.`)) return;
+    await api(`/teacher/quizzes/week/${wk}`, { method: 'DELETE' });
+    setList(prev => prev.filter(x => x.weekIndex !== wk));
+    setEditing(s => (s && s.weekIndex === wk ? null : s));
+  }
+
   return (
     <div style={{ padding: '16px', maxWidth: 960, margin: '0 auto' }}>
       <h2>Teacher · Edit Quizzes</h2>
@@ -110,6 +118,15 @@ export default function TeacherQuizEditor() {
               <div style={{ opacity:.8 }}>Week {q.weekIndex ?? '-'}</div>
               <div>
                 <button className="btn" onClick={() => openEdit(q)}>Edit</button>
+                <button
+                  className="btn"
+                  style={{ marginLeft: 8, background: 'rgba(220, 53, 69, 0.15)', borderColor: 'rgba(220, 53, 69, 0.4)' }}
+                  onClick={() => removeQuiz(q)}
+                  aria-label={`Delete week ${q.weekIndex} quizzes`}
+                  title={`Delete all quizzes of week ${q.weekIndex}`}
+                >
+                  Delete
+                </button>
               </div>
             </div>
           </div>

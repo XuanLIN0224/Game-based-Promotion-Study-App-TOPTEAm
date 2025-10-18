@@ -18,6 +18,7 @@ import Teacher from './pages/Teacher';
 import TeacherEvents from './pages/TeacherEvents';
 import TeacherQuizEditor from './pages/TeacherQuizEditor';
 import StudentQuizArchive from './pages/StudentQuizArchive';
+import TeacherSettings from './pages/TeacherSettings';
 // import './styles.css';
 
 // Auth pages
@@ -88,6 +89,7 @@ function App() {
               <Route path="settings" element={<Settings />} />
               <Route path="teacher" element={<Teacher />} />
               <Route path="teacher/events" element={<TeacherEvents />} />
+              <Route path="teacher/settings" element={<TeacherSettings />} />
               <Route path="/teacher/quizzes" element={<TeacherQuizEditor/>} />
               <Route path="/student/archive" element={<StudentQuizArchive/>} />
             </Route>
