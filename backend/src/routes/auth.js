@@ -1,6 +1,7 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const { z } = require('zod');
+const bcrypt = require('bcrypt');
 
 const User = require('../models/User');
 const Breed = require('../models/Breed');
@@ -92,52 +93,54 @@ const loginSchema = z.object({
   email: z.string().email().max(50),
   password: z.string().min(1)
 });
-
-// POST /api/auth/login
+// =================== LOGIN ===================
 router.post('/login', async (req, res) => {
-  const parsed = loginSchema.safeParse(req.body);
-  if (!parsed.success) return res.status(400).json({ message: 'Invalid credentials' });
+  const { email, password, remember } = req.body || {};
 
-  const { email, password } = parsed.data;
+  try {
+    const user = await User.findOne({ email });
+    if (!user) return res.status(401).json({ message: 'Invalid email or password' });
 
-  // Check whether the pair is already in the system
-  const user = await User.findOne({ email }).populate('breed');
-  if (!user) return res.status(401).json({ message: 'User not found' });
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) return res.status(401).json({ message: 'Invalid email or password' });
 
-  const match = await user.comparePassword(password);
-  if (!match) return res.status(401).json({ message: 'Invalid password' });
+    // 本次请求是否带了 bearer（有些客户端可能还会带）
+    const incomingToken = req.header('Authorization')?.replace('Bearer ', '') || null;
 
-  // 单会话控制（可选）
-  if (user.activeToken) {
-    try {
-      jwt.verify(user.activeToken, process.env.JWT_SECRET);
-      return res.status(409).json({ message: 'Account is logged in elsewhere' });
-    } catch {
-      user.activeToken = null;
-      await user.save();
+    // 数据库里是否有旧 token
+    if (user.token) {
+      let stillValid = false;
+      try {
+        const decoded = jwt.verify(user.token, process.env.JWT_SECRET, { ignoreExpiration: false });
+        stillValid = !!decoded && decoded.exp * 1000 > Date.now();
+      } catch { /* 过期/无效则视为不可用 */ }
+
+      if (stillValid) {
+        // 如果是同一个 token 重登（幂等），就直接放行（可返回同一个 token 或签发新 token）
+        if (incomingToken && incomingToken === user.token) {
+          return res.json({ token: user.token, message: 'Login successful' });
+        }
+        // 否则确实是“别处仍在登录且 token 未过期”→ 409
+        return res.status(409).json({ message: 'Already logged in somewhere else' });
+      }
     }
+
+    // 走到这里：没有旧 token，或旧 token 已过期/无效 → 正常登录发新 token
+    const expiresIn = remember ? '7d' : '1d';
+    const token = jwt.sign(
+      { id: user._id, isStudent: user.isStudent },
+      process.env.JWT_SECRET,
+      { expiresIn }
+    );
+
+    user.token = token;
+    await user.save();
+
+    res.json({ token, message: 'Login successful' });
+  } catch (err) {
+    console.error('POST /auth/login error', err);
+    res.status(500).json({ message: 'Server error' });
   }
-
-  const token = jwt.sign({ userId: user._id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '7d' });
-  const remember = !!req.body.remember;              // 前端可传
-  const ttlMs = (remember ? 7 : 1) * 24*60*60*1000;  // 7天或1天
-  user.activeToken = token;
-  user.tokenExpiresAt = new Date(Date.now() + ttlMs);
-  await user.save();
-
-  return res.json({
-    message: 'Login successful',
-    token,
-    user: {
-      email: user.email,
-      username: user.username,
-      group: user.group,
-      breed: user.breed ? { id: user.breed._id, name: user.breed.name, group: user.breed.group } : null,
-      score: user.score,
-      numPetFood: user.numPetFood,
-      clothingConfig: user.clothingConfig
-    }
-  });
 });
 
 // POST /api/auth/logout
@@ -147,13 +150,13 @@ router.post('/logout', auth, async (req, res) => {
   res.json({ message: 'Logged out' });
 });
 
-// POST /api/auth/forgot-password  -> 发送6位验证码
+// POST /api/auth/forgot-password  -> send reset code
 router.post('/forgot-password', async (req, res) => {
   const email = (req.body.email || '').trim();
   if (!email) return res.status(400).json({ message: 'Email required' });
 
   const user = await User.findOne({ email });
-  // 避免暴露是否注册：统一返回成功
+  // avid to reveal whether email exists
   if (!user) return res.json({ message: 'If the email exists, a code has been sent' });
 
   const code = String(Math.floor(100000 + Math.random() * 900000));
@@ -164,7 +167,7 @@ router.post('/forgot-password', async (req, res) => {
     await sendResetCodeEmail(email, code);
   } catch (e) {
     console.error('Email send error:', e);
-    // 仍返回成功，避免撞库
+    // if email fails, still respond ok to avoid info leak
   }
   res.json({ message: 'If the email exists, a code has been sent' });
 });
@@ -175,7 +178,7 @@ const resetSchema = z.object({
   newPassword: z.string().min(6).max(100),
 });
 
-// POST /api/auth/reset-password  -> 使用验证码重置
+// POST /api/auth/reset-password  -> use reset code to set new password
 router.post('/reset-password', async (req, res) => {
   const parsed = resetSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ message: 'Invalid request' });
@@ -188,7 +191,7 @@ router.post('/reset-password', async (req, res) => {
   const user = await User.findOne({ email });
   if (!user) return res.status(404).json({ message: 'User not found' });
 
-  user.password = newPassword; // 触发 pre-save hash
+  user.password = newPassword; // pre-save hash
   await user.save();
 
   rec.used = true;

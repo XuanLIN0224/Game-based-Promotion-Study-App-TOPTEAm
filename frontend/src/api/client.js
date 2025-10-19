@@ -64,14 +64,24 @@ export async function api(path, { method = 'GET', body, headers = {} } = {}) {
     try { console.error('[api] Missing path', { path, stack: err.stack }); } catch {}
     throw err;
   }
-  // ensure leading slash to avoid accidental concatenation like .../apiendpoint
   if (path[0] !== '/') path = `/${path}`;
 
   const token = getToken();
   const finalHeaders = { ...(headers || {}) };
   const isFormData = (typeof FormData !== 'undefined') && (body instanceof FormData);
   if (!isFormData) finalHeaders['Content-Type'] = finalHeaders['Content-Type'] || 'application/json';
-  if (token) finalHeaders.Authorization = `Bearer ${token}`;
+
+  // 💡 关键：登录/注册类接口不附加 Authorization
+  const lower = path.toLowerCase();
+  const skipAuth =
+    lower.startsWith('/auth/login') ||
+    lower.startsWith('/auth/register') ||
+    lower.startsWith('/auth/forgot') ||
+    lower.startsWith('/auth/reset');
+
+  if (token && !skipAuth) {
+    finalHeaders.Authorization = `Bearer ${token}`;
+  }
 
   const res = await fetch(`${API_BASE}${path}`, {
     method,
@@ -79,12 +89,11 @@ export async function api(path, { method = 'GET', body, headers = {} } = {}) {
     body: body ? (isFormData ? body : JSON.stringify(body)) : undefined
   });
 
-  // Auto-logout on 401
   if (res.status === 401) {
     clearToken();
     if (typeof onUnauthorized === 'function') onUnauthorized();
     else try { window.location.replace('/auth/Login'); } catch {}
-    broadcastLogout('401');
+    try { window.dispatchEvent(new CustomEvent('auth:logout', { detail: { reason: '401' } })); } catch {}
     throw new Error('Unauthorized, please log in again.');
   }
   if (!res.ok) {

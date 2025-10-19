@@ -6,26 +6,27 @@
 const jwt = require('jsonwebtoken');    // The library to sign/verify token
 const User = require('../models/User');
 
-// Run before the actual route handler
-// Check whether the request has a valid token and attach the user (making request) or not
-module.exports = async function auth(req, res, next) {
-  const authHeader = req.headers.authorization || '';
-  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
-  // If token not found
-  if (!token) return res.status(401).json({ message: 'Unauthorized' });
+module.exports = async function (req, res, next) {
+  const token = req.header('Authorization')?.replace('Bearer ', '');
+  if (!token) return res.status(401).json({ message: 'No token, authorization denied' });
 
   try {
-    // Verify the token using a security key
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    // Finds the user database
-    const user = await User.findById(decoded.userId).populate('breed');
-    if (!user) return res.status(401).json({ message: 'Unauthorized' });
-    // If everything is valid
-    // s1: Attach the (requesting) user object to "req.user"
+    const decoded = jwt.verify(token, process.env.JWT_SECRET, { ignoreExpiration: false });
+
+    // check expiration
+    if (!decoded.exp || decoded.exp * 1000 < Date.now()) {
+      return res.status(401).json({ message: 'Token expired' });
+    }
+
+    const user = await User.findById(decoded.id).select('-password');
+    if (!user) {
+      return res.status(401).json({ message: 'User not found' });
+    }
+
     req.user = user;
-    // s2: Call "next()" and continue to the real route handler
-    return next();
+    next();
   } catch (err) {
-    return res.status(401).json({ message: 'Unauthorized' });
+    console.error('[Auth middleware error]', err);
+    return res.status(401).json({ message: 'Invalid or expired token' });
   }
 };
