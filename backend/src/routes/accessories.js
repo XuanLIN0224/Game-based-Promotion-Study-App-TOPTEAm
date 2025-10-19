@@ -24,6 +24,7 @@ const AccessoryItem = require('../models/Accessories');
  const CATALOG = {
    bear_ear:             { title: 'Bear Ear',        imageUrl: '/customise/bear_ear.png',       price: 7,  limit: 1 },
    cat_ear:              { title: 'Cat Ear',         imageUrl: '/customise/cat_ear.png',        price: 5,  limit: 1 },
+   crown:              { title: 'Crown',         imageUrl: '/customise/cat_ear.png',        price: 100,  limit: 1 },
 };
  // imageUrl: '/assets/hat.png',
 
