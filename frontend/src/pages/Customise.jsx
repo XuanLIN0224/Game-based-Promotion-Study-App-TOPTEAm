@@ -118,6 +118,16 @@ function Customise() {
       Ragdoll: `${BASE}accessory/bear/bearEar_ragdoll.gif`,
       Samoyed: `${BASE}accessory/bear/bearEar_Samoyed.gif`,
       Siamese: `${BASE}accessory/bear/bearEar_Siamese.gif`,
+    },
+      crown: {
+      Bombay: `${BASE}accessory/crown/crown_Bombay.gif`,
+      "Border Collie": `${BASE}accessory/crown/crown_BorderCollie.gif`,
+      Dachshund: `${BASE}accessory/crown/crown_dachshund.gif`,
+      "Golden British": `${BASE}accessory/crown/crown_golden_british.gif`,
+      "Toy Poodle": `${BASE}accessory/crown/crown_Poodle.gif`,
+      Ragdoll: `${BASE}accessory/crown/crown_ragdoll.gif`,
+      Samoyed: `${BASE}accessory/crown/crown_Samoyed.gif`,
+      Siamese: `${BASE}accessory/crown/crown_Siamese.gif`,
     }
   };
 
@@ -162,6 +172,7 @@ function Customise() {
   const accessoryImages = {
     bear_ear: `${BASE}accessory/bear/bear_ear.gif`,
     cat_ear: `${BASE}accessory/cat_ear/cat_ear.GIF`,
+    crown: `${BASE}accessory/crown/crown.GIF`
   };
 
   return (
