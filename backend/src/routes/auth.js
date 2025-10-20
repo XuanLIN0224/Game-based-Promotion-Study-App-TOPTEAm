@@ -31,7 +31,7 @@ router.post('/register/step1', async (req, res) => {
   const exists = await User.findOne({ email });
   if (exists) return res.status(400).json({ message: 'Email already registered' });
 
-  // 先创建用户但不绑定 breed（Step2 再选）
+  // first step ok, create user record with basic info
   const user = new User({ email, username, password, group });
   await user.save();
 
@@ -57,7 +57,7 @@ router.post('/register/step2', async (req, res) => {
   const breed = await Breed.findById(breedId);
   if (!breed) return res.status(400).json({ message: 'Invalid breed' });
 
-  // 关键校验：breed.group 必须与 user.group 一致
+  // breed.group has to be same as user.group
   if (breed.group !== user.group) {
     return res.status(400).json({ message: 'Breed group mismatch' });
   }
@@ -65,7 +65,7 @@ router.post('/register/step2', async (req, res) => {
   user.breed = breed._id;
   await user.save();
 
-  //生成登录用的 JWT， 存储 token
+  //generate JWT token
   const token = jwt.sign({ userId: user._id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '7d' });
   const remember = !!req.body.remember;              // 前端可传
   const ttlMs = (remember ? 7 : 1) * 24*60*60*1000;  // 7天或1天
@@ -73,7 +73,7 @@ router.post('/register/step2', async (req, res) => {
   user.tokenExpiresAt = new Date(Date.now() + ttlMs);
   await user.save();
 
-  // 返回一个 JSON， 提示注册成功
+  // return user info + token
   return res.json({
     message: 'Registration completed',
     token,
@@ -104,28 +104,28 @@ router.post('/login', async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(401).json({ message: 'Invalid email or password' });
 
-    // 本次请求是否带了 bearer（有些客户端可能还会带）
+    // this is the token presented by the client (if any)
     const incomingToken = req.header('Authorization')?.replace('Bearer ', '') || null;
 
-    // 数据库里是否有旧 token
+    // check if user already has a valid token
     if (user.token) {
       let stillValid = false;
       try {
         const decoded = jwt.verify(user.token, process.env.JWT_SECRET, { ignoreExpiration: false });
         stillValid = !!decoded && decoded.exp * 1000 > Date.now();
-      } catch { /* 过期/无效则视为不可用 */ }
+      } catch { /* expired */ }
 
       if (stillValid) {
-        // 如果是同一个 token 重登（幂等），就直接放行（可返回同一个 token 或签发新 token）
+        // if the incoming token matches the stored one, allow re-login
         if (incomingToken && incomingToken === user.token) {
           return res.json({ token: user.token, message: 'Login successful' });
         }
-        // 否则确实是“别处仍在登录且 token 未过期”→ 409
+        // otherwise, block login to prevent concurrent sessions
         return res.status(409).json({ message: 'Already logged in somewhere else' });
       }
     }
 
-    // 走到这里：没有旧 token，或旧 token 已过期/无效 → 正常登录发新 token
+    // if no valid token, generate a new one
     const expiresIn = remember ? '7d' : '1d';
     const token = jwt.sign(
       { id: user._id, isStudent: user.isStudent },

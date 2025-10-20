@@ -3,6 +3,18 @@ import { useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 
 function asArray(x){ return Array.isArray(x) ? x : []; }
+// ISO Monday (YYYY-MM-DD) of *this* week; used to hide current week's quizzes
+function currentWeekMondayISO() {
+  const now = new Date();
+  const day = now.getDay(); // 0 Sun .. 6 Sat
+  const monday = new Date(now);
+  const diffToMonday = day === 0 ? -6 : 1 - day; // if Sun, go back 6; else 1-day
+  monday.setDate(now.getDate() + diffToMonday);
+  const y = monday.getFullYear();
+  const m = String(monday.getMonth() + 1).padStart(2, '0');
+  const d = String(monday.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
 function normalizeQuestions(questions) {
   return asArray(questions).map((raw) => {
     // If DB stored question as plain string
@@ -45,14 +57,18 @@ export default function StudentQuizArchive() {
       if (!me?.isStudent) { nav('/teacher', { replace:true }); return; }
       // You can reuse the same teacher endpoint or create a public one:
       const qs = await api('/quiz/archive'); // <- fallback route if you prefer a student-safe list
-      // If you don't have /quiz/archive, you can temporarily use /teacher/quizzes and filter on backend by role.
-      setList(qs);
+      // Only keep quizzes strictly before the Monday of current week
+      const cutoff = currentWeekMondayISO();
+      setList(asArray(qs).filter(it => typeof it?.date === 'string' && it.date < cutoff));
     })();
   }, []);
 
   return (
     <div style={{ padding:'16px', maxWidth: 960, margin:'0 auto' }}>
       <h2>My Quiz Archive</h2>
+      {list.length === 0 && (
+        <div style={{opacity:.8, marginBottom:8}}>No past quizzes yet. Quizzes from the current week are hidden.</div>
+      )}
       <div className="leftside">
         <button className="btn" onClick={() => nav('/student/quiz')}>Back to quiz</button>
       </div>
