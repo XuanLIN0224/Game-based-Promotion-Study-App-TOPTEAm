@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Home.css";
-import "./Rank.css";
+import styles from "./Rank.module.css";
+import { api } from "../api/client";
 
 const BASE = import.meta.env.BASE_URL || '/';
-const API_BASE = (import.meta.env.VITE_API_BASE || "/api").replace(/\/$/, "");
+//const API_BASE = (import.meta.env.VITE_API_BASE || "/api").replace(/\/$/, "");
 
 const breedImages = {
   dog: {
@@ -23,6 +24,42 @@ const breedImages = {
   },
 };
 
+  const breedImagesWithAccessories = {
+
+    // Cat Ear
+    cat_ear: {
+      "Bombay": `${BASE}accessory/cat_ear/catEar_Bombay.gif`,
+      "Border Collie": `${BASE}accessory/cat_ear/catEar_BorderCollie.gif`,
+      "Dachshund": `${BASE}accessory/cat_ear/catEar_Dachshund.gif`,
+      "Toy Poodle": `${BASE}accessory/cat_ear/catEar_Poodle.gif`,
+      default: `${BASE}icons/home/main.gif`
+      },
+
+    // Bear Ear
+    bear_ear: {
+      Bombay: `${BASE}accessory/bear/bearEar_Bombay.gif`,
+      "Border Collie": `${BASE}accessory/bear/bearEar_BorderCollie.gif`,
+      Dachshund: `${BASE}accessory/bear/bearEar_dachshund.gif`,
+      "Golden British": `${BASE}accessory/bear/bearEar_golden_british.gif`,
+      "Toy Poodle": `${BASE}accessory/bear/bearEar_Poodle.gif`,
+      Ragdoll: `${BASE}accessory/bear/bearEar_ragdoll.gif`,
+      Samoyed: `${BASE}accessory/bear/bearEar_Samoyed.gif`,
+      Siamese: `${BASE}accessory/bear/bearEar_Siamese.gif`,
+    },
+
+    // Crown
+    crown: {
+      Bombay: `${BASE}accessory/crown/crown_Bombay.gif`,
+      "Border Collie": `${BASE}accessory/crown/crown_BorderCollie.gif`,
+      Dachshund: `${BASE}accessory/crown/crown_dachshund.gif`,
+      "Golden British": `${BASE}accessory/crown/crown_golden_british.gif`,
+      "Toy Poodle": `${BASE}accessory/crown/crown_Poodle.gif`,
+      Ragdoll: `${BASE}accessory/crown/crown_ragdoll.gif`,
+      Samoyed: `${BASE}accessory/crown/crown_Samoyed.gif`,
+      Siamese: `${BASE}accessory/crown/crown_Siamese.gif`,
+    }
+  };
+
 export default function Rank() {
   const navigate = useNavigate();
   const [rows, setRows] = useState([]);
@@ -34,18 +71,10 @@ export default function Rank() {
   useEffect(() => {
     (async () => {
       try {
-        const token = localStorage.getItem("token");
-        const [rankRes, breedsRes] = await Promise.all([
-          fetch(`${API_BASE}/rank/top`, {
-            headers: token ? { Authorization: `Bearer ${token}` } : {}
-          }),
-          fetch(`${API_BASE}/breeds`)
+        const [rankData, breeds, users] = await Promise.all([
+          api("/rank/top"),
+          api("/breeds"),
         ]);
-
-        if (!rankRes.ok) throw new Error(`HTTP ${rankRes.status} (/rank/top)`);
-        if (!breedsRes.ok) throw new Error(`HTTP ${breedsRes.status} (/breeds)`);
-
-        const [rankData, breeds] = await Promise.all([rankRes.json(), breedsRes.json()]);
 
         const map = {};
         (Array.isArray(breeds) ? breeds : []).forEach(b => {
@@ -53,6 +82,7 @@ export default function Rank() {
         });
         setBreedMap(map);
 
+        // Store the leaderboard for display
         setRows(Array.isArray(rankData) ? rankData : []);
       } catch (e) {
         setErr(e.message || "load failed");
@@ -62,6 +92,7 @@ export default function Rank() {
     })();
   }, []);
 
+  /** Get the clean breed name for display */
   function getBreedName(breed) {
     if (!breed) return "";
     if (typeof breed === "string") {
@@ -71,6 +102,7 @@ export default function Rank() {
     return "";
   }
 
+  /** Figure out the character belongs to the cat or dog group */
   function resolveGroup(u) {
     if (u?.group === "dog" || u?.group === "cat") return u.group;
     if (typeof u?.breed === "string") return breedMap[u.breed]?.group || null;
@@ -78,15 +110,29 @@ export default function Rank() {
     return null;
   }
 
-  function getBreedImageSrc(group, breedName) {
+  /** Choose the right image and the user's corresponding accessory for rendering */
+  function getBreedImageSrc(group, breedName, accessoryKey) {
     const g = group === "dog" ? "dog" : group === "cat" ? "cat" : null;
     if (!g) return `${BASE}icons/home/main.gif`;
-    const table = breedImages[g] || {};
-    return table[breedName] || table.default || `${BASE}icons/home/main.gif`;
+
+    // accessory override (per user)
+    if (accessoryKey && breedImagesWithAccessories?.[accessoryKey]) {
+      const accMap = breedImagesWithAccessories[accessoryKey];
+      const src = accMap[breedName] || accMap.default || `${BASE}icons/home/main.gif`;
+      console.log("Using accessory image:", { accessoryKey, breedName, src });
+      return src;
+    }
+
+    // base breed
+    const baseMap = breedImages[g] || {};
+    const src = baseMap[breedName] || baseMap.default || `${BASE}icons/home/main.gif`;
+    console.log("Using base breed image:", { group: g, breedName, src });
+    return src;
   }
 
+
   return (
-    <div className="page">
+    <div className={styles.page}>
       <div className="leftside">
         <div className="pagelinkicon" onClick={() => navigate("/")}>
           <img src={`${BASE}icons/home/home.png`} className="icon" alt="Home" />
@@ -94,18 +140,18 @@ export default function Rank() {
         </div>
       </div>
 
-      <h1 className="title">Leaderboard</h1>
+      <h1 className={styles.title}>Leaderboard</h1>
 
       {!loading && !err && rows.length > 0 && (
-        <ul className="rank-list">
+        <ul className={styles.rankList}>
           {rows.map((u, i) => {
             const breedName = getBreedName(u.breed);
             const group = resolveGroup(u);
-            const imgSrc = getBreedImageSrc(group, breedName);
+            const imgSrc = getBreedImageSrc(group, breedName, u.equippedKey);
 
             return (
-              <li key={u._id || i} className="rank-item">
-                <img src={imgSrc} alt={breedName || group || "pet"} className="rank-avatar" />
+              <li key={u._id || i} className={styles.rankItem}>
+                <img src={imgSrc} alt={breedName || group || "pet"} className={styles.rankAvatar} />
                 <span className="rank-text">{i + 1}. {u.username} - {u.score}</span>
               </li>
             );
@@ -115,116 +161,4 @@ export default function Rank() {
 
     </div>
   );
-
-  // useEffect(() => {
-  //   (async () => {
-  //     try {
-  //       const token = localStorage.getItem("token");
-  //       const res = await fetch(`${API_BASE}/rank/top`, {
-  //         headers: token ? { Authorization: `Bearer ${token}` } : {}
-  //       });
-  //       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  //       const data = await res.json();
-  //       setRows(Array.isArray(data) ? data : []);
-  //     } catch (e) {
-  //       setErr(e.message || "load failed");
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   })();
-  // }, []);
-
-  // function getBreedName(breed) {
-  //   if (!breed) return "";
-  //   if (typeof breed === "string") return breed;
-  //   if (typeof breed === "object") return breed.name || "";
-  //   return "";
-  // }
-
-  // function getBreedImageSrc(group, breedName) {
-  //   const g = group === "dog" ? "dog" : group === "cat" ? "cat" : null;
-  //   if (!g) return `${BASE}icons/home/main.gif`;
-  //   const table = breedImages[g] || {};
-  //   return table[breedName] || table.default || `${BASE}icons/home/main.gif`;
-  // }
-
-  // return (
-  //   <div className="page">
-  //     <div className="leftside">
-  //       <div className="pagelinkicon" onClick={() => navigate("/")}>
-  //         <img src={`${BASE}icons/home/home.png`} className="icon" alt="Home" />
-  //         <p className="iconcaption">Home</p>
-  //       </div>
-  //     </div>
-
-  //     <h1 className="title">Leaderboard</h1>
-
-  //     {loading && <p>Loading…</p>}
-  //     {err && <p style={{ color: "red" }}>{err}</p>}
-  //     {!loading && !err && rows.length === 0 && <p>no rank data yet</p>}
-
-  //     {!loading && !err && rows.length > 0 && (
-  //       <ul
-  //         style={{
-  //           listStyleType: "none",
-  //           paddingLeft: 0,
-  //           fontSize: "50px",
-  //           fontFamily: "'SuperShiny', sans-serif",
-  //         }}
-  //       >
-  //         {rows.map((u, i) => {
-  //           const breedName = getBreedName(u.breed);
-  //           const imgSrc = getBreedImageSrc(u.group, breedName);
-  //           return (
-  //             <li
-  //               key={u._id || i}
-  //               style={{
-  //                 display: "flex",
-  //                 alignItems: "center",
-  //                 gap: "16px",
-  //                 lineHeight: 1.2,
-  //               }}
-  //             >
-  //               {/* 品种图标放在用户名旁边 */}
-  //               <img
-  //                 src={imgSrc}
-  //                 alt={breedName || u.group || "pet"}
-  //                 style={{ width: 56, height: 56, objectFit: "contain" }}
-  //               />
-  //               <span>
-  //                 {i + 1}. {u.username} - {u.score}
-  //               </span>
-  //             </li>
-  //           );
-  //         })}
-  //       </ul>
-  //     )}
-  //   </div>
-  // );
-  // return (
-  //   <div className="page">
-  //     <div className="leftside">
-  //       <div className="pagelinkicon" onClick={() => navigate("/")}>
-  //         <img src={`${BASE}icons/home/home.png` || `${BASE}icons/default/home.png`} className="icon" alt="Home" />
-  //         <p className="iconcaption">Home</p>
-  //       </div>
-  //     </div>
-
-  //     <h1 className="title">Leaderboard</h1>
-
-  //     {loading && <p>Loading…</p>}
-  //     {err && <p style={{ color: "red" }}>{err}</p>}
-  //     {!loading && !err && rows.length === 0 && <p>no rank data yet</p>}
-
-  //     {!loading && !err && rows.length > 0 && (
-  //       <ul style={{ listStyleType: "none", paddingLeft: 0, fontSize: "50px", fontFamily: "'SuperShiny', sans-serif", }}>
-  //           {rows.map((u, i) => (
-  //           <li key={u._id || i}>
-  //               {i + 1}. {u.username} - {u.score}
-  //           </li>
-  //           ))}
-  //       </ul>
-  //     )}
-  //   </div>
-  // );
 }

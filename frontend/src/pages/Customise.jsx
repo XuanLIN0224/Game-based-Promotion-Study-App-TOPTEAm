@@ -30,7 +30,18 @@ function Customise() {
       .catch((err) => console.error("Failed to fetch /auth/me:", err));
 
     api("/accessories/items")
-      .then(setAccessories)
+      .then((res) => {
+        if (Array.isArray(res)) {
+          const normalized = res.map(item => ({
+            ...item,
+            equipped: !!item.owned?.equipped, // flatten owned.equipped
+            owned: !!item.owned,              // mark owned as boolean
+          }));
+          setAccessories(normalized);
+        } else {
+          setAccessories([]);
+        }
+      })
       .catch((err) => console.error("Failed to fetch /accessories/items:", err));
   }, []);
 
@@ -44,6 +55,7 @@ function Customise() {
 
       if (res.message === "Purchase Successful!") {
         setScore(res.score);
+        // Update the local accessory list
         setAccessories((prev) =>
           prev.map((acc) =>
             acc.key === itemName ? { ...acc, owned: true, equipped: false } : acc
@@ -119,7 +131,7 @@ function Customise() {
       Samoyed: `${BASE}accessory/bear/bearEar_Samoyed.gif`,
       Siamese: `${BASE}accessory/bear/bearEar_Siamese.gif`,
     },
-      crown: {
+    crown: {
       Bombay: `${BASE}accessory/crown/crown_Bombay.gif`,
       "Border Collie": `${BASE}accessory/crown/crown_BorderCollie.gif`,
       Dachshund: `${BASE}accessory/crown/crown_dachshund.gif`,

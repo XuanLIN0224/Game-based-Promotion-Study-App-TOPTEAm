@@ -66,7 +66,7 @@ router.get('/items', auth, async (req, res) => {
 router.post('/purchase/still', auth, async (req, res) => {
   const userId = req.user._id;
   const { itemName } = req.body || {};
-
+  // Check whether the requesting to purchase accessory is valid
   if (!itemName) {
     return res.status(400).json({ message: '[PURCHASE] Invalid itemName' });
   }
@@ -75,17 +75,17 @@ router.post('/purchase/still', auth, async (req, res) => {
   if (!itemRequestingBuy)
     return res.status(400).json({ message: '[PURCHASE] Unknown accessory item' });
 
+  // Check whether the user already has this accessary
   const accessoriesOwned = req.user.accessories || [];
   const alreadyOwned = accessoriesOwned.some((a) => a.key === itemName);
   const alreadyExistsInDB = await AccessoryItem.exists({ userId, itemName });
 
-  //  Prevent duplicates cleanly before attempting insert
+  // Prevent duplicates cleanly before attempting insert
   if (alreadyOwned || alreadyExistsInDB) {
-    return res
-      .status(400)
-      .json({ message: 'You already own this accessory!' });
+    return res.status(400).json({ message: 'You already own this accessory!' });
   }
 
+  // Check whether the user has enough points to buy the accessory
   const price = Number(itemRequestingBuy.price);
   const userScore = Number(req.user.score) || 0;
   if (userScore < price) {
@@ -96,12 +96,14 @@ router.post('/purchase/still', auth, async (req, res) => {
   }
 
   try {
-    // S4s1: Create a new document for the current user and the new item (user, item) (Accessories schema)
+    // Create a new document for the current user and the new item (user, item) (Accessories schema)
     await AccessoryItem.create({ userId, itemName, transform: {} });
-    // S4s2: Update the (User schema)
-    // S4s2.1: Add the new item name to the accessory array in the user schema
+    // Update the (User schema)
+
     accessoriesOwned.push({ key: itemName });
+    // Add the new item name to the accessory array in the user schema
     req.user.accessories = accessoriesOwned;
+    // Update the user's score
     req.user.score = userScore - price;
     await req.user.save();
 
@@ -177,6 +179,7 @@ router.patch('/equip', auth, async (req, res) => {
     return res.status(400).json({ message: '[EQUIP] Unknown accessory item' });
 
   // Unequip all other accessories first
+  // Ensure we only would have one accessories at a time
   await AccessoryItem.updateMany({ userId }, { equipped: false });
 
   // Equip the selected one (if equip=true)
