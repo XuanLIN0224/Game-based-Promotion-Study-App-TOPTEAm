@@ -33,7 +33,6 @@ useEffect(() => {
       setPetfood(data?.numPetFood || 0);
       setBoosterExpiresAt(data?.boosterExpiresAt || null);
 
-      // ✅ now await works
       await getAccessoryKeys();
     } catch (err) {
       console.error('Failed to fetch /auth/me:', err);
@@ -102,7 +101,7 @@ useEffect(() => {
   /* Home Page Breed Images with accessories */
   const breedImagesWithAccessories = {
 
-    // Dog Breeds
+    // Cat Ear
     cat_ear: {
       "Bombay": `${BASE}accessory/cat_ear/catEar_Bombay.gif`,
       "Border Collie": `${BASE}accessory/cat_ear/catEar_BorderCollie.gif`,
@@ -111,13 +110,28 @@ useEffect(() => {
       default: `${BASE}icons/home/main.gif`
       },
 
-    // Cat Breeds
+    // Bear Ear
     bear_ear: {
-      "Golden British": `${BASE}accessory/cat_ear/catEar_golden_british.gif`,
-      "Ragdoll": `${BASE}accessory/cat_ear/catEar_ragdoll.gif`,
-      "Samoyed": `${BASE}accessory/cat_ear/catEar_Samoyed.gif`,
-      "Siamese": `${BASE}accessory/cat_ear/catEar_Siamese.gif`,
-      default: `${BASE}icons/home/main.gif`
+      Bombay: `${BASE}accessory/bear/bearEar_Bombay.gif`,
+      "Border Collie": `${BASE}accessory/bear/bearEar_BorderCollie.gif`,
+      Dachshund: `${BASE}accessory/bear/bearEar_dachshund.gif`,
+      "Golden British": `${BASE}accessory/bear/bearEar_golden_british.gif`,
+      "Toy Poodle": `${BASE}accessory/bear/bearEar_Poodle.gif`,
+      Ragdoll: `${BASE}accessory/bear/bearEar_ragdoll.gif`,
+      Samoyed: `${BASE}accessory/bear/bearEar_Samoyed.gif`,
+      Siamese: `${BASE}accessory/bear/bearEar_Siamese.gif`,
+    },
+
+    // Crown
+    crown: {
+      Bombay: `${BASE}accessory/crown/crown_Bombay.gif`,
+      "Border Collie": `${BASE}accessory/crown/crown_BorderCollie.gif`,
+      Dachshund: `${BASE}accessory/crown/crown_dachshund.gif`,
+      "Golden British": `${BASE}accessory/crown/crown_golden_british.gif`,
+      "Toy Poodle": `${BASE}accessory/crown/crown_Poodle.gif`,
+      Ragdoll: `${BASE}accessory/crown/crown_ragdoll.gif`,
+      Samoyed: `${BASE}accessory/crown/crown_Samoyed.gif`,
+      Siamese: `${BASE}accessory/crown/crown_Siamese.gif`,
     }
   };
 

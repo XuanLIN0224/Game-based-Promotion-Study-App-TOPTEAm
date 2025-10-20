@@ -131,7 +131,7 @@ function Customise() {
       Samoyed: `${BASE}accessory/bear/bearEar_Samoyed.gif`,
       Siamese: `${BASE}accessory/bear/bearEar_Siamese.gif`,
     },
-      crown: {
+    crown: {
       Bombay: `${BASE}accessory/crown/crown_Bombay.gif`,
       "Border Collie": `${BASE}accessory/crown/crown_BorderCollie.gif`,
       Dachshund: `${BASE}accessory/crown/crown_dachshund.gif`,
