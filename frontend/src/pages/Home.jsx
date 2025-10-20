@@ -217,7 +217,7 @@ function Home() {
           className="pic"
         />
 
-        <p className="line">Click to see the current competition.</p>
+        <p className="line">Click or tap anywhere to play...</p>
       </section>
 
       {/* Bottom Buttons */}
