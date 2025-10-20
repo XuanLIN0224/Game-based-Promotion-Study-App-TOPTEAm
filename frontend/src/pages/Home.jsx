@@ -100,7 +100,7 @@ function Home() {
   }
 
   const icons = groupIcons[group] ?? groupIcons.default;
-
+  console.log('Using breed image for breed:', breed, 'and group:', group);
 
   return (
     <main className="page">

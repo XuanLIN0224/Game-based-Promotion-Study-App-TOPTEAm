@@ -136,7 +136,20 @@ router.post('/login', async (req, res) => {
     user.token = token;
     await user.save();
 
-    res.json({ token, message: 'Login successful' });
+    const populatedUser = await User.findById(user._id).populate('breed', 'name group');
+    res.json({
+      token,
+      message: 'Login successful',
+      user: {
+        email: populatedUser.email,
+        username: populatedUser.username,
+        group: populatedUser.group,
+        breed: populatedUser.breed ? { id: populatedUser.breed._id, name: populatedUser.breed.name, group: populatedUser.breed.group } : null,
+        score: populatedUser.score,
+        numPetFood: populatedUser.numPetFood,
+        clothingConfig: populatedUser.clothingConfig,
+      }
+    });
   } catch (err) {
     console.error('POST /auth/login error', err);
     res.status(500).json({ message: 'Server error' });
@@ -201,10 +214,15 @@ router.post('/reset-password', async (req, res) => {
 });
 
 // GET /api/auth/me
+// GET /api/auth/me
 router.get('/me', auth, async (req, res) => {
   console.log('[ROUTE] /api/auth/me HIT');
-  const u = req.user;
+
+  // ⚠️重新查一次并populate breed
+  const u = await User.findById(req.user._id).populate('breed', 'name group');
+
   console.log('createdAt:', u?.createdAt, 'updatedAt:', u?.updatedAt);
+
   res.json({
     email: u.email,
     username: u.username,
