@@ -44,6 +44,7 @@ useEffect(() => {
   const boosterActive = boosterExpiresAt ? new Date(boosterExpiresAt) > new Date() : false;
   const boosterUntil = boosterActive ? new Date(boosterExpiresAt).toLocaleTimeString() : null;
 
+ /** Application of accessories */
   async function getAccessoryKeys() {
     try {
       const res = await api("/accessories/items");
@@ -73,8 +74,6 @@ useEffect(() => {
     console.log('Using base breed image:', { group, breed, src });
     return src;
   }
-
-
 
   /* Home Page Breed Images */
   const breedImages = {

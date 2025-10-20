@@ -24,6 +24,42 @@ const breedImages = {
   },
 };
 
+  const breedImagesWithAccessories = {
+
+    // Cat Ear
+    cat_ear: {
+      "Bombay": `${BASE}accessory/cat_ear/catEar_Bombay.gif`,
+      "Border Collie": `${BASE}accessory/cat_ear/catEar_BorderCollie.gif`,
+      "Dachshund": `${BASE}accessory/cat_ear/catEar_Dachshund.gif`,
+      "Toy Poodle": `${BASE}accessory/cat_ear/catEar_Poodle.gif`,
+      default: `${BASE}icons/home/main.gif`
+      },
+
+    // Bear Ear
+    bear_ear: {
+      Bombay: `${BASE}accessory/bear/bearEar_Bombay.gif`,
+      "Border Collie": `${BASE}accessory/bear/bearEar_BorderCollie.gif`,
+      Dachshund: `${BASE}accessory/bear/bearEar_dachshund.gif`,
+      "Golden British": `${BASE}accessory/bear/bearEar_golden_british.gif`,
+      "Toy Poodle": `${BASE}accessory/bear/bearEar_Poodle.gif`,
+      Ragdoll: `${BASE}accessory/bear/bearEar_ragdoll.gif`,
+      Samoyed: `${BASE}accessory/bear/bearEar_Samoyed.gif`,
+      Siamese: `${BASE}accessory/bear/bearEar_Siamese.gif`,
+    },
+
+    // Crown
+    crown: {
+      Bombay: `${BASE}accessory/crown/crown_Bombay.gif`,
+      "Border Collie": `${BASE}accessory/crown/crown_BorderCollie.gif`,
+      Dachshund: `${BASE}accessory/crown/crown_dachshund.gif`,
+      "Golden British": `${BASE}accessory/crown/crown_golden_british.gif`,
+      "Toy Poodle": `${BASE}accessory/crown/crown_Poodle.gif`,
+      Ragdoll: `${BASE}accessory/crown/crown_ragdoll.gif`,
+      Samoyed: `${BASE}accessory/crown/crown_Samoyed.gif`,
+      Siamese: `${BASE}accessory/crown/crown_Siamese.gif`,
+    }
+  };
+
 export default function Rank() {
   const navigate = useNavigate();
   const [rows, setRows] = useState([]);
@@ -35,7 +71,7 @@ export default function Rank() {
   useEffect(() => {
     (async () => {
       try {
-        const [rankData, breeds] = await Promise.all([
+        const [rankData, breeds, users] = await Promise.all([
           api("/rank/top"),
           api("/breeds"),
         ]);
@@ -74,13 +110,26 @@ export default function Rank() {
     return null;
   }
 
-  /** Choose the right image for rendering */
-  function getBreedImageSrc(group, breedName) {
+  /** Choose the right image and the user's corresponding accessory for rendering */
+  function getBreedImageSrc(group, breedName, accessoryKey) {
     const g = group === "dog" ? "dog" : group === "cat" ? "cat" : null;
     if (!g) return `${BASE}icons/home/main.gif`;
-    const table = breedImages[g] || {};
-    return table[breedName] || table.default || `${BASE}icons/home/main.gif`;
+
+    // accessory override (per user)
+    if (accessoryKey && breedImagesWithAccessories?.[accessoryKey]) {
+      const accMap = breedImagesWithAccessories[accessoryKey];
+      const src = accMap[breedName] || accMap.default || `${BASE}icons/home/main.gif`;
+      console.log("Using accessory image:", { accessoryKey, breedName, src });
+      return src;
+    }
+
+    // base breed
+    const baseMap = breedImages[g] || {};
+    const src = baseMap[breedName] || baseMap.default || `${BASE}icons/home/main.gif`;
+    console.log("Using base breed image:", { group: g, breedName, src });
+    return src;
   }
+
 
   return (
     <div className={styles.page}>
@@ -98,7 +147,7 @@ export default function Rank() {
           {rows.map((u, i) => {
             const breedName = getBreedName(u.breed);
             const group = resolveGroup(u);
-            const imgSrc = getBreedImageSrc(group, breedName);
+            const imgSrc = getBreedImageSrc(group, breedName, u.equippedKey);
 
             return (
               <li key={u._id || i} className={styles.rankItem}>
