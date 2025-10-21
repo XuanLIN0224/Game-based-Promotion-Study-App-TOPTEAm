@@ -92,7 +92,7 @@ export default function Quiz () {
             )}
         </div>
 
-        <ol style={{display:'grid', gap:16}}>
+        <ol style={{display:'grid', gap:16, paddingLeft:20, paddingRight:20}}>
           {quiz.questions.map((q, idx) => (
             <li key={idx} style={{border:'1px solid rgba(255,255,255,0.2)', borderRadius:12, padding:12}}>
               <div style={{fontWeight:700, marginBottom:8}}>{q.stem}</div>

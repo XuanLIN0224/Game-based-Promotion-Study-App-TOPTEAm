@@ -108,7 +108,7 @@ mongoose.connect(process.env.MONGO_URI, { dbName: 'topteam' })
 
 
 /** Part4: Two Cron jobs */
-// Job1: DailyQuiz auto generation
+// Job1: Weekly (Monday) Quiz auto generation
 const CourseSettings = require('./models/CourseSettings');
 const QuizWeekConfig = require('./models/QuizWeekConfig');
 const DailyQuiz = require('./models/DailyQuiz');
@@ -130,8 +130,8 @@ function weekIndexForDate(startDateStr, dateStr) {
   return Math.min(Math.max(idx, 1), 12);
 }
 
-// Run at 00:05 local time
-cron.schedule('5 0 * * *', async () => {
+// Run at 00:05 local time every Monday
+cron.schedule('5 0 * * 1', async () => {
   try {
     const date = isoDate();
     const settings = await CourseSettings.findOne({ key: 'course' });

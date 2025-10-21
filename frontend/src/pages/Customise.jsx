@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { api } from "../api/client";
 import s from "./Customise.module.css"; // accessory styling
 import "./Home.css"; // shared structure & title styling
+import "../components/Button.css";
 
 const BASE = import.meta.env.BASE_URL || "/";
 
@@ -29,7 +30,18 @@ function Customise() {
       .catch((err) => console.error("Failed to fetch /auth/me:", err));
 
     api("/accessories/items")
-      .then(setAccessories)
+      .then((res) => {
+        if (Array.isArray(res)) {
+          const normalized = res.map(item => ({
+            ...item,
+            equipped: !!item.owned?.equipped, // flatten owned.equipped
+            owned: !!item.owned,              // mark owned as boolean
+          }));
+          setAccessories(normalized);
+        } else {
+          setAccessories([]);
+        }
+      })
       .catch((err) => console.error("Failed to fetch /accessories/items:", err));
   }, []);
 
@@ -43,6 +55,7 @@ function Customise() {
 
       if (res.message === "Purchase Successful!") {
         setScore(res.score);
+        // Update the local accessory list
         setAccessories((prev) =>
           prev.map((acc) =>
             acc.key === itemName ? { ...acc, owned: true, equipped: false } : acc
@@ -108,6 +121,26 @@ function Customise() {
       Samoyed: `${BASE}accessory/cat_ear/catEar_Samoyed.gif`,
       Siamese: `${BASE}accessory/cat_ear/catEar_Siamese.gif`,
     },
+    bear_ear: {
+      Bombay: `${BASE}accessory/bear/bearEar_Bombay.gif`,
+      "Border Collie": `${BASE}accessory/bear/bearEar_BorderCollie.gif`,
+      Dachshund: `${BASE}accessory/bear/bearEar_dachshund.gif`,
+      "Golden British": `${BASE}accessory/bear/bearEar_golden_british.gif`,
+      "Toy Poodle": `${BASE}accessory/bear/bearEar_Poodle.gif`,
+      Ragdoll: `${BASE}accessory/bear/bearEar_ragdoll.gif`,
+      Samoyed: `${BASE}accessory/bear/bearEar_Samoyed.gif`,
+      Siamese: `${BASE}accessory/bear/bearEar_Siamese.gif`,
+    },
+    crown: {
+      Bombay: `${BASE}accessory/crown/crown_Bombay.gif`,
+      "Border Collie": `${BASE}accessory/crown/crown_BorderCollie.gif`,
+      Dachshund: `${BASE}accessory/crown/crown_dachshund.gif`,
+      "Golden British": `${BASE}accessory/crown/crown_golden_british.gif`,
+      "Toy Poodle": `${BASE}accessory/crown/crown_Poodle.gif`,
+      Ragdoll: `${BASE}accessory/crown/crown_ragdoll.gif`,
+      Samoyed: `${BASE}accessory/crown/crown_Samoyed.gif`,
+      Siamese: `${BASE}accessory/crown/crown_Siamese.gif`,
+    }
   };
 
   // Group-specific icons
@@ -149,8 +182,9 @@ function Customise() {
   }
 
   const accessoryImages = {
-    bear_ear: `${BASE}accessory/bear/bear_ear.png`,
-    cat_ear: `${BASE}accessory/cat_ear/cat_ear.png`,
+    bear_ear: `${BASE}accessory/bear/bear_ear.gif`,
+    cat_ear: `${BASE}accessory/cat_ear/cat_ear.GIF`,
+    crown: `${BASE}accessory/crown/crown.GIF`
   };
 
   return (

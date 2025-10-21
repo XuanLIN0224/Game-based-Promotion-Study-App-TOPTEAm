@@ -11,30 +11,69 @@ function Home() {
   const [breed, setBreed] = useState('');
   const [username, setUsername] = useState('');
   const [numPetfood, setPetfood] = useState('');
+  const [accessories, setAccessories] = useState('');
   const [boosterExpiresAt, setBoosterExpiresAt] = useState(null);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    api('/auth/me')
-      .then(data => {
-        if (data && data.isStudent === false) {
-          navigate('/teacher', { replace: true });
-          console.log('Redirecting to /teacher because user is not a student');
-          return; // stop setting student-specific state
-        }
-        setScore(data?.score || 0);
-        setGroup(data?.group || '');
-        setBreed(data?.breed?.name || '');
-        setUsername(data?.username || '');
-        setPetfood(data?.numPetFood || 0);
-        setBoosterExpiresAt(data?.boosterExpiresAt || null);
-      })
-      .catch(err => console.error('Failed to fetch /auth/me:', err));
-  }, []);
+useEffect(() => {
+  (async () => {
+    try {
+      const data = await api('/auth/me');
+
+      if (data && data.isStudent === false) {
+        navigate('/teacher', { replace: true });
+        console.log('Redirecting to /teacher because user is not a student');
+        return;
+      }
+
+      setScore(data?.score || 0);
+      setGroup(data?.group || '');
+      setBreed(data?.breed?.name || '');
+      setUsername(data?.username || '');
+      setPetfood(data?.numPetFood || 0);
+      setBoosterExpiresAt(data?.boosterExpiresAt || null);
+
+      await getAccessoryKeys();
+    } catch (err) {
+      console.error('Failed to fetch /auth/me:', err);
+    }
+  })();
+}, []);
+
 
   const boosterActive = boosterExpiresAt ? new Date(boosterExpiresAt) > new Date() : false;
   const boosterUntil = boosterActive ? new Date(boosterExpiresAt).toLocaleTimeString() : null;
 
+ /** Application of accessories */
+  async function getAccessoryKeys() {
+    try {
+      const res = await api("/accessories/items");
+      if (!Array.isArray(res)) {
+        setAccessories('');
+        return;
+      }
+      const equippedItem = res.find((item) => item?.owned?.equipped);
+      setAccessories(equippedItem ? equippedItem.key : ''); // safe
+    } catch (err) {
+      console.error("Failed to fetch accessories:", err);
+      setAccessories('');
+    }
+  }
+  function pickMainSrc() {
+    // try accessory first
+    if (accessories && breedImagesWithAccessories[accessories]) {
+      const accMap = breedImagesWithAccessories[accessories];
+      const src = accMap[breed] || accMap.default || `${BASE}icons/home/main.gif`;
+      console.log('Using accessory image:', { accessories, breed, src });
+      return src;
+    }
+
+    // fallback to base breed
+    const baseMap = breedImages[group];
+    const src = (baseMap && (baseMap[breed] || baseMap.default)) || `${BASE}icons/home/main.gif`;
+    console.log('Using base breed image:', { group, breed, src });
+    return src;
+  }
 
   /* Home Page Breed Images */
   const breedImages = {
@@ -57,6 +96,44 @@ function Home() {
       default: `${BASE}icons/home/main.gif`
     }
   };
+
+  /* Home Page Breed Images with accessories */
+  const breedImagesWithAccessories = {
+
+    // Cat Ear
+    cat_ear: {
+      "Bombay": `${BASE}accessory/cat_ear/catEar_Bombay.gif`,
+      "Border Collie": `${BASE}accessory/cat_ear/catEar_BorderCollie.gif`,
+      "Dachshund": `${BASE}accessory/cat_ear/catEar_Dachshund.gif`,
+      "Toy Poodle": `${BASE}accessory/cat_ear/catEar_Poodle.gif`,
+      default: `${BASE}icons/home/main.gif`
+      },
+
+    // Bear Ear
+    bear_ear: {
+      Bombay: `${BASE}accessory/bear/bearEar_Bombay.gif`,
+      "Border Collie": `${BASE}accessory/bear/bearEar_BorderCollie.gif`,
+      Dachshund: `${BASE}accessory/bear/bearEar_dachshund.gif`,
+      "Golden British": `${BASE}accessory/bear/bearEar_golden_british.gif`,
+      "Toy Poodle": `${BASE}accessory/bear/bearEar_Poodle.gif`,
+      Ragdoll: `${BASE}accessory/bear/bearEar_ragdoll.gif`,
+      Samoyed: `${BASE}accessory/bear/bearEar_Samoyed.gif`,
+      Siamese: `${BASE}accessory/bear/bearEar_Siamese.gif`,
+    },
+
+    // Crown
+    crown: {
+      Bombay: `${BASE}accessory/crown/crown_Bombay.gif`,
+      "Border Collie": `${BASE}accessory/crown/crown_BorderCollie.gif`,
+      Dachshund: `${BASE}accessory/crown/crown_dachshund.gif`,
+      "Golden British": `${BASE}accessory/crown/crown_golden_british.gif`,
+      "Toy Poodle": `${BASE}accessory/crown/crown_Poodle.gif`,
+      Ragdoll: `${BASE}accessory/crown/crown_ragdoll.gif`,
+      Samoyed: `${BASE}accessory/crown/crown_Samoyed.gif`,
+      Siamese: `${BASE}accessory/crown/crown_Siamese.gif`,
+    }
+  };
+
 
   /* Group Icons */
   const groupIcons = {
@@ -100,7 +177,7 @@ function Home() {
   }
 
   const icons = groupIcons[group] ?? groupIcons.default;
-
+  console.log('Using breed image for breed:', breed, 'and group:', group);
 
   return (
     <main className="page">
@@ -208,12 +285,8 @@ function Home() {
 
         {/* Main Image */}
         <img
-          src={
-            (breedImages[group] && breedImages[group][breed]) ||
-            (breedImages[group] && breedImages[group].default) ||
-            `${BASE}icons/home/main.gif`
-          }
-          alt={breed || group || "default"}
+          src={pickMainSrc()}
+          alt={accessories ? `${breed} with ${accessories}` : (breed || group || "default")}
           className="pic"
         />
 

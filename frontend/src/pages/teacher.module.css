@@ -1,0 +1,213 @@
+/* =========================================
+   Teacher pages – responsive & compact UI
+   作用对象：
+   .teacher-page .content .teacher-row .teacher-card .btn
+   以及 .tp-daygrid / .tp-modal / 百分比条 等
+========================================= */
+
+/* —— 主题变量 —— */
+:root {
+  --tp-bg-soft: rgba(255,255,255,0.06);
+  --tp-border: rgba(255,255,255,0.18);
+  --tp-border-subtle: rgba(255,255,255,0.12);
+  --tp-text: #eaeaea;
+  --tp-text-dim: rgba(234,234,234,0.8);
+  --tp-primary: rgba(255,255,255,0.16);
+  --tp-primary-border: rgba(255,255,255,0.24);
+}
+
+/* —— 页面容器 —— */
+.teacher-page .content {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+/* —— 通用输入控件 —— */
+.teacher-field,
+.teacher-page input[type="text"],
+.teacher-page input[type="number"],
+.teacher-page input[type="datetime-local"],
+.teacher-page input[type="file"],
+.teacher-page textarea,
+.teacher-page select {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  background: var(--tp-bg-soft);
+  border: 1px solid var(--tp-border-subtle);
+  border-radius: 10px;
+  padding: 10px 12px;
+  color: var(--tp-text);
+}
+
+/* —— 按钮 —— */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--tp-border);
+  background: rgba(255,255,255,0.08);
+  color: var(--tp-text);
+  cursor: pointer;
+  line-height: 1;
+  white-space: nowrap;
+  font-size: 14px;
+  min-width: 0;
+}
+.btn:hover { background: rgba(255,255,255,0.12); }
+.btn:disabled { opacity: .6; cursor: not-allowed; }
+.btn.primary {
+  background: var(--tp-primary);
+  border-color: var(--tp-primary-border);
+  font-weight: 600;
+}
+.btn-sm { padding: 6px 8px; font-size: 13px; border-radius: 8px; }
+.btn-xs { padding: 4px 6px; font-size: 12px; border-radius: 8px; }
+
+/* —— 顶部行（避免小屏溢出） —— */
+.teacher-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* —— 卡片 —— */
+.teacher-card {
+  background: var(--tp-bg-soft);
+  border: 1px solid var(--tp-border-subtle);
+  border-radius: 12px;
+  padding: 12px;
+  min-width: 0; /* 允许内部元素收缩 */
+}
+.teacher-card__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap; /* 小屏自动换行 */
+  min-width: 0;
+}
+
+/* —— 百分比条（可选） —— */
+.tp-percentbar {
+  border: 1px solid #999;
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  height: 20px;
+}
+.tp-percentbar__cat { background: #5ec3ff; }
+.tp-percentbar__dog { background: #ff9db1; }
+
+/* —— 弹窗（TeacherEvents 编辑面板） —— */
+.tp-modal {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: start center;
+  background: rgba(0,0,0,0.6);
+  padding: 24px;
+  z-index: 1000;
+}
+.tp-modal__panel {
+  width: min(640px, calc(100vw - 32px));
+  max-height: 90vh;
+  overflow: auto;
+  background: rgba(10,10,14,0.75);
+  border: 1px solid var(--tp-border-subtle);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+  color: var(--tp-text);
+}
+/* nicer scrollbar */
+.tp-modal__panel::-webkit-scrollbar { width: 10px; }
+.tp-modal__panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 10px; }
+.tp-modal__panel::-webkit-scrollbar-track { background: transparent; }
+
+/* —— 列表容器 —— */
+.teacher-list {
+  display: grid;
+  gap: 12px;
+}
+
+/* —— 你给的 Mon–Fri 网格（防溢出） —— */
+/* 让 Mon–Fri 区块在小屏下自动换行，不再外溢 */
+.tp-daygrid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(90px, 1fr));
+  gap: 6px;
+  width: 100%;
+  max-width: 560px;
+  min-width: 0; /* 防止内部元素把容器撑宽 */
+}
+
+/* 下拉与按钮在网格单元内可收缩 */
+.tp-daygrid select,
+.tp-daygrid .btn {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+/* 文案较长时不挤出容器 */
+.tp-daygrid .btn {
+  justify-content: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 6px 8px;  /* 更紧凑一点 */
+  font-size: 13px;
+}
+
+/* —— 响应式 —— */
+@media (max-width: 992px) {
+  .teacher-page .content { padding: 12px; }
+  .btn { padding: 7px 10px; font-size: 13.5px; }
+}
+
+@media (max-width: 768px) {
+  .btn { padding: 6px 9px; font-size: 13px; }
+  .btn-sm { padding: 5px 7px; font-size: 12.5px; }
+  .teacher-card { padding: 10px; }
+  .teacher-row { gap: 8px; }
+  .teacher-card__head { gap: 6px; }
+
+  /* 768px 以下改成三列 */
+  .tp-daygrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .tp-daygrid select { padding: 4px 6px; }
+}
+
+@media (max-width: 480px) {
+  .btn { padding: 6px 8px; font-size: 12.5px; }
+  .btn-sm, .btn-xs { padding: 4px 6px; font-size: 12px; }
+  .teacher-card { padding: 8px; }
+  .teacher-row { gap: 6px; }
+  .teacher-field,
+  .teacher-page input,
+  .teacher-page textarea,
+  .teacher-page select { padding: 9px 10px; }
+
+  /* 480px 以下改成两列，并进一步缩小按钮与下拉 */
+  .tp-daygrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tp-daygrid .btn { padding: 5px 6px; font-size: 12.5px; }
+  .tp-daygrid select { padding: 4px 6px; }
+}
+
+/* —— 移动端标题适配 —— */
+@media (max-width: 480px) {
+  .teacher-page .title { font-size: 20px; }
+  .teacher-page h2 { font-size: 18px; }
+  .teacher-page h3 { font-size: 16px; }
+}

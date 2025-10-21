@@ -39,6 +39,19 @@ function isMonToFri(dateStr) {
   return day >= 1 && day <= 5;
 }
 
+// 计算某周某天的具体日期字符串
+function dateForWeekDay(startDateStr, weekIndex, dayIndex /* 0..4 => Mon..Fri */) {
+  if (!startDateStr) return null;
+  if (!Number.isInteger(weekIndex) || weekIndex < 1 || weekIndex > 12) return null;
+  if (!Number.isInteger(dayIndex) || dayIndex < 0 || dayIndex > 4) return null;
+  const base = new Date(startDateStr + 'T00:00:00'); // week 1 Monday
+  base.setDate(base.getDate() + (weekIndex - 1) * 7 + dayIndex);
+  const y = base.getFullYear();
+  const m = String(base.getMonth() + 1).padStart(2, '0');
+  const d = String(base.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
 // ===== GET current config =====
 router.get('/quiz-config', auth, requireTeacher, async (req, res) => {
   const [settings, weeks] = await Promise.all([
@@ -135,38 +148,128 @@ router.patch('/quiz-config/:weekIndex/meta', auth, requireTeacher, async (req, r
   res.json(cfg);
 });
 
-// ===== Generate quiz from week for a given date (default today) =====
+// ===== Delete all quizzes of a specific week =====
+// Example: DELETE /api/teacher/quizzes/week/3  -> remove all DailyQuiz docs where weekIndex=3
+router.delete('/quizzes/week/:weekIndex', auth, requireTeacher, async (req, res) => {
+  const weekIndex = Number(req.params.weekIndex);
+  if (!Number.isInteger(weekIndex) || weekIndex < 1 || weekIndex > 12) {
+    return res.status(400).json({ message: 'Invalid weekIndex' });
+  }
+
+  try {
+    const result = await DailyQuiz.deleteMany({ weekIndex });
+    return res.json({
+      message: 'Deleted week quizzes',
+      weekIndex,
+      deletedCount: result?.deletedCount || 0
+    });
+  } catch (err) {
+    console.error('[DELETE week] error:', err);
+    return res.status(500).json({ message: 'Failed to delete week quizzes' });
+  }
+});
+
+// ===== Generate quiz from week for a given date (支持按天/整周/指定天集三种模式) =====
 router.post('/quiz-config/:weekIndex/generate', auth, requireTeacher, async (req, res) => {
   const weekIndex = Number(req.params.weekIndex);
-  const { date, numQuestions = 5, difficulty = 'medium' } = req.body || {};
+  const {
+    date,                   // 单天模式：具体 YYYY-MM-DD
+    numQuestions = 5,
+    difficulty = 'medium',  // 单天默认难度
+    mode,                    // 'day' | 'week' | 'days'（可选，默认自动判断）
+    days,                    // days 数组 [0..4]，仅当 mode==='days' 时生效
+    difficulties             // 可选：每日难度映射 {0:'easy',1:'medium',...}
+  } = req.body || {};
 
   const allowed = ['easy','medium','difficult'];
-  const level = allowed.includes(difficulty) ? difficulty : 'medium';
+  const normLevel = lvl => (allowed.includes(lvl) ? lvl : 'medium');
 
   if (!Number.isInteger(weekIndex) || weekIndex < 1 || weekIndex > 12) {
     return res.status(400).json({ message: 'Invalid weekIndex' });
   }
-  const targetDate = date && /\d{4}-\d{2}-\d{2}/.test(date) ? date : isoDate();
+
   const cfg = await QuizWeekConfig.findOne({ weekIndex });
   if (!cfg || !cfg.pdfText) {
     return res.status(400).json({ message: 'No PDF uploaded for this week' });
   }
 
-  const gen = await generateQuizFromContext({
-    pdfText: cfg.pdfText,
-    notes: cfg.notes,
-    title: cfg.title,
-    numQuestions,
-    difficulty: level,
-  });
+  // 读取课程设置以便按周/按天集计算具体日期
+  const settings = await CourseSettings.findOne({ key: 'course' });
+  const startDateStr = settings?.startDate || null;
 
-  const doc = await DailyQuiz.findOneAndUpdate(
-    { date: targetDate },
-    { $set: { date: targetDate, weekIndex, questions: gen.questions, generatedAt: new Date() } },
-    { new: true, upsert: true }
-  );
+  // —— 模式判定 ——
+  let effectiveMode = mode;
+  if (!effectiveMode) {
+    if (Array.isArray(days) && days.length) effectiveMode = 'days';
+    else if (date) effectiveMode = 'day';
+    else effectiveMode = 'week'; // 默认整周
+  }
 
-  res.json({ message: 'Generated', date: doc.date, count: doc.questions.length });
+  // —— 单天生成 ——
+  if (effectiveMode === 'day') {
+    const targetDate = (date && /\d{4}-\d{2}-\d{2}/.test(date)) ? date : isoDate();
+    const level = normLevel(difficulty);
+
+    const gen = await generateQuizFromContext({
+      pdfText: cfg.pdfText,
+      notes: cfg.notes,
+      title: cfg.title,
+      numQuestions,
+      difficulty: level,
+    });
+
+    const doc = await DailyQuiz.findOneAndUpdate(
+      { date: targetDate },
+      { $set: { date: targetDate, weekIndex, questions: gen.questions, generatedAt: new Date(), difficulty: level } },
+      { new: true, upsert: true }
+    );
+
+    return res.json({ message: 'Generated (day)', date: doc.date, count: doc.questions.length, difficulty: level });
+  }
+
+  // —— 指定多天（days 数组）或整周 ——
+  if (effectiveMode === 'days' || effectiveMode === 'week') {
+    if (!startDateStr) {
+      return res.status(400).json({ message: 'Start Date not configured. Please set /teacher/quiz-config startDate first.' });
+    }
+
+    const dayIndices = (effectiveMode === 'week')
+      ? [0,1,2,3,4]
+      : (Array.isArray(days) ? days.filter(d => Number.isInteger(d) && d >= 0 && d <= 4) : []);
+
+    if (!dayIndices.length) {
+      return res.status(400).json({ message: 'No valid days provided' });
+    }
+
+    const results = [];
+    for (const dIdx of dayIndices) {
+      const dayDate = dateForWeekDay(startDateStr, weekIndex, dIdx);
+      if (!dayDate) continue;
+
+      const lvl = normLevel(difficulties?.[dIdx] || difficulty);
+
+      const gen = await generateQuizFromContext({
+        pdfText: cfg.pdfText,
+        notes: cfg.notes,
+        title: cfg.title,
+        numQuestions,
+        difficulty: lvl,
+      });
+
+      const doc = await DailyQuiz.findOneAndUpdate(
+        { date: dayDate },
+        { $set: { date: dayDate, weekIndex, questions: gen.questions, generatedAt: new Date(), difficulty: lvl } },
+        { new: true, upsert: true }
+      );
+
+      results.push({ date: doc.date, count: doc.questions.length, difficulty: lvl, dayIndex: dIdx });
+    }
+
+    return res.json({ message: `Generated (${effectiveMode})`, weekIndex, results });
+  }
+
+  // —— 未知模式 ——
+  return res.status(400).json({ message: 'Unknown mode' });
 });
 
 module.exports = router;

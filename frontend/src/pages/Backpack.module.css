@@ -78,7 +78,6 @@ ul.backpackList > li {
 		gap: 55px;
 		width: 100%;
 		justify-self: start
-		!important; outline: 1px solid red;
 	}
 
 }

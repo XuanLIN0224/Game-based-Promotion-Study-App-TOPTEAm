@@ -32,9 +32,19 @@ function EventWidget() {
   }, []);
 
   if (!data || !data.event) return (
+    <>
+    {/* Left side nav */}
+    <div className="leftside">
+        <div className="pagelinkicon" onClick={() => navigate("/")}>
+            <img src={`icons/home/home.png` || `icons/default/home.png`} className="icon" alt="Home" />
+            <p className="iconcaption">Home</p>
+        </div>
+    </div>
+
     <div style={{border:'1px solid #ddd', borderRadius:8, padding:12, marginBottom:12}}>
       <b>No active event</b>
     </div>
+    </>
   );
 
   const ev = data.event;
