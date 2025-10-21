@@ -116,7 +116,7 @@ export default function Teacher() {
         method:'POST',
         body:{ mode:'week', difficulty:'medium', numQuestions:5 }
       });
-      setMsg(`Generated week ${weekIndex} quizzes for ${r.results?.length || 0} days.`);
+      setMsg(`Generated week ${weekIndex} quizzes`);
     } catch (e) { setMsg(e.message); }
     finally { setBusy(false); }
   }
@@ -131,8 +131,9 @@ export default function Teacher() {
         </div>
       </div>
 
-      <h1 className="title">Teacher Console</h1>
-
+      <div style={{ marginTop:30 }}>
+        <h1 className="title" >Teacher Console</h1>
+      </div>
       <div className="content" style={{maxWidth: 980}}>
         {msg && <div className="auth-ok" style={{marginBottom:10}}>{msg}</div>}
 

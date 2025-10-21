@@ -233,9 +233,46 @@ router.post('/quiz-config/:weekIndex/generate', auth, requireTeacher, async (req
       return res.status(400).json({ message: 'Start Date not configured. Please set /teacher/quiz-config startDate first.' });
     }
 
-    const dayIndices = (effectiveMode === 'week')
-      ? [0,1,2,3,4]
-      : (Array.isArray(days) ? days.filter(d => Number.isInteger(d) && d >= 0 && d <= 4) : []);
+        // WEEK mode: generate once, only upload to Monday (first day of the week)
+    if (effectiveMode === 'week') {
+      const lvl = normLevel(difficulty);
+
+      // call Gemini ONCE for the week
+      const genAll = await generateQuizFromContext({
+        pdfText: cfg.pdfText,
+        notes: cfg.notes,
+        title: cfg.title,
+        numQuestions,
+        difficulty: lvl,
+      });
+
+      // compute Monday date of that week
+      const mondayDate = dateForWeekDay(startDateStr, weekIndex, 0);
+      if (!mondayDate) {
+        return res.status(400).json({ message: 'Invalid Monday date for week' });
+      }
+
+      const doc = await DailyQuiz.findOneAndUpdate(
+        { date: mondayDate },
+        {
+          $set: {
+            date: mondayDate,
+            weekIndex,
+            questions: genAll.questions, // one quiz for the week
+            generatedAt: new Date(),
+            difficulty: lvl
+          }
+        },
+        { new: true, upsert: true }
+      );
+
+      return res.json({ message: 'Generated (week, single quiz)', weekIndex, date: mondayDate, count: doc.questions.length });
+    }
+
+    // DAYS mode: keep existing per-day generation behavior (supports per-day difficulties)
+    const dayIndices = Array.isArray(days)
+      ? days.filter(d => Number.isInteger(d) && d >= 0 && d <= 4)
+      : [];
 
     if (!dayIndices.length) {
       return res.status(400).json({ message: 'No valid days provided' });
@@ -265,7 +302,7 @@ router.post('/quiz-config/:weekIndex/generate', auth, requireTeacher, async (req
       results.push({ date: doc.date, count: doc.questions.length, difficulty: lvl, dayIndex: dIdx });
     }
 
-    return res.json({ message: `Generated (${effectiveMode})`, weekIndex, results });
+    return res.json({ message: 'Generated (days)', weekIndex, results });
   }
 
   // —— 未知模式 ——

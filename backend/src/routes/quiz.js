@@ -20,32 +20,71 @@ function weekdayIndex(dateStr) {
   return js - 1; // Mon(1) -> 0
 }
 
-// get today’s quiz + attempts left
+// 计算今天属于第几周（基于 settings.startDate 是第 1 周的周一）
+function weekIndexForDate(startDateStr, dateStr) {
+  if (!startDateStr) return null;
+  const start = new Date(startDateStr + 'T00:00:00');
+  const cur = new Date(dateStr + 'T00:00:00');
+  const diffDays = Math.floor((cur - start) / 86400000);
+  const idx = Math.floor(diffDays / 7) + 1; // week 1 starts at startDate (Mon)
+  return idx >= 1 ? idx : null;
+}
+
+// 查找本周的 quiz 文档（优先找周一那条；找不到就取该 weekIndex 最早的一条）
+async function findWeeklyQuizDoc(dateStr) {
+  const settings = await CourseSettings.findOne({ key: 'course' });
+  const startDate = settings?.startDate || null;
+
+  // 兼容：若没设置 startDate，退回到老逻辑（按当天 date 找）
+  if (!startDate) {
+    return await DailyQuiz.findOne({ date: dateStr });
+  }
+
+  const wIdx = weekIndexForDate(startDate, dateStr);
+  if (!wIdx) return null;
+
+  // 优先周一
+  const start = new Date(startDate + 'T00:00:00');
+  const monday = new Date(start);
+  monday.setDate(start.getDate() + (wIdx - 1) * 7); // 本周周一
+  const mondayStr = isoDate(monday);
+
+  let doc = await DailyQuiz.findOne({ date: mondayStr, weekIndex: wIdx });
+  if (doc) return doc;
+
+  // 其次：该周的任何一条（例如之前历史数据）
+  doc = await DailyQuiz.findOne({ weekIndex: wIdx }).sort({ date: 1 });
+  return doc;
+}
+
+// get today’s quiz + attempts left（从本周周一的 quiz 里切出今天那 1 题）
 router.get('/today', auth, async (req, res) => {
-  const date = isoDate();
-  const quiz = await DailyQuiz.findOne({ date });
-  const idx = weekdayIndex(date);
+  const today = isoDate();
+  const idx = weekdayIndex(today); // 0..4 for Mon..Fri; -1 for weekend
+  if (idx < 0) return res.status(204).send(); // 周末无题
 
-  if (idx < 0) {
-    return res.status(204).send(); // no quiz on weekends
-  }
-  if (!quiz || !Array.isArray(quiz.questions) || quiz.questions.length < 5) {
-    return res.status(404).json({ message: 'No quiz for today' });
+  // 找本周的 quiz 文档（只保存于周一）
+  const quiz = await findWeeklyQuizDoc(today);
+  if (!quiz || !Array.isArray(quiz.questions) || quiz.questions.length < 1) {
+    return res.status(404).json({ message: 'No quiz for this week' });
   }
 
-  const single = quiz.questions[idx]; // 0..4 for Mon..Fri
+  // 只给当天那 1 题（若题目不到 5，则取 idx 可用范围）
+  const safeIdx = Math.min(idx, quiz.questions.length - 1);
+  const single = quiz.questions[safeIdx];
   const projectedQuiz = {
-    date: quiz.date,
+    date: quiz.date,         // 周一的日期
     weekIndex: quiz.weekIndex,
-    questions: [single],
-    totalInWeek: quiz.questions.length // 5
+    questions: [single],     // 今天这一题
+    totalInWeek: quiz.questions.length
   };
 
-  const state = await DailyUserQuizState.findOne({ userId: req.user._id, date }) ||
-    await DailyUserQuizState.create({ userId: req.user._id, date, attemptsAllowed: 1, attemptsUsed: 0 });
+  // 当天的作答状态仍按“今天”记（不跟周一走）
+  const state = await DailyUserQuizState.findOne({ userId: req.user._id, date: today }) ||
+    await DailyUserQuizState.create({ userId: req.user._id, date: today, attemptsAllowed: 1, attemptsUsed: 0 });
 
   res.json({
-    date,
+    date: today, // 今天
     quiz: projectedQuiz,
     attempts: {
       allowed: state.attemptsAllowed,
@@ -90,15 +129,20 @@ router.post('/attempts/use-extra', auth, async (req, res) => {
   });
 });
 
-// submit answers
+// submit answers（按今天是周几，从周一文档切 1 题来判分）
 router.post('/attempt', auth, async (req, res) => {
-  const { answers } = req.body || {}; // [0..3] per question
-  const date = isoDate();
-  const quiz = await DailyQuiz.findOne({ date });
-  if (!quiz) return res.status(400).json({ message: 'No quiz for today' });
+  const { answers } = req.body || {}; // [singleAnswerIndex]
+  const today = isoDate();
+  const idx = weekdayIndex(today); // 0..4
+  if (idx < 0) return res.status(400).json({ message: 'No quiz on weekends' });
 
-  const state = await DailyUserQuizState.findOne({ userId: req.user._id, date }) ||
-    await DailyUserQuizState.create({ userId: req.user._id, date, attemptsAllowed: 1, attemptsUsed: 0 });
+  const quiz = await findWeeklyQuizDoc(today);
+  if (!quiz || !Array.isArray(quiz.questions) || quiz.questions.length < 1) {
+    return res.status(400).json({ message: 'No quiz for this week' });
+  }
+
+  const state = await DailyUserQuizState.findOne({ userId: req.user._id, date: today }) ||
+    await DailyUserQuizState.create({ userId: req.user._id, date: today, attemptsAllowed: 1, attemptsUsed: 0 });
 
   if (state.attemptsUsed >= state.attemptsAllowed) {
     return res.status(400).json({ message: 'No attempts left' });
@@ -108,17 +152,18 @@ router.post('/attempt', auth, async (req, res) => {
     return res.status(400).json({ message: 'Answers length mismatch' });
   }
 
-  // grade
-  let correct = 0;
-  const correctIndexes = quiz.questions.map(q => q.answerIndex);
-  answers.forEach((a, i) => { if (Number(a) === correctIndexes[i]) correct += 1; });
+  // 只判今天这 1 题（若题目不到 5，则用最后一题）
+  const safeIdx = Math.min(idx, quiz.questions.length - 1);
+  const correctIndex = quiz.questions[safeIdx]?.answerIndex ?? 0;
+  const isCorrect = Number(answers[0]) === Number(correctIndex);
+  const correct = isCorrect ? 1 : 0;
 
-  // award score: 10 per correct, *2 if booster active
+  // 计分：每题 10 分，booster *2
   const base = correct * 10;
   const boosterActive = !!(req.user.boosterExpiresAt && new Date(req.user.boosterExpiresAt) > new Date());
   const award = boosterActive ? base * 2 : base;
 
-  // update attempt count and score
+  // 更新尝试次数 & 积分（当天维度）
   state.attemptsUsed += 1;
   await state.save();
 
@@ -128,10 +173,11 @@ router.post('/attempt', auth, async (req, res) => {
   res.json({
     message: 'submitted',
     correct,
-    total: quiz.questions.length,
+    total: 1,
     award,
     boosterApplied: boosterActive,
-    correctIndexes
+    // 为了前端显示解释：告诉它今天题目的正确选项索引
+    correctIndexes: [correctIndex]
   });
 });
 
