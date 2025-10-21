@@ -27,11 +27,10 @@ import RegisterStep2 from './pages/auth/RegisterStep2';
 import ForgotPassword from './pages/auth/ForgotPassword';
 import ResetPassword from './pages/auth/ResetPassword';
 
-// Global unifications
-import './components/Button.css';
 
 // Global unifications
 import './components/Button.css';
+import './components/PageLinkIcon.css';
 
 import { useEffect } from 'react';
 import { setOnUnauthorized } from './api/client';

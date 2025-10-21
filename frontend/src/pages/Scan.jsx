@@ -150,18 +150,15 @@ export default function Scan() {
               e.currentTarget.src = `${BASE}icons/default/home.png`;
             }}
           />
-          <p className="iconcaption">Home</p>
+          <p>Home</p>
         </div>
       </div>
 
       {/* Score Pad */}
       <div className="scorePad">
-        <div
-          className="pagelinkicon"
-          style={{ display: "flex", flexDirection: "row", gap: "10px" }}
-        >
-          <img src={icons.coin} className="icon" alt="Score" />
-          <p className="iconcaption">{score}</p>
+        <div className="score">
+          <img src={icons.coin} alt="Score" />
+          <p >{score}</p>
         </div>
       </div>
 

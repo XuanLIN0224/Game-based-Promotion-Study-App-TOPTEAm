@@ -22,7 +22,7 @@ ul.backpackList {
 /* Single Backpack Item */
 ul.backpackList > li {
   display: grid;
-  grid-template-columns: 1fr 120px;
+  grid-template-columns: 1fr clamp(120px, 30vw, 260px);
   align-items: center;
   /* gap: 12px; */
   padding: 12px;
@@ -84,12 +84,11 @@ ul.backpackList > li {
 		gap: 55px;
 		width: 100%;
 		justify-self: start
-		!important; outline: 1px solid red;
+		/* !important; outline: 1px solid red; */
 	}
 
   .btnRow {
     grid-column: 3 / 4;      
-    width: auto;
     justify-self: end;      
   }
 

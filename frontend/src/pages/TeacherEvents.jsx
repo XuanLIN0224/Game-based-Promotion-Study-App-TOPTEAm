@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import { EventsAPI } from '../api/events';
-import "./Home.css";
+// import "./Home.css";
 
 function fmtDuration(ms) {
   if (ms <= 0) return 'Ended';

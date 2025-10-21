@@ -110,7 +110,7 @@ ul.catalogList > li {
   ul.catalogList > li {
     list-style: none;
     display: grid;
-    grid-template-columns: 1fr 165px 180px;
+    grid-template-columns: 1fr 160px 180px;
     align-items: center;
     gap: 20px;
     padding: 12px 14px;
@@ -136,7 +136,7 @@ ul.catalogList > li {
 
   .btnRow {
     grid-column: 3 / 4;      
-    width: auto;
+    /* width: auto; */
     justify-self: end;      
   }
 
