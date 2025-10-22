@@ -161,6 +161,7 @@ describe('Login page', () => {
       expect(mockApi).toHaveBeenCalledTimes(2);
     });
 
+    // 第一次调用 /auth/login 的 body 应该带 remember:true
     // first use of mockApi
     const firstCall = mockApi.mock.calls[0];
     expect(firstCall[0]).toBe('/auth/login');

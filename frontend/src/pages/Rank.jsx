@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./Home.css";
+//import "./Home.css";
 import styles from "./Rank.module.css";
 import { api } from "../api/client";
 

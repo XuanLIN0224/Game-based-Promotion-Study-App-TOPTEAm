@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../api/client";
 import s from "./Customise.module.css"; // accessory styling
-import "./Home.css"; // shared structure & title styling
+//import "./Home.css"; // shared structure & title styling
 import "../components/Button.css";
 
 const BASE = import.meta.env.BASE_URL || "/";
