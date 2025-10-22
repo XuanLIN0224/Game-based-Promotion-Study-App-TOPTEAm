@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { api } from "../api/client";
-import "./Home.css";
+import s from "./Home.module.css";
 
 const BASE = import.meta.env.BASE_URL || '/';
 
@@ -182,11 +182,11 @@ useEffect(() => {
   return (
     <main className="page">
       {/* User summary (Delete later, For Testing only) */}
-      <div>
-        <p className="iconcaption">User: {username || '—'}</p>  {/* The css is in the 'main.css' */}
+      {/* <div>
+        <p className="iconcaption">User: {username || '—'}</p>  
         <p className="iconcaption">Group: {group || '—'}</p>
         <p className="iconcaption">Breed: {breed || '—'}</p>
-      </div>
+      </div> */}
 
       {/* Active effects */}
       <div style={{ position:'absolute', top: 60, left: '50%', transform:'translateX(-50%)', zIndex:5, display:'flex', gap:10 }}>
@@ -212,25 +212,21 @@ useEffect(() => {
 
         <div className="scorePad">
           {/* Money */}
-          <div className="pagelinkicon"
-            style={{display: "flex", flexDirection: "row", gap: "10px"}}>
+          <div className="score">
             <img
               src={ icons.coin }
-              className="icon"
               alt="Money"
             />
-            <p className="iconcaption">{score}</p>
+            <p>{score}</p>
           </div>
           
           {/* Bones/Fishes */}
-          <div className="pagelinkicon"
-            style={{display: "flex", flexDirection: "row", gap: "10px"}}>
+          <div className="score">
             <img
               src={ icons.feed }
-              className="icon"
               alt="Feed"
             />
-            <p className="iconcaption">{numPetfood}</p>
+            <p >{numPetfood}</p>
           </div>
         </div>
       </div>
@@ -278,23 +274,27 @@ useEffect(() => {
         onClick={() => navigate("/game")}
       >
         {/* Title of the Project */}
-        <div className="title-wrap">
-          <h1 className="title1">PowerUp</h1>
-          <h1 className="title2">O O S D</h1>
+        <div className={s.titleWrap}>
+          <h1 className={s.title1}>PowerUp</h1>
+          <h1 className={s.title2}>O O S D</h1>
         </div>
 
         {/* Main Image */}
         <img
-          src={pickMainSrc()}
-          alt={accessories ? `${breed} with ${accessories}` : (breed || group || "default")}
-          className="pic"
+          src={
+            (breedImages[group] && breedImages[group][breed]) ||
+            (breedImages[group] && breedImages[group].default) ||
+            `${BASE}icons/home/main.gif`
+          }
+          alt={breed || group || "default"}
+          className={s.pic}
         />
 
-        <p className="line">Click or tap anywhere to play...</p>
+        <p className={s.line}>Click or tap anywhere to play...</p>
       </section>
 
       {/* Bottom Buttons */}
-      <div className="downpad">
+      <div className={s.downpad}>
         {/* Quiz */}
         <button 
           className="btn primary"

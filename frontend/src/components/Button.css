@@ -24,8 +24,6 @@
   */
 
 
-
-
 /* Default styles for all buttons */
 button, .btn {
   font-family: "SuperShiny", sans-serif;
@@ -41,10 +39,8 @@ button, .btn {
 	transition: border-color 0.25s;
 }
 button:hover {
-  /* border-color: #646cff; */
   border-width: 2.5px;
   border-style: solid;
-  border-color: #00000030;
 }
 button:focus,
 button:focus-visible {
@@ -82,7 +78,7 @@ button:focus-visible {
   color: #fff;
   font-size: clamp(14px, 4vw, 16px);
   font-weight: 600;
-	grid-column: 1 / -1;
+	/* grid-column: 1 / -1; */
 	width: 100%;
 	background: linear-gradient(90deg, #49b, #5cd);
   border: none;
@@ -92,7 +88,17 @@ button:focus-visible {
 /* Ghost Button */
 .btn.ghost {
   background: transparent;
-  border: 1px solid rgba(255,255,255,0.25);
+  /* border: 1px solid rgba(255,255,255,0.25); */
+  
+  font-family: sans-serif;
+  font-weight: 700;
+  text-decoration: underline; 
+  text-underline-offset: 2px; 
+  text-decoration-thickness: 1.5px;
+}
+
+.btn.ghost:hover{
+  color: rgba(255, 0, 0, 0.926);
 }
 
 .buttoncaption {
@@ -102,50 +108,4 @@ button:focus-visible {
   align-content: center;
 }
 
-/* Responsive adjustments for buttons */
-@media (min-width: 768px) {
 
-.btn.secondary{
-	grid-column: 3 / 4; 		/* align to col 3 */
-}
-
-
-}
-
-
-/** This section below need to be further refactored and moved to respective CSS files **/
-
-/* In Setting.css */
-.page-settings .btn {
-  /* STOP stretching (works in grid or flex parents) */
-  justify-self: start;         /* grid: align to start, don't stretch */
-  flex: 0 0 auto;              /* flex: don't grow/shrink */
-
-  /* Compact, content-based box */
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: max-content;          /* <-- key: hug text in grid/flex */
-  white-space: nowrap;         /* keep label on one line */
-  line-height: 1;              /* tighter height */
-  padding: 2px 8px;            /* smaller frame */
-  min-height: 0;               /* remove tall constraint */
-
-  /* Visuals */
-  font-size: 1.2em;            /* keep or tweak */
-  font-weight: 600;
-  font-family: "SuperShiny", sans-serif;
-  background: #c0e5d6;
-  color: #888;
-  border: 1px solid rgba(0,0,0,.18);
-  border-radius: 6px;
-
-  /* spacing */
-  margin-right: 30px;
-}
-.page-settings .btn:hover { filter:brightness(0.98); }
-.page-settings .btn:focus-visible { outline:2px solid #111; outline-offset:2px; }
-
-/* Buttons with strong/primary action (e.g., "Log out") */
-.page-settings .btn.primary { background:#3c97b5; color:#fff; }
-.page-settings .btn.primary:hover { opacity:.95; }

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { flushSync } from 'react-dom';
 import { Link, useNavigate } from 'react-router-dom';
 import { api, setToken } from '../../api/client';
-import './Auth.css';
+import m from './Auth.module.css';
 
 export default function Login() {
   const nav = useNavigate();
@@ -47,8 +47,8 @@ export default function Login() {
   };
 
   return (
-    <div className="auth-page">
-      <div className="auth-card">
+    <div className={`page ${m.authPage}`}>
+      <div className={m.authCard}>
         <h2>Welcome back</h2>
         <form className="auth-form" onSubmit={onSubmit}>
   <label htmlFor="email">Email</label>
@@ -100,7 +100,7 @@ export default function Login() {
           </div>
         )}
 
-        <div className="auth-actions">
+        <div className={m.authActions}>
           <Link to="/register/step1">Create account</Link>
           <Link to="/forgot">Forgot password?</Link>
         </div>

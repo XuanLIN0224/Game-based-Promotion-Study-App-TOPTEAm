@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../api/client";
-import b from "./Backpack.module.css";
+import s from "./Backpack.module.css";
 
 const BASE = import.meta.env.BASE_URL || '/';
 
@@ -11,7 +11,7 @@ const LABELS = {
   lollies_voucher: { title: "Lollies Voucher", hint: "Claim in workshop" },
   // if you later store pet_food in inventory instead of a counter:
   pet_food: { title: "Pet Food", hint: "Feed your pet" },
-  quiz_booster_today: { title: "Quiz Booster for today", hint: "double quiz score for today." },
+  quiz_sooster_today: { title: "Quiz Booster for today", hint: "double quiz score for today." },
 };
 
 export default function Backpack () {
@@ -74,7 +74,7 @@ export default function Backpack () {
         {err && <div className="auth-error" style={{maxWidth: 520}}>{err}</div>}
 
         {/* Feed Info */}
-        <div className={b.feedInfo}>
+        <div className={s.feedInfo}>
           <strong>Pet Food:</strong> {totalPetFood}
         </div>
 
@@ -82,30 +82,29 @@ export default function Backpack () {
           <div>No items yet. Visit the <span className="linklike" onClick={()=>navigate('/shop')}>Shop</span> to get some.</div>
         ) : (
           // Backpack Listing
-          <ul className={b.backpackList}>
+          <ul className={s.backpackList}>
             {inventory.map((it) => {
               const meta = LABELS[it.key] || { title: it.key, hint: "" };
               const canUse = it.key === 'extra_attempt' || it.key === 'lecture_qr' || it.key === 'lollies_voucher' || it.key === 'pet_food' || it.key === 'quiz_booster_today';
               return (
                 // Item Info
                 <li key={it.key} >
-                  <div className={b.itemInfo}>
-                    <div className={b.itemTitle}>{meta.title}</div>
-                    <div className={b.itemHint}>{meta.hint}</div>
+                  <div className={s.itemInfo}>
+                    <div className={s.itemTitle}>{meta.title}</div>
+                    <div className={s.itemHint}>{meta.hint}</div>
                   </div>
 
                   {/* Quantity Info and Use Button */}
-                  <div className={b.itemAction}>
-                    <div className={b.itemQty}>Qty: <b>{it.qty}</b></div>
+                  <div className={s.itemAction}>
+                    <div className={s.itemQty}>Qty: <b>{it.qty}</b></div>
                     {canUse && it.qty > 0 && (
-                        <button
-                          className="btn secondary"
-                          data-testid="use-item-button"
-                          onClick={()=>useItem(it.key, 1)}
-                          disabled={busyKey === it.key}
-                        >
-                          {busyKey === it.key ? 'Using…' : 'Use'}
-                        </button>
+                      <button
+                        className={`btn secondary ${s.btnRow}`}
+                        onClick={()=>useItem(it.key, 1)}
+                        disabled={busyKey === it.key}
+                      >
+                        {busyKey === it.key ? 'Using…' : 'Use'}
+                      </button>
                     )}
                   </div>
                 </li>

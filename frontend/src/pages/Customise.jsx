@@ -204,20 +204,14 @@ function Customise() {
         </div>
 
         <div className="scorePad">
-          <div
-            className="pagelinkicon"
-            style={{ display: "flex", flexDirection: "row", gap: "10px" }}
-          >
-            <img src={icons.coin} className="icon" alt="Money" />
-            <p className="iconcaption">{score}</p>
+          <div className="score">
+            <img src={icons.coin} alt="Money" />
+            <p>{score}</p>
           </div>
 
-          <div
-            className="pagelinkicon"
-            style={{ display: "flex", flexDirection: "row", gap: "10px" }}
-          >
-            <img src={icons.feed} className="icon" alt="Feed" />
-            <p className="iconcaption">{numPetfood}</p>
+          <div className="score">
+            <img src={icons.feed} alt="Feed" />
+            <p>{numPetfood}</p>
           </div>
         </div>
       </div>
