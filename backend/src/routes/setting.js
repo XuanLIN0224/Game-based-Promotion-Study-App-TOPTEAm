@@ -108,11 +108,9 @@ router.patch('/password', auth, async (req, res) => {
     return res.status(400).json({ message: 'The new password should not be the same as the old one. Please enter a different password' });
   }
 
-  // 4) Save new bcrypt hash
+  // 4) Save new password 
   try {
-    const salt = await bcrypt.genSalt(10);
-    const hashed = await bcrypt.hash(newPassword, salt);
-    req.user.password = hashed;
+    req.user.password = newPassword;
 
     // Optional: invalidate active token(s) so other sessions are logged out
     // req.user.activeToken = null;
