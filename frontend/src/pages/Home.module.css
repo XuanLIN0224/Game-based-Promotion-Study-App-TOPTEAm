@@ -4,7 +4,7 @@
  */
 
 .titleWrap {
-  margin-top: 10px;
+  margin-top: clamp(10px, 5vh, 50px);
   position: relative;
   display: inline-block;   /* 包裹内容大小 */
 }
