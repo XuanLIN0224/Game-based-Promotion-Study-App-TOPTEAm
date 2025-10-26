@@ -7,21 +7,21 @@
 
 const { GoogleGenAI } = require('@google/genai');
 
-/** 从 SDK 响应里尽可能拿到纯文本 */
+/** Extract text content from model result */
 function extractText(result) {
   try {
     if (!result) return '';
     if (typeof result.output_text === 'string' && result.output_text.trim()) {
       return result.output_text;
     }
-    // 新 SDK 可能返回 candidates 数组
+    // new style of response
     const cand = Array.isArray(result.candidates) ? result.candidates[0] : undefined;
     const parts = cand?.content?.parts;
     if (Array.isArray(parts)) {
       const withText = parts.find(p => typeof p.text === 'string' && p.text.trim());
       if (withText) return withText.text;
     }
-    // 旧风格兼容
+    // fallback to text() method
     if (typeof result.text === 'function') {
       const t = result.text();
       if (typeof t === 'string') return t;
@@ -30,20 +30,20 @@ function extractText(result) {
   return '';
 }
 
-/** 确保 API key 存在 */
+/** make sure API key exists */
 function assertEnv() {
   const key = process.env.GOOGLE_GENERATIVE_AI_API_KEY || process.env.GOOGLE_API_KEY;
   if (!key) throw new Error('Missing GOOGLE_GENERATIVE_AI_API_KEY in .env');
   return key;
 }
 
-/** 截断过长文本 */
+/** truncate long text */
 function truncateText(s, max = 8000) {
   if (!s) return '';
   return s.length > max ? s.slice(0, max) : s;
 }
 
-/** prompt 生成函数 */
+/** prompt builder */
 function buildPrompt({ pdfText = '', notes = '', title = '', numQuestions = 5, difficulty = 'medium' }) {
   return `
 You are a quiz generator AI. Create exactly ${numQuestions} multiple-choice questions at ${difficulty} difficulty.
@@ -63,18 +63,18 @@ ${truncateText(pdfText)}
   `.trim();
 }
 
-/** 安全 JSON 解析 */
+/** safe JSON parse */
 function safeParseJSON(text) {
   try { return JSON.parse(text); } catch { return null; }
 }
 
-/** 主函数 */
+/** main function to generate quiz */
 async function generateQuizFromContext({ pdfText, notes, title, numQuestions = 5, difficulty = 'medium' }) {
   const ai = new GoogleGenAI({ apiKey: assertEnv() });
 
   const prompt = buildPrompt({ pdfText, notes, title, numQuestions, difficulty });
 
-  // ✅ 仅使用新版模型
+  // try multiple models in order
   const models = ['gemini-2.5-flash', 'gemini-2.0-flash'];
   let raw = '', lastError;
 
@@ -86,7 +86,7 @@ async function generateQuizFromContext({ pdfText, notes, title, numQuestions = 5
         contents: [{ role: 'user', parts: [{ text: prompt }] }],
       });
 
-      // 处理可能的安全拦截
+      // handle content block
       if (result?.prompt_feedback?.block_reason) {
         const br = result.prompt_feedback.block_reason;
         throw new Error(`prompt blocked: ${br}`);
@@ -97,13 +97,13 @@ async function generateQuizFromContext({ pdfText, notes, title, numQuestions = 5
         console.log(`[genai] ✅ success with ${model}`);
         break;
       } else {
-        // 没有抛错但也没有返回文本，打印一份精简诊断
+        // if no text, log details
         console.warn(`[genai] empty output from ${model}, sample=`, JSON.stringify({
           hasOutputText: !!result?.output_text,
           candidatesLen: Array.isArray(result?.candidates) ? result.candidates.length : 0,
           promptFeedback: result?.prompt_feedback || null,
         }));
-        // 继续 fallback 到下一个模型
+        // continue to next model
       }
     } catch (err) {
       console.warn(`[genai] fallback from ${model}:`, err.message);
@@ -112,7 +112,7 @@ async function generateQuizFromContext({ pdfText, notes, title, numQuestions = 5
     }
   }
 
-  // 如果上面没有捕捉到具体错误，但也没有拿到文本，给出更多上下文
+  // if all models failed
   if (!raw && lastError && lastError.response) {
     try {
       console.warn('[genai] last error response:', JSON.stringify(lastError.response, null, 2));
@@ -122,7 +122,7 @@ async function generateQuizFromContext({ pdfText, notes, title, numQuestions = 5
     throw new Error('All Gemini models failed: ' + (lastError?.message || 'unknown error'));
   }
 
-  // 清理 Markdown 包裹
+  // clean and parse output
   const cleaned = raw
     .replace(/^```json\s*/i, '')
     .replace(/```$/i, '')
@@ -134,7 +134,7 @@ async function generateQuizFromContext({ pdfText, notes, title, numQuestions = 5
     throw new Error('Quiz generation failed: invalid model response');
   }
 
-  // 标准化输出
+  // structure output
   const arr = parsed.questions.slice(0, numQuestions).map((q, i) => {
     const stem = q.stem || q.text || q.question || `Question ${i + 1}?`;
     const choices = Array.isArray(q.choices ?? q.options)
