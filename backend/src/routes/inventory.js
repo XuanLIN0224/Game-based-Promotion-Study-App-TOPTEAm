@@ -1,3 +1,11 @@
+/**
+ * This file includes APIs (routes) used for the realization of the "Inventory" feature.
+ *
+ * Main Functions:
+ * F1: Retrieve the user’s current inventory, listing all owned items and their quantities.
+ * F2: Use or consume an item from the inventory, update its remaining quantity, apply its effects, and save changes to the user record.
+ */
+
 const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth');

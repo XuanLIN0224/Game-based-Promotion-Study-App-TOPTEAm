@@ -1,3 +1,10 @@
+/**
+ * This file includes APIs (routes) used for the realization of the "Leaderboard & Ranking" feature.
+ *
+ * Main Functions:
+ * F1: Retrieve the top percentage of users ranked by score, optionally filtered by a `percent` query parameter (default 20%), including each user’s equipped accessory for display.
+ */
+
 const express = require('express');
 const auth = require('../middleware/auth');
 const User = require('../models/User');

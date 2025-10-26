@@ -1,4 +1,11 @@
-// src/routes/shop.js
+/**
+ * This file includes APIs (routes) used for the realization of the "Shop" feature.
+ *
+ * Main Functions:
+ * F1: Provide a weekly catalog for the authenticated user showing each item’s price, purchased count this week, and remaining quota.
+ * F2: Handle item purchases by validating limits and balance, applying effects to the user (inventory/counter), recording the transaction, and returning the updated state.
+ */
+
 const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth');

@@ -1,3 +1,13 @@
+/**
+ * This file includes APIs (routes) used for the realization of the "Daily Quiz" feature.
+ *
+ * Main Functions:
+ * F1: Serve today’s quiz question (1 per weekday) with the user’s attempt state and booster status.
+ * F2: Provide a paginated-lite archive (up to 50) of stored weekly quiz documents for browsing.
+ * F3: Consume an "extra_attempt" inventory item to grant +1 attempt for today and return the new attempt counters.
+ * F4: Accept today’s quiz submission, check correctness, apply scoring (booster doubles), persist attempt usage, and return the result.
+ */
+
 const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth');

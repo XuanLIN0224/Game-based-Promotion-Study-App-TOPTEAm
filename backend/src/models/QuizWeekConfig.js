@@ -1,6 +1,6 @@
 /**
  * This file is a schema for the line item for a quiz's file, related to the teacher's portal.
- * It enables the teacher to upload a file so as to generate a quiz, rather than using AI generated quiz (default in our system).
+ * It enables the teacher to upload a file so as to generate a quiz (done by our AI), rather than directly using AI generated quiz (default in our system).
  */
 
 const mongoose = require('mongoose');

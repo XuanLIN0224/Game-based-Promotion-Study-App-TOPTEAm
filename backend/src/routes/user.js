@@ -1,3 +1,11 @@
+/**
+ * This file includes APIs (routes) used for the realization of the "User Profile & QR Scan" feature.
+ *
+ * Main Functions:
+ * F1: Update user profile fields (username, clothingConfig) with schema validation and return the updated summary.
+ * F2: Handle QR scans with priority for DB-managed codes (time window + anti-duplication, +20 score) and a legacy fallback ("reward:QR-#", +2 score), persisting scan history and returning the new score.
+ */
+
 const express = require('express');
 const { z } = require('zod');
 const auth = require('../middleware/auth');

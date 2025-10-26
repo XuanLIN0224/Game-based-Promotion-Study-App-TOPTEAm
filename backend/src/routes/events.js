@@ -1,3 +1,11 @@
+/**
+ * This file includes APIs (routes) used for the realization of the "Team Event & Hints" feature.
+ *
+ * Main Functions:
+ * F1: Retrieve the currently active event within the active time range and display real-time team progress (cats vs dogs).
+ * F2: Retrieve the status and progress of a specific event by its ID, showing hint unlocks based on team performance.
+ */
+
 const express = require('express');
 const Event = require('../models/Event');
 const User = require('../models/User');
@@ -25,6 +33,7 @@ async function computeTeamStats() {
 }
 
 /** Get active event (now within [start,end]) */
+// GET  /api/events/active
 router.get('/active', requireAuth, async (req, res) => {
   const now = new Date();
   const ev = await Event.findOne({ startAt: { $lte: now }, endAt: { $gte: now } }).sort({ startAt: -1 });
@@ -67,6 +76,7 @@ router.get('/active', requireAuth, async (req, res) => {
 });
 
 /** Get specific event status (readonly) */
+// GET  /api/events/:id/status
 router.get('/:id/status', requireAuth, async (req, res) => {
   const ev = await Event.findById(req.params.id);
   if (!ev) return res.status(404).json({ error: 'not found' });

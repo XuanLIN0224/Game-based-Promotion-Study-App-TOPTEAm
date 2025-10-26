@@ -1,3 +1,16 @@
+/**
+ * This file includes APIs (routes) used for the realization of the "Authentication & Account" feature.
+ *
+ * Main Functions:
+ * F1: Register (step 1) — create a user without breed using { email, username, password, confirmPassword, group }.
+ * F2: Register (step 2) — bind a breed to the user, enforce group match, issue JWT (respecting "remember"), and return user summary.
+ * F3: Login — verify email/password; if an existing valid token is stored, block concurrent sessions; otherwise issue a new JWT and return user summary.
+ * F4: Logout — clear the stored active token for the authenticated user.
+ * F5: Forgot password — generate and email a 6-digit reset code; always respond with a generic success to prevent user enumeration.
+ * F6: Reset password — verify { email, code } and set newPassword; mark the code as used.
+ * F7: Me — return the authenticated user’s profile with populated breed and key fields.
+ */
+
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const { z } = require('zod');
@@ -220,7 +233,7 @@ router.post('/reset-password', async (req, res) => {
 router.get('/me', auth, async (req, res) => {
   console.log('[ROUTE] /api/auth/me HIT');
 
-  // ⚠️重新查一次并populate breed
+  // check again and populate breed
   const u = await User.findById(req.user._id).populate('breed', 'name group');
 
   console.log('createdAt:', u?.createdAt, 'updatedAt:', u?.updatedAt);

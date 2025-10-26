@@ -1,4 +1,12 @@
-/* APIs for the setting page */
+/**
+ * This file includes APIs (routes) used for the realization of the "Account Settings" feature.
+ *
+ * Main Functions:
+ * F0: Provide a public ping endpoint to verify the settings router is mounted.
+ * F1: Update profile fields (username/email) for the authenticated user with schema validation.
+ * F2: Reset the authenticated user’s password: verify old password, validate and confirm new password, and persist securely.
+ */
+
 const express = require('express');
 const router = express.Router();
 const { z } = require('zod');

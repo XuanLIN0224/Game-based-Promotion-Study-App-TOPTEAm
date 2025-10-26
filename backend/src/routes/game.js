@@ -9,14 +9,13 @@ const deltaSchema = z.object({
   petFoodDelta: z.number().int().optional()
 });
 
-// PATCH /api/game/reward
+// PATCH /game/reward
 router.patch('/reward', auth, async (req, res) => {
   const parsed = deltaSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ message: 'Invalid delta' });
 
   const { scoreDelta = 0, petFoodDelta = 0 } = parsed.data;
 
-  // 基本防刷：一次操作限制范围
   if (Math.abs(scoreDelta) > 100 || Math.abs(petFoodDelta) > 100) {
     return res.status(400).json({ message: 'Delta too large' });
   }

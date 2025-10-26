@@ -1,3 +1,14 @@
+/**
+ * This file includes APIs (routes) used for the realization of the "Event Management (Teacher Admin)" feature.
+ *
+ * Main Functions:
+ * F1: Create a new event with time window, optional hints (threshold-gated), and optional reward score.
+ * F2: Update event fields (name, start/end times, hints array, rewardScore) by ID.
+ * F3: Delete an event by ID.
+ * F4: List all events for teacher administration, newest first.
+ * F5: Preview a specific event’s runtime status — running flag, remaining time, team stats (cat/dog totals & percentages), and unlocked hint thresholds.
+ */
+
 const express = require('express');
 const Event = require('../models/Event');
 const User = require('../models/User');

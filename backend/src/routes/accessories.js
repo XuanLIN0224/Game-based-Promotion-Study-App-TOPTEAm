@@ -7,6 +7,7 @@
  * F4: The user would like to remove/add back an already owned accessory from the character (picture)
  *
  */
+
 const express = require('express');
 const router = express.Router();
 

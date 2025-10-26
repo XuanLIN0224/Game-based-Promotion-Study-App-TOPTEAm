@@ -1,3 +1,11 @@
+/**
+ * This file includes APIs (routes) used for the realization of the "Breed" feature.
+ *
+ * Main Functions:
+ * F1: Retrieve all available breeds, optionally filtered by group (e.g., dog or cat).
+ * F2: Seed the database with initial breed data for both groups (one-time setup, removable after deployment).
+ */
+
 const express = require('express');
 const router = express.Router();
 const Breed = require('../models/Breed');
@@ -10,7 +18,7 @@ router.get('/', async (req, res) => {
   res.json(breeds);
 });
 
-// 一次性种子：GET /api/breeds/seed  (部署后可注释/移除)
+// GET /api/breeds/seed--one-time seed--could be deleted once deployed
 router.get('/seed', async (req, res) => {
   const seed = [
     { group: 'dog', name: 'Border collie' },

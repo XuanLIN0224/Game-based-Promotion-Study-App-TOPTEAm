@@ -1,3 +1,20 @@
+/**
+ * This file includes APIs (routes) used for the realization of the "Teacher Admin" feature set.
+ *
+ * Main Functions:
+ * F1: Read course-wide quiz configuration (startDate, auto-generate flag, breakWeek) and per-week configs.
+ * F2: Browse recent quizzes with simple pagination for auditing/editing.
+ * F3: Edit an existing quiz’s questions/answers.
+ * F4: Configure the course start date (defines Week 1 Monday for scheduling).
+ * F5: Toggle weekday auto-generation based on course start date.
+ * F6: Set or clear the mid-semester break week (shifts subsequent weeks by +1).
+ * F7: Upload/replace a week PDF and extract text for quiz generation.
+ * F8: Update week metadata such as title and notes.
+ * F9: Delete all quizzes associated with a specific week index.
+ * F10: Generate quizzes from a week’s PDF (single day, full week, or selected days with per-day difficulty).
+ * F11: Create QR codes for attendance or events with robust defaults and a data-URL image for display.
+ */
+
 const express = require('express');
 const multer = require('multer');
 const pdfParse = require('pdf-parse');
@@ -73,6 +90,7 @@ function dateForWeekDayWithBreak(startDateStr, weekIndex, dayIndex /* 0..4 */, b
 }
 
 // ===== GET current config =====
+// GET /api/teacher/quiz-config
 router.get('/quiz-config', auth, requireTeacher, async (req, res) => {
   const [settings, weeks] = await Promise.all([
     CourseSettings.findOne({ key: 'course' }),
@@ -87,6 +105,7 @@ router.get('/quiz-config', auth, requireTeacher, async (req, res) => {
 });
 
 // ===== List recent quizzes (teacher) =====
+// GET /api/teacher/quizzes
 router.get('/quizzes', auth, requireTeacher, async (req, res) => {
   const { limit = 50, cursor } = req.query; // optional pagination
   const q = {};
@@ -96,6 +115,7 @@ router.get('/quizzes', auth, requireTeacher, async (req, res) => {
 });
 
 // ===== Update a quiz (questions & answers) =====
+// PATCH /api/teacher/quizzes/:id
 router.patch('/quizzes/:id', auth, requireTeacher, async (req, res) => {
   const { questions } = req.body || {};
   if (!Array.isArray(questions)) {
@@ -111,6 +131,7 @@ router.patch('/quizzes/:id', auth, requireTeacher, async (req, res) => {
 });
 
 // ===== PATCH start date =====
+// PATCH /api/teacher/quiz-config/start-date
 router.patch('/quiz-config/start-date', auth, requireTeacher, async (req, res) => {
   const { startDate } = req.body || {};
   if (!/\d{4}-\d{2}-\d{2}/.test(startDate || '')) {
@@ -125,6 +146,7 @@ router.patch('/quiz-config/start-date', auth, requireTeacher, async (req, res) =
 });
 
 // ===== Toggle auto-generate (Mon–Fri based on startDate) =====
+// PATCH /api/teacher/quiz-config/auto-generate
 router.patch('/quiz-config/auto-generate', auth, requireTeacher, async (req, res) => {
   const { autoGenerate } = req.body || {};
   if (typeof autoGenerate !== 'boolean') {
@@ -139,6 +161,7 @@ router.patch('/quiz-config/auto-generate', auth, requireTeacher, async (req, res
 });
 
 // ===== Set/Clear mid-semester break week =====
+// PATCH /api/teacher/quiz-config/break-week
 router.patch('/quiz-config/break-week', auth, requireTeacher, async (req, res) => {
   let { breakWeek } = req.body || {};
   if (breakWeek === null || breakWeek === undefined || breakWeek === '' ) {
@@ -158,6 +181,7 @@ router.patch('/quiz-config/break-week', auth, requireTeacher, async (req, res) =
 });
 
 // ===== Upload/replace PDF for a week =====
+// POST /api/teacher/quiz-config/:weekIndex/pdf
 router.post('/quiz-config/:weekIndex/pdf', auth, requireTeacher, upload.single('file'), async (req, res) => {
   const weekIndex = Number(req.params.weekIndex);
   if (!Number.isInteger(weekIndex) || weekIndex < 1 || weekIndex > 12) {
@@ -177,6 +201,7 @@ router.post('/quiz-config/:weekIndex/pdf', auth, requireTeacher, upload.single('
 });
 
 // ===== Update week title/notes =====
+// PATCH /api/teacher/quiz-config/:weekIndex/meta
 router.patch('/quiz-config/:weekIndex/meta', auth, requireTeacher, async (req, res) => {
   const weekIndex = Number(req.params.weekIndex);
   const { title, notes } = req.body || {};
@@ -189,6 +214,7 @@ router.patch('/quiz-config/:weekIndex/meta', auth, requireTeacher, async (req, r
 });
 
 // ===== Delete all quizzes of a specific week =====
+// DELETE /api/teacher/quizzes/week/:weekIndex
 // Example: DELETE /api/teacher/quizzes/week/3  -> remove all DailyQuiz docs where weekIndex=3
 router.delete('/quizzes/week/:weekIndex', auth, requireTeacher, async (req, res) => {
   const weekIndex = Number(req.params.weekIndex);
@@ -210,6 +236,7 @@ router.delete('/quizzes/week/:weekIndex', auth, requireTeacher, async (req, res)
 });
 
 // ===== Generate quiz from week for a given date (支持按天/整周/指定天集三种模式) =====
+// POST /api/teacher/quiz-config/:weekIndex/generate
 router.post('/quiz-config/:weekIndex/generate', auth, requireTeacher, async (req, res) => {
   const weekIndex = Number(req.params.weekIndex);
   const {

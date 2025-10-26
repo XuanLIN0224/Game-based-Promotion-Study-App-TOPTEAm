@@ -1,4 +1,10 @@
-// backend/src/routes/user.js
+/**
+ * This file includes APIs (routes) used for the realization of the "QR Scanning & Reward" feature.
+ *
+ * Main Functions:
+ * F1: Process QR code scans by validating the provided code, rewarding the user with additional score points (+2), saving the updated score, and returning the new total.
+ */
+
 const express = require("express");
 const auth = require("../middleware/auth");
 
