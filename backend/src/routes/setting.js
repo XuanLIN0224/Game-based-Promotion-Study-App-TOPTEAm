@@ -2,6 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const { z } = require('zod');
+const bcrypt = require('bcrypt');
 // Using the token to varify the requesting user
 const auth = require('../middleware/auth');
 
@@ -53,42 +54,74 @@ router.patch('/me', auth, async (req, res) => {
 });
 
 // PATCH /api/setting/password
-/* Update the user's email or username */
+/* Update the user's password */
 router.patch('/password', auth, async (req, res) => {
-  // Validate the request body against schema (only username/email allowed)
+  // Validate the request body against schema (old/new/newConfirm required)
   const parsed = resetPasswordSchema.safeParse(req.body);
-  if (!parsed.success) return res.status(400).json({ message: 'Invalid field. Expecting three passwords' });
-
-  // Read in the old, new, and new confirm passwords (from the request)
-  const { oldPassword, newPassword, newConfirmPassword } = parsed.data;
-
-  // Defensive Check
-  if (!oldPassword || !newPassword || !newConfirmPassword) {
-    return res.status(400).json({ message: "All password fields are required. Enter all three fields please" });
+  if (!parsed.success) {
+    return res.status(400).json({ message: 'Invalid field. Expecting three passwords' });
   }
 
-  // S1: Check whether the old password is valid
-  const match = await req.user.comparePassword(oldPassword);
-  if (!match) return res.status(400).json({ message: 'Old password is incorrect. Try again or reset password' });
+  const { oldPassword, newPassword, newConfirmPassword } = parsed.data;
 
-  // S2: Check whether the new and new confirm passwords are the same
-  const same = (newPassword === newConfirmPassword);
-  if(!same) return res.status(400).json({ message: 'New passwords do not match. Please try again' });
+  // Defensive checks
+  if (!oldPassword || !newPassword || !newConfirmPassword) {
+    return res.status(400).json({ message: 'All password fields are required. Enter all three fields please' });
+  }
 
-  // S3: Check whether the new and old passwords are the same--non-allowed behaviour
-  const allowed = (newPassword !== oldPassword);
-  if(!allowed) return res.status(400).json({ message: 'The new password should not be the same as the old one. Please enter a different password' });
+  // Ensure current user record has a password in DB
+  if (!req.user.password || typeof req.user.password !== 'string') {
+    return res.status(500).json({ message: 'Account has no password set. Please reset your password via "Forgot password".' });
+  }
 
-  // If both of the two checks are passed
-  // Update the DB
-  req.user.password = newPassword;
+  // If somehow the stored password is not a bcrypt hash (e.g., legacy/plaintext), migrate it
+  if (!req.user.password.startsWith('$2')) {
+    try {
+      const salt0 = await bcrypt.genSalt(10);
+      req.user.password = await bcrypt.hash(req.user.password, salt0);
+      await req.user.save();
+    } catch (e) {
+      console.error('[setting/password] migrate plaintext password error:', e);
+      return res.status(500).json({ message: 'Server error while migrating password' });
+    }
+  }
 
-  // Optional but recommended: invalidate active token(s) so other sessions are logged out
-  //req.user.activeToken = null;
+  // 1) Verify old password
+  let isMatch = false;
+  try {
+    isMatch = await bcrypt.compare(oldPassword, req.user.password);
+  } catch (e) {
+    console.error('[setting/password] bcrypt.compare error:', e);
+    return res.status(500).json({ message: 'Server error during password verification' });
+  }
+  if (!isMatch) {
+    return res.status(400).json({ message: 'Old password is incorrect. Try again or reset password' });
+  }
 
-  await req.user.save();
+  // 2) New passwords must match
+  if (newPassword !== newConfirmPassword) {
+    return res.status(400).json({ message: 'New passwords do not match. Please try again' });
+  }
 
-  res.json({ message: "Password updated successfully" });
+  // 3) New must be different from old
+  if (newPassword === oldPassword) {
+    return res.status(400).json({ message: 'The new password should not be the same as the old one. Please enter a different password' });
+  }
+
+  // 4) Save new password 
+  try {
+    req.user.password = newPassword;
+
+    // Optional: invalidate active token(s) so other sessions are logged out
+    // req.user.activeToken = null;
+
+    await req.user.save();
+  } catch (e) {
+    console.error('[setting/password] save new hash error:', e);
+    return res.status(500).json({ message: 'Server error while saving new password' });
+  }
+
+  res.json({ message: 'Password updated successfully' });
 });
 
 module.exports = router;

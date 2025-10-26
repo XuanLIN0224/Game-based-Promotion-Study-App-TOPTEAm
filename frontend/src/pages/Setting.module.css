@@ -1,14 +1,11 @@
-/* General Font */
-.page-settings h1{ font-size: 48px; line-height: 1.2; }
-.page-settings p{ font-size: 22px; }
-/* Line spacing */
-.page-settings li {
-  line-height: 2;
+.settingPage{
+  grid-template-rows: 1fr;
+  align-items: center;
 }
 
 .userInfo{
   display: grid;
-  gap: 8px;
+  gap: 16px;
   max-width: 640px;
 }
 
@@ -23,44 +20,7 @@
 }
 
 
-/* Buttons */
-.page-settings .btn {
-  /* STOP stretching (works in grid or flex parents) */
-  justify-self: start;         /* grid: align to start, don't stretch */
-  flex: 0 0 auto;              /* flex: don't grow/shrink */
-
-  /* Compact, content-based box */
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: max-content;          /* <-- key: hug text in grid/flex */
-  white-space: nowrap;         /* keep label on one line */
-  line-height: 1;              /* tighter height */
-  padding: 2px 8px;            /* smaller frame */
-  min-height: 0;               /* remove tall constraint */
-
-  /* Visuals */
-  font-size: 1.2em;            /* keep or tweak */
-  font-weight: 600;
-  font-family: "SuperShiny", sans-serif;
-  background: #c0e5d6;
-  color: #888;
-  border: 1px solid rgba(0,0,0,.18);
-  border-radius: 6px;
-
-  /* spacing */
-  margin-right: 30px;
-  min-width: 80px;    /* pick a base size */
-  flex-shrink: 0;     /* don’t let text width shrink */
-}
-.page-settings .btn:hover { filter:brightness(0.98); }
-.page-settings .btn:focus-visible { outline:2px solid #111; outline-offset:2px; }
-
-/* Buttons with strong/primary action (e.g., "Log out") */
-.page-settings .btn.primary { background:#3c97b5; color:#fff; }
-.page-settings .btn.primary:hover { opacity:.95; }
-
-.page-settings .actions {
+.actions {
   display: flex;          /* keep Save + Cancel side by side */
   gap: 8px;               /* spacing between Save/Cancel */
   margin-top: 8px;        /* spacing above the button group */
@@ -69,47 +29,51 @@
 
 /* Text (aligned with the css from the home page) */
 /* Text in View Mode */
-.page-settings .line {
+.line {
   font-family: "SuperShiny", sans-serif;
   margin: 0 0 0 0;
-  font-size: 1.8em;
+  font-size: clamp(18px, 2.5vw, 22px);
 }
 
-/* Text in Edit Mode */
-.page-settings .lineHide {
+/* Text in Edit Mode */ 
+.lineHide {
 /* try */
-  display: flex;
-  flex-direction: column;
-  flex-wrap: wrap;    /* allow wrapping when space is tight */
+  display: grid;
+  grid-template-columns: auto 1fr; 
+  gap: 10px;
+  align-items: center;
   font-family: "SuperShiny", sans-serif;
   margin: 0 0 0 0;
-  font-size: 1.5em;
-  color: #9dc9b7;
+  font-size: clamp(18px, 2.5vw, 22px);
 }
 
-.page-settings .lineHide input{
-  flex: 0 0 auto;
+.lineHide input{
+  /* flex: 0 0 auto; */
+  grid-column: 2;
   justify-self: start;
   font-size: 1rem;
-  width: 600px;
-  justify-self: start;
+  width: clamp(160px, 30vw, 300px);
 }
 
 /* Checkbox */
-.page-settings .lineHide input[type="checkbox"] {
+.lineHide input[type="checkbox"] {
   width: auto !important;
   flex: 0 0 auto !important;
+  grid-column: 2;
   margin: 0;
   transform: scale(1.3);
   accent-color: #3c97b5;
 }
 
-.page-settings .checkbox-row {
+.checkboxRow {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   white-space: nowrap;
+  font-family: sans-serif;
+  font-size: clamp(12px, 1.3vw, 18px);
 }
+
 
 /* Text navigating to the home page */
 .lineNevBack {
@@ -122,13 +86,13 @@
 /* Text popping up as a successful message */
 .lineMsg {
   /* Text styles */
-  font-family: "SuperShiny", sans-serif;
+  font-family: sans-serif;
   margin: 0;
-  font-size: 1.4em;
+  font-size: clamp(12px, 1.4vw, 18px);
   color: #8cf72f;
 
   /* Let the frame hug the text instead of full width */
-  display: inline-block;
+  display: inline-flex;
   width: fit-content;
 
   /* Frame */
@@ -138,11 +102,17 @@
   background: rgba(140, 247, 47, 0.08);   /* subtle glow behind text */
 }
 
+.settingPage .lineMsg {
+  justify-self: center;
+  align-self: start;         /* 避免拉高整行 */
+}
+
+
 /* Text popping up as a warning message */
 .lineErr {
-  font-family: "SuperShiny", sans-serif;
+  font-family: sans-serif;
   margin: 0 0 0 0;
-  font-size: 1.4em;
+  font-size: 1em;
   color: #ff6e42;
 
   display: inline-block;
@@ -156,60 +126,15 @@
 
 
 /* Mobile View Adjustment */
-@media (max-width: 650px) {
-  .page-settings p {
-    font-size: 15px;
-  }
-
-  /* Buttons: full width, consistent look */
-  .page-settings .btn {
-    font-size: 15px;
-    width: 20%;              /* full width */
-    justify-content: center;  /* center the text inside */
-    margin: 4px 0;            /* spacing between stacked buttons */
-  }
+@media (max-width: 767px) {
 
   /* Contain user info panel */
-  .page-settings .userInfo {
+  .userInfo {
     max-width: 360px !important;
-    width: 90%;               /* use most of the screen width */
+    width: 90%;
     margin: 0 auto;
+    gap: 10px;
   }
 
-  /* Row layout becomes stacked layout */
-  .page-settings .lineHide {
-    flex-direction: column;   /* stack vertically */
-    align-items: stretch;     /* make children fill the width */
-    font-size: 15.5px;
-    gap: 6px;                 /* vertical spacing */
-  }
-
-  /* Labels: full width, above input */
-  .page-settings .lineHide label {
-    flex: 0 0 auto;
-    width: 100%;
-    text-align: left;         /* keep left aligned */
-    margin-bottom: 2px;
-  }
-
-  /* Inputs: full width */
-  .page-settings .lineHide input {
-    flex: 1 1 auto;
-    min-width: 0;
-    box-sizing: border-box;   /* prevent overflow */
-  }
-
-  /* Checkboxes: inline with their label text */
-  .page-settings .checkboxRow {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 15px;
-  }
-
-  .page-settings .lineHide input[type="checkbox"] {
-    transform: scale(1.1);
-    margin: 0;
-    width: auto;
-  }
+  
 }

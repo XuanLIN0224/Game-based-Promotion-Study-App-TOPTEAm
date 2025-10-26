@@ -100,23 +100,33 @@ h1, .title {
   gap: 15px;
 }
 
-.pagelinkicon {
-  display: flex;
+
+.scorePad {
+  flex: 1 1 auto;
+  display:  flex;
   flex-direction: column;
+  justify-content: center;
+  gap : 5px;
+  margin: 0 0 0 6.5px 
+}
+
+.score{
+  display: flex;
+  flex-direction: row;
   align-items: center;
-  cursor: pointer;
-  transition: transform .15s ease;
+  gap: 10px
 }
 
-.icon {
-  width: clamp(40px, 14vw, 72px);
+.scorePad img {
+  margin: 0;            
+  padding: 0;
+  display: block;       
+  width: clamp(25px, 7vw, 32px);        
   height: auto;
-  cursor: pointer;
-  transition: transform .15s ease;
 }
 
-.iconcaption {
-  font-size: 0.75em;
+.scorePad p {
+  font-size:clamp(12px, 3vw, 20px);
   font-family: "SuperShiny", sans-serif;
   line-height: 1.5;
   font-weight: bold;
@@ -125,55 +135,22 @@ h1, .title {
   transition: opacity .15s ease;
 }
 
-.pagelinkicon:hover .icon{
-  transform: scale(1.12);
-}
-.pagelinkicon:hover .iconcaption {
-  opacity: 0;
-}
-
-
-/* button {
-  border-radius: 4px;
-  border: 0.5px solid transparent;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-width: 2.5px;
-  border-style: solid;
-  border-color: #00000030;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
-
-.buttoncaption {
-  flex: 1;
-  font-family: "SuperShiny", sans-serif;
-  align-content: center;
-} */
 
 
 /* Laptop View */
 @media (min-width: 768px) {
 
-  .icon {
-    width: 70px;
-    height: 70px;
+  .scorePad {
+    gap : 5px;
+    margin: 0 0 0 20px  
   }
 
-  .iconcaption {
-    font-size: 1.3em;
+  .scorePad img {     
+    width: 40px;        
+    height: 40px;
   }
-
 }
+
 
 /* Dark mode by default, light mode if user prefers */
 @media (prefers-color-scheme: light) {
@@ -181,12 +158,10 @@ button:focus-visible {
     color: #213547;
     background-color: #faf8db;
   }
-  a:hover {
+  /* a:hover {
     color: #747bff;
-  }
-  /* button {
-    background-color: #f9f9f9;
   } */
+
 }
 
 @font-face {

@@ -13,18 +13,6 @@ import styles from "./Setting.module.css"
 
 const BASE = import.meta.env.BASE_URL || '/';
 
-export const LABELS = {
-  user_name: { title: "User Name", prop: "Could be reset (countless times allowed)" },
-  group: { title: "Group", prop: "Could not be changed" },
-  join_date: { title: "Join Date", prop: "Could not be reset, done automatically" },
-  last_detail_update_date: { title: "Last Update Date", prop: "Could not be reset, done automatically" },
-  password: { title: "Password", prop: "Could be reset (countless times allowed), need to re-enter the correct old password?" },
-  score: { title: "Total Point/Score", prop: "Could not be reset, done automatically" },
-  asset: { title: "Total Assets", prop: "Could not be reset, done automatically" },
-  setting: { title: "Setting Preference", prop: "Could be reset (countless times allowed)" }
-};
-
-
 export default function Settings() {
   const navigate = useNavigate();
 
@@ -202,7 +190,7 @@ export default function Settings() {
 
   /** UI Part */
   return (
-    <section className={styles["page-settings"]}>
+    <section className="page">
 
       {/* Left side nav */}
       <div className="leftside">
@@ -212,17 +200,8 @@ export default function Settings() {
         </div>
       </div>
 
-
-      <h1
-        style={{
-          fontSize: 50,
-          margin: "0 0 16px",   // 16px below
-          lineHeight: 4,
-          textAlign: "center"
-        }}
-      >
-        Settings
-      </h1>
+    
+      <h1 className="title">Settings</h1>
 
 
       {loading ? (
@@ -231,7 +210,7 @@ export default function Settings() {
         <>
           {err && <div className={styles.lineErr} style={{ maxWidth: 520 }}>{err}</div>}
           {msg && <div className={styles.lineMsg} style={{ maxWidth: 520 }}>{msg}</div>}
-
+          <div className={`content ${styles.settingPage}`}>
           <div className={styles.userInfo}>
             {/* Username row */}
             {!editingUsername ? (
@@ -241,7 +220,7 @@ export default function Settings() {
                 <p className={styles.line} style={{ margin: 0 }}><strong>User Name:</strong> {username}</p>
                 {/* if the button "Change" is hit, switch to the Edit MODE */}
                 <button
-                  className={styles.btn}
+                  className="btn ghost"
                   onClick={() => { setUsernameInput(username || ""); setEditingUsername(true); }}
                 >
                   Edit
@@ -263,7 +242,7 @@ export default function Settings() {
                 />
                 <div className={styles.actions}>
                   {/* the "Save" button */}
-                  <button className={`${styles.btn} ${styles.primary}`} disabled={busyField === "username"}>
+                  <button className="btn" disabled={busyField === "username"}>
                     {busyField === "username" ? "Saving…" : "Save"}
                   </button>
                   {/* the "Cancel" button */}
@@ -284,7 +263,7 @@ export default function Settings() {
               <div>
                 <p className={styles.line} style={{ margin: 0 }}><strong>Email:</strong> {email}</p>
                 <button
-                  className={styles.btn}
+                  className="btn ghost"
                   onClick={() => { setEmailInput(email || ""); setEditingEmail(true); }}
                 >
                   Edit
@@ -333,7 +312,7 @@ export default function Settings() {
                 <p className={styles.line} style={{ margin: 0 }}><strong>Password:</strong> ••••••••</p>
                 {/* if the button "Change" is hit, switch to the Edit MODE*/}
                 <button
-                  className={styles.btn}
+                  className="btn ghost"
                   onClick={() => {
                     setOldPassword("");
                     setNewPassword("");
@@ -411,8 +390,13 @@ export default function Settings() {
                 </div>
 
                 {/* Forget password link */}
-                <Link to="/forgot" className="text-sm" style={{ color: "#3c97b5" }}>
-                Forgot password?
+                <Link to="/forgot" className="text-sm" 
+                  style={{ fontFamily: "sans-serif", 
+                            fontSize:"clamp(14px, 1.3vw, 18px)", 
+                            color: "#3c97b5" 
+                          }}
+                  >
+                  Forgot password?
                 </Link>
 
               </form>
@@ -421,13 +405,15 @@ export default function Settings() {
 
 
             {/* Logout */}
-            <button className={`${styles.btn} ${styles.primary}`} onClick={handleLogout} style={{marginTop: 30, minWidth: 300}}>
-              <p className={styles.line} ><strong>Log out</strong></p>
+            <button className="btn secondary" onClick={handleLogout}>
+              <strong>Log out</strong>
             </button>
-
+          </div>
           </div>
         </>
+        
       )}
+      {/* </div> */}
     </section>
   );
 }

@@ -1,0 +1,115 @@
+.page {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  font-family: "SuperShiny", sans-serif;
+}
+
+/* ---------- Score pad ---------- */
+.scorePad {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}
+
+.score {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.score img {
+  width: 40px;
+  height: 40px;
+}
+
+.score p {
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+}
+
+/* ---------- Title ---------- */
+.title {
+  text-align: center;
+  font-size: 32px;
+  margin-top: 100px;
+  color: #222;
+  letter-spacing: 1px;
+}
+
+/* ---------- Scanner ---------- */
+.content {
+  text-align: center;
+  position: relative;
+  display: inline-block;
+  margin-top: 20px;
+}
+
+.video {
+  width: 350px;
+  height: 350px;
+  object-fit: cover;
+  border: 2px solid rgba(83, 248, 83, 1);
+  border-radius: 8px;
+}
+
+.canvas {
+  display: none;
+}
+
+/* Green scanning bar */
+.scanBar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: limegreen;
+  animation: scan 2s linear infinite;
+}
+
+/* Bar movement animation */
+@keyframes scan {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(346px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+/* ---------- QR text ---------- */
+.qrText {
+  margin-top: 20px;
+  font-size: 16px;
+  color: #333;
+}
+
+/* ---------- Upload button ---------- */
+.uploadWrapper {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.uploadLabel {
+  display: inline-block;
+  padding: 10px 20px;
+  background: rgba(241, 218, 102, 1);
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  color: #222;
+  transition: background 0.2s ease;
+}
+
+.uploadLabel:hover {
+  background: rgba(241, 218, 102, 0.8);
+}
+
+.uploadInput {
+  display: none;
+}

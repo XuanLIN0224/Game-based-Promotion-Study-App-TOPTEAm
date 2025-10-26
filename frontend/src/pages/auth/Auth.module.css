@@ -1,17 +1,14 @@
-
-/* 页面容器 */
-.auth-page {
-  min-height: 100dvh; /* mobile-safe viewport height */
-  display: grid;
-  place-items: center;
-  color: #fff;
-  padding: clamp(12px, 4vw, 24px); /* scale padding for small screens */
+.authPage {
+  justify-content: center;
+   align-items: center
 }
 
 /* 卡片 */
-.auth-card {
+.authCard {
   width: 100%;
-  max-width: 560px; /* keep desktop cap */
+  /* flex: 0 1 auto; */
+ /* max-width: 560px; /* keep desktop cap */
+  max-width: min(calc(100vw - 20vw), 300px);  
   background: rgba(15, 15, 20, 0.55); /* deep black glass */
   border: 1px solid rgba(255, 240, 200, 0.18); /* subtle warm border contrast */
   backdrop-filter: blur(12px) saturate(120%);
@@ -21,32 +18,35 @@
   box-shadow: 0 10px 30px rgba(0,0,0,0.55);
 }
 
-.auth-card h2 {
+.authCard h2 {
   margin: 0 0 16px;
   font-size: clamp(18px, 2.6vw, 24px);
   letter-spacing: 0.5px;
 }
 
 /* 表单 */
-.auth-form {
+.authForm {
   display: grid;
   gap: clamp(8px, 2.5vw, 10px);
+  grid-template-columns: 1fr;
+  /* grid-column: 1 / -1; */
+  /* grid-auto-flow: row; */
   margin-bottom: 12px;
+  /* gap: 12px; */
 }
+/* .full{ grid-column: 1 / -1; } */
 
 /* two-column on wider screens; single column on phones */
-.form-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+.formGrid { display: grid; grid-template-columns: 1fr; gap: 12px; }
 .field { display: flex; flex-direction: column; gap: 6px; }
 
-@media (min-width: 680px) {
-  .form-grid { grid-template-columns: 1fr 1fr; }
-}
 
-.auth-form label {
+.authForm label {
   font-size: 13px;
   color: #ddd;
+  grid-column: 1 / -1;
 }
-.auth-input {
+.authInput {
   height: 44px; /* larger touch target */
   border-radius: 10px;
   border: 1px solid rgba(255,255,255,0.15);
@@ -54,14 +54,15 @@
   color: #fff;
   padding: 0 12px;
   outline: none;
+  grid-column: 1 / -1;
 }
-.auth-input:focus {
+.authInput:focus {
   border-color: #6cf;
   box-shadow: 0 0 0 3px rgba(102,204,255,0.2);
 }
 
 /* 组块标题 */
-.block-label {
+.blockLabel {
   margin-top: 8px;
   margin-bottom: 6px;
   font-weight: 600;
@@ -97,6 +98,7 @@
   transform: translateY(-1px);
 }
 
+
 /* 品种网格（四个按钮） */
 .breed-grid {
   display: grid;
@@ -108,44 +110,18 @@
   letter-spacing: .3px;
 }
 
-/* 按钮 */
-/* .btn {
-  height: 42px;
-  padding: 0 16px;
-  border-radius: 10px;
-  border: 1px solid rgba(255,255,255,0.18);
-  background: rgba(255,255,255,0.08);
-  color: #fff;
-  cursor: pointer;
-  font-size: clamp(14px, 4vw, 16px);
-  font-weight: 600;
-  text-align: center;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.btn.primary {
-  background: linear-gradient(90deg, #49b, #5cd);
-  border: none;
-}
-.btn.primary:disabled { opacity: .7; cursor: not-allowed; }
-.btn.ghost {
-  background: transparent;
-  border: 1px solid rgba(255,255,255,0.25);
-} */
-
 /* 下部链接 */
-.auth-actions {
+.authActions {
   margin-top: 8px;
   display: flex;
   justify-content: space-between;
   gap: 8px;
 }
-.auth-actions a { color: #9df; text-decoration: none; }
-.auth-actions a:hover { text-decoration: underline; }
+.authActions a { color: #9df; text-decoration: none; }
+.authActions a:hover { text-decoration: underline; }
 
 /* 信息/错误 */
-.auth-error {
+.authError {
   margin: 6px 0;
   color: #ffb3b3;
   background: rgba(255,0,0,0.12);
@@ -154,7 +130,7 @@
   border-radius: 8px;
   font-size: 13px;
 }
-.auth-info {
+.authInfo {
   margin: 6px 0;
   color: #bfe3ff;
   background: rgba(0,110,255,0.14);
@@ -163,7 +139,7 @@
   border-radius: 8px;
   font-size: 13px;
 }
-.auth-ok {
+.authOk {
   margin: 6px 0;
   color: #b9ffcc;
   background: rgba(0,180,60,0.14);
@@ -174,30 +150,15 @@
 }
 
 /* 行内操作区 */
-.actions-row {
+.actionsRow {
   display: flex;
   gap: 10px;
   justify-content: flex-end;
   margin-top: 12px;
 }
 
-.list-picker {
+.listPicker {
   display: grid;
   gap: 12px;
 }
 
-/* 竖屏时再收紧一点（iPhone 上观感更好） */
-@media (orientation: portrait) {
-  .auth-card {
-    max-width: calc(100vw - 20vw);  /* 保留边距，避免紧贴边缘 */
-  }
-}
-/* Respect iOS safe areas (e.g., notch) */
-@supports (padding: max(0px)) {
-  .auth-page {
-    padding-left: max(12px, env(safe-area-inset-left));
-    padding-right: max(12px, env(safe-area-inset-right));
-    padding-top: max(12px, env(safe-area-inset-top));
-    padding-bottom: max(12px, env(safe-area-inset-bottom));
-  }
-}

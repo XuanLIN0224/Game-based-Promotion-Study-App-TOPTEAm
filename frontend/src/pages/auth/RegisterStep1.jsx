@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { api } from '../../api/client';
-import './Auth.css';
+import m from './Auth.module.css';
 const BASE = import.meta.env.BASE_URL || '/';
 
 function GroupPicker({ value, onChange }) {
@@ -53,32 +53,32 @@ export default function RegisterStep1() {
   };
 
   return (
-    <div className="auth-page">
-      <div className="auth-card">
+    <div className={`page ${m.authPage}`}>
+      <div className={m.authCard}>
         <h2>Create your account</h2>
-        <form className="auth-form" onSubmit={onSubmit}>
-          <div className="form-grid">
-            <div className="field">
+        <form className={m.authFrom} onSubmit={onSubmit}>
+          <div className={m.formGrid}>
+            <div className={m.field}>
               <label>Email</label>
-              <input className="auth-input" type="email" required maxLength={50}
+              <input className={m.authInput} type="email" required maxLength={50}
                      value={form.email} onChange={e=>onChange('email', e.target.value)} />
             </div>
-            <div className="field">
+            <div className={m.field}>
               <label>Username</label>
-              <input className="auth-input" required maxLength={50}
+              <input className={m.authInput} required maxLength={50}
                      value={form.username} onChange={e=>onChange('username', e.target.value)} />
             </div>
-            <div className="field">
+            <div className={m.field}>
               <label>Password</label>
-              <input className="auth-input" type={showPassword ? "text" : "password"}  required
+              <input className={m.authInput} type={showPassword ? "text" : "password"}  required
                      value={form.password} onChange={e=>onChange('password', e.target.value)} />
             </div>
-            <div className="field">
+            <div className={m.field}>
               <label>Confirm password</label>
-              <input className="auth-input" type={showPassword ? "text" : "password"}  required
+              <input className={m.authInput} type={showPassword ? "text" : "password"}  required
                      value={form.confirmPassword} onChange={e=>onChange('confirmPassword', e.target.value)} />
             </div>
-            <label className="remember-row">
+            <label className={m.rememberRow}>
               <input
                 type="checkbox"
                 checked={showPassword}
@@ -88,14 +88,14 @@ export default function RegisterStep1() {
             </label>
           </div>
 
-          <div className="block-label">Are you a dog person or a cat person?</div>
+          <div className={m.blockLabel}>Are you a dog person or a cat person?</div>
           <GroupPicker value={form.group} onChange={(g)=>onChange('group', g)} />
 
-          {err && <div className="auth-error">{err}</div>}
-          <button className="btn primary" disabled={busy}>{busy?'Next...':'Next'}</button>
+          {err && <div className={m.authError}>{err}</div>}
+          <button className="btn secondary" disabled={busy}>{busy?'Next...':'Next'}</button>
         </form>
 
-        <div className="auth-actions">
+        <div className={m.authActions}>
           <Link to="/login">Already have an account? Log in</Link>
         </div>
       </div>

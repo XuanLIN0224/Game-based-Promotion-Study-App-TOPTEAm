@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { api, setToken } from '../../api/client';
-import './Auth.css';
+import m from './Auth.module.css';
 
 export default function RegisterStep2() {
   const nav = useNavigate();
@@ -44,11 +44,11 @@ export default function RegisterStep2() {
   };
 
   return (
-    <div className="auth-page">
-      <div className="auth-card">
+    <div className={`page ${m.authPage}`}>
+      <div className={m.authCard}>
         <h2>Choose your {group === 'dog' ? 'puppy' : 'kitty'}</h2>
         <form onSubmit={onSubmit}>
-          <div className="list-picker">
+          <div className={m.listPicker}>
             {breeds.map(b=>(
               <button key={b._id} type="button"
                 className={`breed-card ${selected===b._id?'selected':''}`}
@@ -58,8 +58,8 @@ export default function RegisterStep2() {
               </button>
             ))}
           </div>
-          {err && <div className="auth-error">{err}</div>}
-          <div className="actions-row">
+          {err && <div className={m.authError}>{err}</div>}
+          <div className={m.actionsRow}>
             <button className="btn primary" disabled={busy}>
               {busy?'Creating...':'Create account'}
             </button>
