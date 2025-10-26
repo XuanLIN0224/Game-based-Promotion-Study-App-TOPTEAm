@@ -1,3 +1,10 @@
+/*
+  There are three main functions in the Scan page:
+   1. Scan a QR code through the camera
+   2. Upload a QR file
+   3. Update user's score (award attendance during lectures)
+*/
+
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 // A JS library that decodes QR codes from raw pixel data
@@ -83,7 +90,7 @@ export default function Scan() {
     }
   };
 
-  /** Method 1: Scan the QR code */
+  /** Function 1: Scan the QR code */
   // QR scanning effect (camera)--live scanning loop
   useEffect(() => {
     let isMounted = true;
@@ -149,7 +156,7 @@ export default function Scan() {
     };
   }, []);
 
-  /** Method 2: Upload the QR code file */
+  /** Function 2: Upload the QR code file */
   // Handle file upload
   const handleFileUpload = (e) => {
     // Triggered when the user selects a file

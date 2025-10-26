@@ -1,8 +1,9 @@
-/*There are three main functions in the Setting page:
- 1. Change username and email
- 2. Change password--basically the same process as resetting password
- 3. Log out and redirect to log-in page
- */
+/*
+   There are three main functions in the Setting page:
+    1. Change username and email
+    2. Change password--basically the same process as resetting password
+    3. Log out and redirect to log-in page
+*/
 
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";

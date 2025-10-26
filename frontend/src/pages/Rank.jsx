@@ -1,3 +1,11 @@
+/*
+  There are three main functions in the Rank page:
+   1. Fetch the top 20 percent of users in the system
+   2. Render leaders with correct numbering and images (of the corresponding user's breed's group and name)
+   3. Navigate back to the Home page by clicking the Home icon
+   4. Empty/error branches: no list rendered
+*/
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 //import "./Home.css";

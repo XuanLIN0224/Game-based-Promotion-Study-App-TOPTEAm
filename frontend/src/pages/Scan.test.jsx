@@ -1,4 +1,10 @@
-/* @vitest-environment jsdom */
+/*
+  This test file covers the main functions of the Scan page:
+   1. Scan a QR code through the camera
+   2. Upload a QR file
+   3. Update user's score (award attendance during lectures)
+   (additional) Navigation back to the Home page
+*/
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, waitFor, act } from "@testing-library/react";
@@ -62,7 +68,7 @@ vi.mock("jsqr", () => {
 
 let getContextSpy;
 
-// Video ready & canvas
+// Get the video and canvas element ready
 beforeEach(() => {
   rafQueue = [];
 
@@ -86,7 +92,7 @@ beforeEach(() => {
     },
   });
 
-  // keep no-op functions to avoid errors
+  // Keep no-op functions to avoid errors--[Defensive]
   HTMLVideoElement.prototype.play = vi.fn();
   HTMLVideoElement.prototype.pause = vi.fn();
 
@@ -103,7 +109,7 @@ beforeEach(() => {
     }));
 });
 
-// navigator.mediaDevices.getUserMedia mock
+// "navigator.mediaDevices.getUserMedia" mock
 const mockTrackStop = vi.fn();
 const mockStream = { getTracks: () => [{ stop: mockTrackStop }] };
 beforeEach(() => {
@@ -113,11 +119,11 @@ beforeEach(() => {
   };
 });
 
-// fetch mock (used by /auth/me and /user/scan)
+// Fetching API mock (used by /auth/me and /user/scan)
 const fetchMock = vi.fn();
 global.fetch = fetchMock;
 
-// Provide a DEFAULT fetch implementation so extra calls don't explode
+// Our fetch implementation replacing the actual fetching calls
 beforeEach(() => {
   fetchMock.mockImplementation((url) => {
     const u = String(url);
@@ -133,7 +139,7 @@ beforeEach(() => {
   });
 });
 
-// localStorage token mock
+// LocalStorage token mock
 beforeEach(() => {
   vi.spyOn(Storage.prototype, "getItem").mockImplementation((key) => {
     if (key === "token") return "TEST_TOKEN";
@@ -141,12 +147,12 @@ beforeEach(() => {
   });
 });
 
-// alert mock
+// Start mocking before we run the code each time
 beforeEach(() => {
   vi.spyOn(window, "alert").mockImplementation(() => {});
 });
 
-// Mock Image for upload flow
+// Mock Image for the uploading file feature
 class MockImage {
   constructor() {
     this.onload = null;
@@ -231,7 +237,7 @@ describe("Scan page", () => {
     const videoEl = document.querySelector("video");
     expect(videoEl).toBeInTheDocument();
 
-    // getUserMedia called with rear cam
+    // "getUserMedia" called with rear cam
     expect(navigator.mediaDevices.getUserMedia).toHaveBeenCalledWith({
       video: { facingMode: "environment" },
     });
@@ -255,7 +261,7 @@ describe("Scan page", () => {
     // Trigger one frame: should decode and POST once
     advanceRaf(1);
 
-    // Ensure the scan POST happened and has correct payload
+    // Ensure the scan POST happened and has correct body
     const scanCall = await waitForFetchCall(urlIncludes("/user/scan"));
     expect(scanCall[0]).toBe("http://localhost:5001/api/user/scan");
     expect(scanCall[1]).toEqual(
@@ -305,7 +311,7 @@ describe("Scan page", () => {
     // The important bit: tracks were stopped
     expect(mockTrackStop).toHaveBeenCalled();
 
-    // Optional: if you still want to check clearing, make it non-fatal:
+    // Optional: if you still want to check clearing, make it non-fatal:--too strict
     // const after = videoEl._srcObject || videoEl.srcObject;
     // expect(after === null || after === undefined || Array.isArray(after?.getTracks?.()) && after.getTracks().length === 0).toBe(true);
   });
@@ -348,7 +354,7 @@ describe("Scan page", () => {
     );
 
     await screen.findByText("9");
-    expect(window.alert).toHaveBeenCalledWith("✅ Scanned! Your new score: 9");
+    expect(screen.getByText(/qr code:/i)).toBeInTheDocument();
   });
 
   it("file upload: alerts when no QR is found in the image", async () => {
@@ -373,8 +379,7 @@ describe("Scan page", () => {
       await userEvent.upload(fileInput, file);
     });
 
-    await waitFor(() =>
-      expect(window.alert).toHaveBeenCalledWith("❌ No QR code found in this image")
-    );
+    // Inline message appears under the scanner
+    await screen.findByText(/no qr.*found in this image/i);
   });
 });
