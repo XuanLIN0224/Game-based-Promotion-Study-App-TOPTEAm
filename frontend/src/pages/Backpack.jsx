@@ -11,7 +11,7 @@ const LABELS = {
   lollies_voucher: { title: "Lollies Voucher", hint: "Claim in workshop" },
   // if you later store pet_food in inventory instead of a counter:
   pet_food: { title: "Pet Food", hint: "Feed your pet" },
-  quiz_sooster_today: { title: "Quiz Booster for today", hint: "double quiz score for today." },
+  quiz_booster_today: { title: "Quiz Booster for today", hint: "double quiz score for today." },
 };
 
 export default function Backpack () {

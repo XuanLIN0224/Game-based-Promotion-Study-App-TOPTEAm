@@ -1,6 +1,6 @@
 import React from "react";
 import { it, expect, describe, vi, beforeEach } from "vitest";
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { render, screen, waitFor, within, cleanup } from "@testing-library/react";
 import userEvent from "@testing-library/user-event"; // use to simulate events (e.g. click)
 import Backpack from "./Backpack.jsx";
 
@@ -67,7 +67,7 @@ describe("Quiz Booster for today", () => {
     //const useItemButton = await screen.findByTestId("use-item-button");
     const boosterTitleEl = screen.getByText("Quiz Booster for today");
     const boosterRow = boosterTitleEl.closest("li");
-    const useItemButton = await within(boosterRow).findByTestId("use-item-button");
+    const useItemButton = within(boosterRow).getByRole("button", { name: /use/i });
 
     const user = userEvent.setup();
     await user.click(useItemButton);
@@ -83,9 +83,10 @@ describe("Quiz Booster for today", () => {
 
   it("shows lollies_voucher (qty=2) with Use button", async () => {
      const utils = render(<Backpack />);
+     cleanup();
   
+    // set inventory before render, so useEffect loads correct data
     inventoryState = [{ key: "lollies_voucher", qty: 2 }];
-    utils.unmount();
     render(<Backpack />);
   
     await screen.findByText("Backpack");
@@ -93,7 +94,7 @@ describe("Quiz Booster for today", () => {
   
     const voucherRow = screen.getByText("Lollies Voucher").closest("li");
     expect(voucherRow.textContent).toMatch(/Qty:\s*2/i);
-    const voucherUseBtn = within(voucherRow).getByTestId("use-item-button");
+    const voucherUseBtn = within(voucherRow).getByRole("button", { name: /use/i });
     expect(voucherUseBtn).toBeInTheDocument();
     expect(voucherUseBtn).not.toBeDisabled();
   });
