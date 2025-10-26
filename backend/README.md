@@ -6,54 +6,48 @@ Handles authentication, registration, breeds, scores, leaderboards, etc.
 ## Project Structure
 ```
 backend/
-  .env
-  package.json
-  src/
-    app.js
-    middleware/
-      auth.js
-    models/
-	  Accessories.js
-      Breed.js
-      CouseSettings.js
-	  DailyUserQuizState.js
-      Event.js
-      PasswordResetCode.js
-	  Purchase.js
-	  QRcode.js
-	  QuizWeekConfig.js
-      User.js
-	  
-    routes/
-	  accessories.js
-      auth.js
-      breeds.js
-	  event.js
-      game.js
-	  inventory.js
-	  quiz.js
-	  rank.js
-	  scan.js
-	  setting.js
-	  shop.js
-	  teacher.js
-	  teacherEvent.js
-	  user.js
-    utils/
-      email.js
-	  genai.js
+├── .env                              # Environment variables (Mongo URI, JWT secret, etc.)
+├── package.json                      # Node.js dependencies and scripts
+│
+├── src/
+│   ├── app.js                        # Main server entry point (sets up Express, routes, DB, CORS)
+│   │
+│   ├── middleware/
+│   │   └── auth.js                   # Authentication middleware (JWT verification, user attach)
+│   │
+│   ├── models/                       # MongoDB schemas (Mongoose)
+│   │   ├── Accessories.js            # Stores user accessory items & equip state
+│   │   ├── Breed.js                  # Defines cat/dog breeds
+│   │   ├── CourseSettings.js         # Stores global course settings (start date, auto-gen, etc.)
+│   │   ├── DailyUserQuizState.js     # Tracks daily quiz attempts per user
+│   │   ├── Event.js                  # Cats vs Dogs event model
+│   │   ├── PasswordResetCode.js      # Stores password reset codes
+│   │   ├── Purchase.js               # Records user shop purchases per week
+│   │   ├── QRcode.js                 # Teacher-generated QR codes (attendance/reward)
+│   │   ├── QuizWeekConfig.js         # Stores per-week quiz metadata and uploaded PDF text
+│   │   └── User.js                   # Main user schema (auth, score, group, inventory)
+│   │
+│   ├── routes/                       # API endpoints (mounted under /api/)
+│   │   ├── accessories.js            # Customise page (list, buy, equip accessories)
+│   │   ├── auth.js                   # Register, login, password reset, profile fetch
+│   │   ├── breeds.js                 # Fetch or seed cat/dog breed data
+│   │   ├── event.js                  # Teacher-only event management (CRUD + stats)
+│   │   ├── game.js                   # Active event data for students (Cats vs Dogs progress)
+│   │   ├── inventory.js              # Manage & use items in user inventory
+│   │   ├── quiz.js                   # Daily/weekly student quiz logic (attempt, archive)
+│   │   ├── rank.js                   # Leaderboard listing and equipped accessories
+│   │   ├── scan.js                   # QR code scanning for reward/attendance (legacy)
+│   │   ├── setting.js                # Profile & password updates
+│   │   ├── shop.js                   # Shop catalog & purchase logic
+│   │   ├── teacher.js                # Teacher tools (upload PDFs, generate quizzes)
+│   │   ├── teacherEvent.js           # Teacher event configuration and team stats
+│   │   └── user.js                   # User-level actions (scan QR, update avatar, etc.)
+│   │
+│   └── utils/                        # Helper utilities
+│       ├── email.js                  # Sends password reset emails
+│       └── genai.js                  # Quiz generation using LLM-based content generation
 ```
 
-## package installation
-```ruby
-# install dependencies
-npm install
-```
-
-## running the server
-```ruby
-npm run start
-```
 
 ## Database Models
 ```
@@ -297,7 +291,7 @@ POST  /api/user/scan      # F2: scan QR to record attendance/reward; supports DB
 ```
 
 
-## Backend File Overview
+## Route Overview
 src/app.js (Main entrypoint)
 ```
 	•	Loads .env.
@@ -419,3 +413,39 @@ user.js
 	• PATCH /api/user/me → Updates the authenticated user’s profile. Reads the user token and body { username?, clothingConfig? } (validated with zod); saves changes and returns the updated lightweight user info.
 	• POST /api/user/scan → Processes a QR scan for attendance/reward. Reads the user token and { code }; first checks DB-backed QR (validFrom/validUntil window, double-scan prevention, rewards +20), otherwise falls back to legacy "reward:QR-#" codes (single-use, rewards +2); returns new score and metadata.
 ```
+
+
+## Code Usage
+
+### run the code
+```ruby
+cd backend
+node src/app.js
+```
+
+### install
+```ruby
+npm install express	        # Web framework for handling routes and middleware
+npm install mongoose	    # MongoDB object modeling for Node.js
+npm install jsonwebtoken	# Token-based authentication (JWT)
+npm install bcrypt	        # Password hashing for secure storage
+npm install zod	            # Data validation and schema checking
+npm install multer	        # Handle file uploads (used for uploading quiz PDFs)
+npm install pdf-parse	    # Extract text content from uploaded PDF files
+npm install qrcode	        # Generate QR code images for attendance or events
+npm install dotenv	        # Load environment variables from a .env file
+npm install cors	        # Enable Cross-Origin Resource Sharing (connect frontend ↔ backend)
+```
+
+### environment
+```ruby
+PORT=5001                                                                                    # Port number for Express server
+MONGO_URI=mongodb+srv://<username>:<password>@clusterdev.xmbbcsi.mongodb.net/?retryWrites=true&w=majority
+JWT_SECRET=replace_me_with_a_strong_secret                                                   # Secret key for JWT authentication
+GOOGLE_GENERATIVE_AI_API_KEY=<your-google-api-key>                                           # Gemini API for quiz generation
+POSTMARK_API_KEY=<your-postmark-api-key>                                                     # Email service for password reset
+EMAIL_FROM=<your-email-address>                                                              # Sender email for notifications
+```
+
+## Liscence
+MIT License © 2025 TOPTEAm
