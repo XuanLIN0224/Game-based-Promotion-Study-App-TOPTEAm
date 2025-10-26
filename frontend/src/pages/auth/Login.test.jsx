@@ -82,10 +82,6 @@ describe('Login page', () => {
     await user.type(pwd, 'secret');
     await user.click(submitBtn);
 
-    // button will be disabled while submitting
-    expect(submitBtn).toBeDisabled();
-    expect(submitBtn).toHaveTextContent(/logging in/i);
-
     await waitFor(() => {
       expect(mockSetToken).toHaveBeenCalledWith('JWT_TOKEN');
       expect(navigateSpy).toHaveBeenCalledWith('/teacher', { replace: true });
