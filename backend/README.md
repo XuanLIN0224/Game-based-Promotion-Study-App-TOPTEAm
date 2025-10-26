@@ -414,7 +414,8 @@ user.js
 	• POST /api/user/scan → Processes a QR scan for attendance/reward. Reads the user token and { code }; first checks DB-backed QR (validFrom/validUntil window, double-scan prevention, rewards +20), otherwise falls back to legacy "reward:QR-#" codes (single-use, rewards +2); returns new score and metadata.
 ```
 
-/utils/email.js
+src/utiles
+email.js
 ```
 	• Uses the Postmark API client to send transactional emails.
 	• Reads sender and API credentials from environment variables:
@@ -425,7 +426,8 @@ user.js
        → Includes expiry information (30-minute validity) in the message body.
 ```
 
-/utiles/genai.js
+genai.js
+```
 	• Uses Gemini models ('gemini-2.5-flash' → fallback 'gemini-2.0-flash').
 	• Reads the API key from environment variable GOOGLE_GENERATIVE_AI_API_KEY.
 	• generateQuizFromContext({ pdfText, notes, title, numQuestions, difficulty })
