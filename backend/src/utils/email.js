@@ -1,3 +1,15 @@
+/**
+ * Handles email delivery for password reset verification via Postmark.
+ *
+ * Uses the Postmark API client to send transactional emails.
+ * Reads sender and API credentials from environment variables:
+ *   - POSTMARK_API_KEY
+ *   - EMAIL_FROM
+ * sendResetCodeEmail(to, code)
+ *   -- Sends a 6-digit password reset code to the specified email.
+ *   -- Includes expiry information (30-minute validity) in the message body.
+ */
+
 const postmark = require('postmark');
 
 const client = new postmark.ServerClient(process.env.POSTMARK_API_KEY);

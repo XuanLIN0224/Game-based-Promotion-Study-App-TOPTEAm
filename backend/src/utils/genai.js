@@ -1,9 +1,19 @@
 'use strict';
 /**
- * ✅ Gemini Quiz Generator (using @google/genai v1)
- * Works with Gemini 2.x (gemini-2.0-flash / gemini-2.5-flash).
+ * Generates multiple-choice quiz questions using Google Gemini (via @google/genai).
+ *
+ * Uses Gemini models ('gemini-2.5-flash' → fallback 'gemini-2.0-flash').
+ * Reads the API key from environment variable GOOGLE_GENERATIVE_AI_API_KEY.
+ * generateQuizFromContext({ pdfText, notes, title, numQuestions, difficulty })
+ *   -- Builds a JSON-only prompt and generates quiz questions with 4 choices each.
+ *   -- Parses and validates the model’s response into a structured format:
+ *        { questions: [{ stem, choices, answerIndex }] }.
+ * Helper functions:
+ *   – extractText(result): Safely retrieves text output from varied Gemini responses.
+ *   – buildPrompt(opts): Constructs the AI prompt with course context and notes.
+ *   – truncateText(text, max): Trims long text before sending to the model.
+ *   – safeParseJSON(text): Robust JSON parser with fallback.
  */
-
 
 const { GoogleGenAI } = require('@google/genai');
 
