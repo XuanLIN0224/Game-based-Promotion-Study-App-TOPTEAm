@@ -11,6 +11,13 @@ function addDays(dateStr, days){
   d.setDate(d.getDate() + days);
   return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
 }
+// 依据 breakWeek（1..12）将 break 之后的所有周顺延一周
+function addDaysWithBreak(startDateStr, weekIndex, dayIndex, breakWeek) {
+  if (!startDateStr) return '';
+  const extraWeeks = (Number.isInteger(breakWeek) && breakWeek >= 1 && breakWeek <= 12 && weekIndex > breakWeek) ? 1 : 0;
+  const days = ((weekIndex - 1 + extraWeeks) * 7) + dayIndex;
+  return addDays(startDateStr, days);
+}
 
 export default function Teacher() {
   const nav = useNavigate();
@@ -22,12 +29,14 @@ export default function Teacher() {
   const [autoGen, setAutoGen] = useState(false);
   const [difficultyByWeekDay, setDifficultyByWeekDay] = useState({}); // {1:{0:'medium',1:'medium',2:'medium',3:'medium',4:'medium'}}
   const [selectedDayByWeek, setSelectedDayByWeek] = useState({}); // {1:0, 2:0, ...} 0..4 -> Mon..Fri
+  const [breakWeek, setBreakWeek] = useState(null); // 1..12 or null
 
   async function load() {
     const cfg = await api('/teacher/quiz-config');
     setStartDate(cfg.startDate || '');
     setWeeks(cfg.weeks || []);
     setAutoGen(!!cfg.autoGenerate);
+    setBreakWeek(Number.isInteger(cfg.breakWeek) ? cfg.breakWeek : null);
     const m = {};
     (cfg.weeks || []).forEach(w => m[w.weekIndex] = { title: w.title || '', notes: w.notes || '' });
     setMeta(m);
@@ -58,6 +67,18 @@ export default function Teacher() {
       setAutoGen(!!r.autoGenerate);
       setMsg(`Auto-generate ${r.autoGenerate ? 'enabled' : 'disabled'}.`);
     } catch (e) { setMsg(e.message); }
+    finally { setBusy(false); }
+  }
+
+  async function saveBreakWeek(next) {
+    setBusy(true); setMsg('');
+    try {
+      const r = await api('/teacher/quiz-config/break-week', { method:'PATCH', body:{ breakWeek: next } });
+      setBreakWeek(Number.isInteger(r.breakWeek) ? r.breakWeek : null);
+      setMsg(r.breakWeek ? `Break week set to Week ${r.breakWeek}` : 'Break week cleared');
+      // 🔄 Immediately reload to refresh scheduled Mondays
+      await load();
+    } catch(e) { setMsg(e.message); }
     finally { setBusy(false); }
   }
 
@@ -97,7 +118,7 @@ export default function Teacher() {
 
       // If startDate is configured, compute the concrete date for this week/day
       // startDate is the Monday of week 1 (as used by backend weekIndexForDate)
-      const date = startDate ? addDays(startDate, (weekIndex-1)*7 + dayIndex) : undefined;
+      const date = startDate ? addDaysWithBreak(startDate, weekIndex, dayIndex, breakWeek) : undefined;
 
       const r = await api(`/teacher/quiz-config/${weekIndex}/generate`, {
         method:'POST',
@@ -116,7 +137,7 @@ export default function Teacher() {
         method:'POST',
         body:{ mode:'week', difficulty:'medium', numQuestions:5 }
       });
-      setMsg(`Generated week ${weekIndex} quizzes`);
+      setMsg(`Generated week ${weekIndex} quizzes (Monday: ${r?.date || (startDate ? addDaysWithBreak(startDate, weekIndex, 0, breakWeek) : 'N/A')})`);
     } catch (e) { setMsg(e.message); }
     finally { setBusy(false); }
   }
@@ -151,15 +172,49 @@ export default function Teacher() {
           <span style={{opacity:0.8}}>Generate daily quiz automatically based on Start Date and uploaded PDFs</span>
         </div>
 
+        <div className={s.teacherRow} style={{display:'flex', alignItems:'center', gap:10, marginBottom:16}}>
+          <label><b>Mid-semester break week:</b></label>
+          <select
+            value={breakWeek ?? ''}
+            onChange={e => {
+              const v = e.target.value === '' ? null : Number(e.target.value);
+              // 💡 Optimistic UI update so the Monday dates update immediately
+              setBreakWeek(v);
+              saveBreakWeek(v);
+            }}
+            className={s.teacherField}
+            style={{height:34, borderRadius:8, padding:'0 8px', width:180}}
+          >
+            <option value=''>None</option>
+            {Array.from({length:12}, (_,i)=>i+1).map(w => (
+              <option key={w} value={w}>Week {w}</option>
+            ))}
+          </select>
+          <span style={{opacity:0.8}}>Weeks after this will shift by +1 week for generation.</span>
+        </div>
+
         <div style={{display:'grid', gap:12}}>
           {[...Array(12)].map((_,i)=> {
             const weekIdx = i+1;
             const w = weeks.find(x => x.weekIndex === weekIdx) || {};
             const m = meta[weekIdx] || { title:'', notes:'' };
+            const shifted = Number.isInteger(breakWeek) && weekIdx > breakWeek;
+            const monday = startDate ? addDaysWithBreak(startDate, weekIdx, 0, breakWeek) : null;
             return (
               <div key={weekIdx} className={s.teacherCard} style={{border:'1px solid rgba(255,255,255,0.2)', borderRadius:12, padding:12, background:'rgba(255,255,255,0.06)'}}>
                 <div className={s.teacherCard__head} style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:8}}>
-                  <div><b>Week {weekIdx}</b> {w.pdfName ? <span style={{opacity:0.8}}> · PDF: {w.pdfName}</span> : <span style={{opacity:0.6}}> · No PDF</span>}</div>
+                  <div>
+                    <b>Week {weekIdx}</b> {w.pdfName ? <span style={{opacity:0.8}}> · PDF: {w.pdfName}</span> : <span style={{opacity:0.6}}> · No PDF</span>}
+                    <div style={{fontSize:12, opacity:0.8}}>
+                      {startDate ? (
+                        <>
+                          Scheduled Monday: {monday} {shifted ? <span style={{opacity:0.8}}> (shifted +1w due to break)</span> : null}
+                        </>
+                      ) : (
+                        <>Scheduled Monday: <span style={{opacity:0.6}}>Set Start Date</span></>
+                      )}
+                    </div>
+                  </div>
                   <div style={{display:'flex', gap:8, flexWrap:'wrap', alignItems:'center'}}>
                     <div style={{ display:'flex', gap:8, alignItems:'center', flexWrap:'wrap' }}>
                       {/* Weekday selector */}

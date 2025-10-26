@@ -18,7 +18,6 @@ const QRCodeSchema = new mongoose.Schema({
 });
 
 // Indexes
-QRCodeSchema.index({ code: 1 }, { unique: true });
 QRCodeSchema.index({ sessionIndex: 1, validFrom: 1 });
 
 module.exports = mongoose.model('QRCode', QRCodeSchema);

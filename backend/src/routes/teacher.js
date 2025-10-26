@@ -55,6 +55,23 @@ function dateForWeekDay(startDateStr, weekIndex, dayIndex /* 0..4 => Mon..Fri */
   return `${y}-${m}-${d}`;
 }
 
+// 计算某周某天的具体日期（支持 mid-semester break 将后续周整体顺延 1 周）
+function dateForWeekDayWithBreak(startDateStr, weekIndex, dayIndex /* 0..4 */, breakWeek) {
+  if (!startDateStr) return null;
+  if (!Number.isInteger(weekIndex) || weekIndex < 1 || weekIndex > 12) return null;
+  if (!Number.isInteger(dayIndex) || dayIndex < 0 || dayIndex > 4) return null;
+  const base = new Date(startDateStr + 'T00:00:00');
+  let extraWeeks = 0;
+  if (Number.isInteger(breakWeek) && breakWeek >= 1 && breakWeek <= 12) {
+    if (weekIndex > breakWeek) extraWeeks = 1; // break 为 1 周，之后的周整体 +1 周
+  }
+  base.setDate(base.getDate() + ((weekIndex - 1 + extraWeeks) * 7) + dayIndex);
+  const y = base.getFullYear();
+  const m = String(base.getMonth() + 1).padStart(2, '0');
+  const d = String(base.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
 // ===== GET current config =====
 router.get('/quiz-config', auth, requireTeacher, async (req, res) => {
   const [settings, weeks] = await Promise.all([
@@ -64,6 +81,7 @@ router.get('/quiz-config', auth, requireTeacher, async (req, res) => {
   res.json({
     startDate: settings?.startDate || null,
     autoGenerate: settings?.autoGenerate ?? false,
+    breakWeek: Number.isInteger(settings?.breakWeek) ? settings.breakWeek : null,
     weeks
   });
 });
@@ -118,6 +136,25 @@ router.patch('/quiz-config/auto-generate', auth, requireTeacher, async (req, res
     { new: true, upsert: true }
   );
   res.json({ autoGenerate: !!doc.autoGenerate });
+});
+
+// ===== Set/Clear mid-semester break week =====
+router.patch('/quiz-config/break-week', auth, requireTeacher, async (req, res) => {
+  let { breakWeek } = req.body || {};
+  if (breakWeek === null || breakWeek === undefined || breakWeek === '' ) {
+    breakWeek = null;
+  } else {
+    breakWeek = Number(breakWeek);
+    if (!Number.isInteger(breakWeek) || breakWeek < 1 || breakWeek > 12) {
+      return res.status(400).json({ message: 'breakWeek must be 1..12 or null' });
+    }
+  }
+  const doc = await CourseSettings.findOneAndUpdate(
+    { key: 'course' },
+    { $set: { breakWeek } },
+    { new: true, upsert: true }
+  );
+  res.json({ breakWeek: doc.breakWeek ?? null });
 });
 
 // ===== Upload/replace PDF for a week =====
@@ -199,6 +236,7 @@ router.post('/quiz-config/:weekIndex/generate', auth, requireTeacher, async (req
   // 读取课程设置以便按周/按天集计算具体日期
   const settings = await CourseSettings.findOne({ key: 'course' });
   const startDateStr = settings?.startDate || null;
+  const breakWeek = Number.isInteger(settings?.breakWeek) ? settings.breakWeek : null;
 
   // —— 模式判定 ——
   let effectiveMode = mode;
@@ -236,7 +274,7 @@ router.post('/quiz-config/:weekIndex/generate', auth, requireTeacher, async (req
       return res.status(400).json({ message: 'Start Date not configured. Please set /teacher/quiz-config startDate first.' });
     }
 
-        // WEEK mode: generate once, only upload to Monday (first day of the week)
+    // WEEK mode: generate once, only upload to Monday (first day of the week)
     if (effectiveMode === 'week') {
       const lvl = normLevel(difficulty);
 
@@ -249,8 +287,8 @@ router.post('/quiz-config/:weekIndex/generate', auth, requireTeacher, async (req
         difficulty: lvl,
       });
 
-      // compute Monday date of that week
-      const mondayDate = dateForWeekDay(startDateStr, weekIndex, 0);
+      // compute Monday date of that week (with break)
+      const mondayDate = dateForWeekDayWithBreak(startDateStr, weekIndex, 0, breakWeek);
       if (!mondayDate) {
         return res.status(400).json({ message: 'Invalid Monday date for week' });
       }
@@ -283,7 +321,7 @@ router.post('/quiz-config/:weekIndex/generate', auth, requireTeacher, async (req
 
     const results = [];
     for (const dIdx of dayIndices) {
-      const dayDate = dateForWeekDay(startDateStr, weekIndex, dIdx);
+      const dayDate = dateForWeekDayWithBreak(startDateStr, weekIndex, dIdx, breakWeek);
       if (!dayDate) continue;
 
       const lvl = normLevel(difficulties?.[dIdx] || difficulty);
