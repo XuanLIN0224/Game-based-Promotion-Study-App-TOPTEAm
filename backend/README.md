@@ -291,7 +291,7 @@ POST  /api/user/scan      # F2: scan QR to record attendance/reward; supports DB
 ```
 
 
-## Route Overview
+## File Overview
 src/app.js (Main entrypoint)
 ```
 	•	Loads .env.
@@ -412,6 +412,25 @@ user.js
 ```
 	• PATCH /api/user/me → Updates the authenticated user’s profile. Reads the user token and body { username?, clothingConfig? } (validated with zod); saves changes and returns the updated lightweight user info.
 	• POST /api/user/scan → Processes a QR scan for attendance/reward. Reads the user token and { code }; first checks DB-backed QR (validFrom/validUntil window, double-scan prevention, rewards +20), otherwise falls back to legacy "reward:QR-#" codes (single-use, rewards +2); returns new score and metadata.
+```
+
+/utils/email.js
+```
+	• Uses the Postmark API client to send transactional emails.
+	• Reads sender and API credentials from environment variables:
+       - POSTMARK_API_KEY
+       - EMAIL_FROM
+ 	• sendResetCodeEmail(to, code)
+       → Sends a 6-digit password reset code to the specified email.
+       → Includes expiry information (30-minute validity) in the message body.
+```
+
+/utiles/genai.js
+	• Uses Gemini models ('gemini-2.5-flash' → fallback 'gemini-2.0-flash').
+	• Reads the API key from environment variable GOOGLE_GENERATIVE_AI_API_KEY.
+	• generateQuizFromContext({ pdfText, notes, title, numQuestions, difficulty })
+       → Builds a JSON-only prompt and generates quiz questions with 4 choices each.
+       → Parses and validates the model’s response into a structured format: { questions: [{ stem, choices, answerIndex }] }.
 ```
 
 
