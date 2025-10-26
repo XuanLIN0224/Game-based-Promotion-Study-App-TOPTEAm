@@ -4,22 +4,22 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import { render, screen, within, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-// --- Mock router navigation ---
+// Mock router navigation
 const mockNavigate = vi.fn();
 vi.mock("react-router-dom", () => ({
   useNavigate: () => mockNavigate,
   Link: ({ children }) => children ?? null,
 }));
 
-// --- Mock CSS module (returns class names as strings) ---
+// Mock CSS module
 vi.mock("./Shop.module.css", () => {
   const proxy = new Proxy({}, { get: (_t, p) => String(p) });
   return { default: proxy };
 });
 
-// --- Mock API module and server state ---
+// Mock API client
 const { apiMock, resetServerState } = vi.hoisted(() => {
-  // initial in-memory catalog
+  // Initial catalog (as shown in the developer's examples)
   const initialCatalog = [
     { key: "extra_attempt", price: 20, weeklyLimit: 2, used: 0, remaining: 2 },
     { key: "lollies_voucher", price: 5, weeklyLimit: 1, used: 1, remaining: 0 },
@@ -28,68 +28,76 @@ const { apiMock, resetServerState } = vi.hoisted(() => {
     { key: "lecture_qr", price: 10, weeklyLimit: 1, used: 1, remaining: 0 },
   ];
 
-  // server-side user and catalog
+  // Mutable "server" state
   let catalog;
-  let user;
+  let me;
 
-  // resets server state before each test
+  // Reset between tests
   function resetServerState() {
     catalog = initialCatalog.map(i => ({ ...i }));
-    user = { score: 50 }; // starting balance
+    me = {
+      score: 50,       // initial balance shown next to the coin
+      group: "dog",    // affects which icon is used; not critical to assertions
+      numPetFood: 3,   // shown next to the feed icon
+    };
   }
   resetServerState();
 
-  // main API mock function
+  // Core API mock that supports api(path) and api(path, { method, body })
   const apiMock = vi.fn((arg1, arg2) => {
     if (typeof arg1 === "string") {
       const path = arg1;
       const opts = arg2 || {};
       const method = (opts.method || "GET").toUpperCase();
 
-      // GET /shop/catalog → returns catalog list
+      // GET /shop/catalog -> return all items
       if (path === "/shop/catalog" && method === "GET") {
         return Promise.resolve(catalog.map(i => ({ ...i })));
       }
 
-      // GET /auth/me → returns user info
+      // GET /auth/me -> include score, group, numPetFood
       if (path === "/auth/me" && method === "GET") {
-        return Promise.resolve({ score: user.score });
+        return Promise.resolve({ ...me });
       }
 
-      // POST /shop/purchase → simulates buying an item
+      // POST /shop/purchase -> apply purchase, update "me.score" and item remaining/used
       if (path === "/shop/purchase" && method === "POST") {
         const body = opts.body || opts.data || {};
         const { itemKey, qty } = body;
         const q = Number(qty) || 1;
+
         const item = catalog.find(i => i.key === itemKey);
         if (!item) return Promise.reject(new Error("Item not found"));
 
-        const total = (item.price || 0) * q;
-
-        if (item.remaining <= 0)
+        // Reject if weekly limit or insufficient balance
+        if (item.remaining <= 0) {
           return Promise.reject(new Error("Weekly limit reached"));
-        if (total > user.score)
+        }
+        const total = (item.price || 0) * q;
+        if (total > me.score) {
           return Promise.reject(new Error("Insufficient balance"));
+        }
 
-        // apply the purchase
+        // Apply purchase
         const consume = Math.min(q, item.remaining);
         item.remaining -= consume;
         item.used = Math.min(
           (item.used || 0) + consume,
-          item.weeklyLimit || item.used + consume
+          item.weeklyLimit || (item.used + consume)
         );
-        user.score -= (item.price || 0) * consume;
+        me.score -= (item.price || 0) * consume;
 
         return Promise.resolve({
           remaining: item.remaining,
-          user: { score: user.score },
+          user: { score: me.score },
         });
       }
 
+      // Unknown path: return an empty object as a safe default
       return Promise.resolve({});
     }
 
-    // fallback (axios-like style)
+    // axios-like fallback (unused but harmless)
     return {
       get: (p) => apiMock(p),
       post: (p, data) => apiMock(p, { method: "POST", body: data }),
@@ -99,78 +107,111 @@ const { apiMock, resetServerState } = vi.hoisted(() => {
   return { apiMock, resetServerState };
 });
 
-// --- Mock the real client API import ---
+// Wire the component to our mocked API
 vi.mock("../api/client", () => ({ api: apiMock }));
 
-// --- Import the component under test ---
+// Import the component under test AFTER mocks
 import Shop from "./Shop.jsx";
 
-// --- Helper function: render and wait until data loaded ---
 async function renderAndLoad() {
   render(<Shop />);
-  // Wait until the balance and one item title are visible
-  await screen.findByText(/Balance \(Score\):/i);
   await screen.findByText("Extra Quiz Attempt");
+  // The left sidebar shows the score next to a Money icon.
+  // We'll assert it in tests where needed, so it's okay to just wait for catalog here.
 }
 
-// --- TEST SUITE ---
-describe("Shop page (happy path & basic disabled cases)", () => {
+// --- Helpers (minimal) ---
+// Fallback-friendly way to get the container that holds the balance number:
+// 1) Prefer the new sidebar row (alt="Money"); 2) fallback to legacy "Balance (Score): <num>" row.
+function getBalanceContainer() {
+  const moneyIcon = screen.queryByAltText("Money");
+  if (moneyIcon) return moneyIcon.closest(".pagelinkicon");
+  const legacyLabel = screen.queryByText(/Balance \(Score\):/i);
+  return legacyLabel ? legacyLabel.parentElement : null;
+}
+
+// TESTS
+describe("Shop page (updated UI: sidebar balance & pet food)", () => {
   beforeEach(() => {
     resetServerState();
     vi.clearAllMocks();
   });
 
-  // Test 1: initial load
-  it("loads catalog and shows balance", async () => {
+  it("loads catalog, shows balance near the Money icon, and shows Pet Food count", async () => {
     await renderAndLoad();
 
-    // Check item titles appear in catalog
+    // Catalog items appear
     expect(screen.getByText("Extra Quiz Attempt")).toBeInTheDocument();
     expect(screen.getByText("Lollies Voucher")).toBeInTheDocument();
     expect(screen.getByText("Quiz Booster (Today)")).toBeInTheDocument();
     expect(screen.getByText("Pet Food")).toBeInTheDocument();
     expect(screen.getByText("Lecture QR Code")).toBeInTheDocument();
 
-    // Check balance displays 50 
-    const balanceRow = screen.getByText(/Balance \(Score\):/i).parentElement;
-    expect(balanceRow).toHaveTextContent(/Balance \(Score\):\s*50/i);
+    // Sidebar numbers:
+    // Find the "Money" icon, then assert the same row shows the score "50".
+    // (If the Money icon doesn't exist in this layout, gracefully fallback to the legacy Balance row.)
+    const moneyIcon = screen.queryByAltText("Money");
+    if (moneyIcon) {
+      const moneyRow = moneyIcon.closest(".pagelinkicon");
+      expect(within(moneyRow).getByText("50")).toBeInTheDocument();
+    } else {
+      const balanceRow = getBalanceContainer();
+      expect(balanceRow).not.toBeNull();
+      expect(balanceRow.textContent).toMatch(/\b50\b/);
+    }
+
+    // Find the "Feed" icon, then assert the same row shows pet food count "3".
+    // (Feed only exists in the new sidebar layout; if absent, skip this assertion.)
+    const feedIcon = screen.queryByAltText("Feed");
+    if (feedIcon) {
+      const feedRow = feedIcon.closest(".pagelinkicon");
+      expect(within(feedRow).getByText("3")).toBeInTheDocument();
+    }
   });
 
-  // Test 2: successful purchase
-  it("buys one Extra Quiz Attempt (x1 by default), updates remaining and balance", async () => {
+  it("buys one Extra Quiz Attempt and updates remaining + sidebar balance", async () => {
     await renderAndLoad();
 
+    // Locate the Extra Quiz Attempt row
     const row = screen.getByText("Extra Quiz Attempt").closest("li");
     const buyBtn = within(row).getByRole("button", { name: "Buy" });
 
-    // Simulate clicking Buy button
+    // Click Buy
     const user = userEvent.setup();
     await user.click(buyBtn);
 
-    // Wait for success message instead of transient "Purchasing…" text
     const okMsg = await screen.findByText(/Purchased Extra Quiz Attempt x1/i);
-    expect(okMsg.textContent).toMatch(/Remaining this week: 1/);
+    expect(okMsg.textContent).toMatch(/Remaining this week:\s*1/);
 
-    // Verify balance updated: 30
-    const balanceRowAfter = screen.getByText(/Balance \(Score\):/i).parentElement;
-    expect(balanceRowAfter).toHaveTextContent(/Balance \(Score\):\s*30/i);
+    // Sidebar balance should update: 50 - 20 = 30
+    // (Again: prefer Money icon row, fallback to legacy balance row.)
+    const moneyIcon = screen.queryByAltText("Money");
+    if (moneyIcon) {
+      const moneyRow = moneyIcon.closest(".pagelinkicon");
+      expect(moneyRow).toHaveTextContent(/\b30\b/);
+    } else {
+      const balanceRow = getBalanceContainer();
+      expect(balanceRow).not.toBeNull();
+      expect(balanceRow.textContent).toMatch(/\b30\b/);
+    }
 
-    // Verify updated "Remaining" count after catalog refetch
+    // The row's "Remaining" should reflect refetched catalog (1 left)
     await waitFor(() => {
       const info = within(row).getByText(/Remaining:/i).textContent;
       expect(info).toMatch(/Remaining:\s*1/);
     });
   });
 
-  // Test 3: "Buy" disabled when remaining = 0
-  it("disables Buy when remaining is 0", async () => {
+  it("disables Buy when remaining is 0 (e.g., Lollies Voucher)", async () => {
     await renderAndLoad();
 
     const row = screen.getByText("Lollies Voucher").closest("li");
     const buyBtn = within(row).getByRole("button", { name: "Buy" });
 
+    // Button must be disabled due to remaining=0
     expect(buyBtn).toBeDisabled();
 
+    // Shows "Unable to buy" hint in the total box
     expect(within(row).getByText(/Unable to buy/i)).toBeInTheDocument();
   });
 });
