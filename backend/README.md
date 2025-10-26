@@ -220,13 +220,13 @@ GET /api/breeds/seed             # F3: insert 4 dog + 4 cat (dev use)
 
 Event
 ```
-GET  /events/active         # F1: Returns the currently active event and team progress (requires token)
-GET  /events/:id/status     # F2: Returns the status and progress of a specific event (requires token)
+GET  /events/active         # F1: return the currently active event and team progress (requires token)
+GET  /events/:id/status     # F2: return the status and progress of a specific event (requires token)
 ```
 
 Game/User
 ```
-PATCH /api/game/reward           # add score / pet food
+PATCH /api/game/reward           # F1: add score / pet food
 ```
 
 Inventory
