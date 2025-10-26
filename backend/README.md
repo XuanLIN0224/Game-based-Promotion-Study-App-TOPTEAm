@@ -202,12 +202,13 @@ PATCH /api/accessories/equip           # F4: equip/unequip one accessory at a ti
 
 Auth
 ```
-POST /api/auth/register/step1    # F1-S1: email, username, password, confirmPassword, group
-POST /api/auth/register/step2    # F1-S2: email, breedId
-POST /api/auth/login             # F2: email, password
-GET  /api/auth/me                # F3: get current user (requires token)
-POST /api/auth/forgot-password   # F4: send code to email
-POST /api/auth/reset-password    # F4: reset with code + newPassword
+POST   /api/auth/register/step1      # F1: create user without breed (email, username, password, confirmPassword, group)
+POST   /api/auth/register/step2      # F2: bind breed to user and return JWT (email, breedId[, remember])
+POST   /api/auth/login               # F3: verify credentials and return JWT (optional single-session control)
+POST   /api/auth/logout              # F4: clear active token (requires token)
+POST   /api/auth/forgot-password     # F5: generate & send 6-digit reset code (always returns success)
+POST   /api/auth/reset-password      # F6: verify code and set new password
+GET    /api/auth/me                  # F7: return current user info (requires token)
 ```
 
 Breeds
@@ -317,11 +318,13 @@ src/middleware/auth.js
 src/routes/
 accessories.js (playable function Customise)
 ```
-	• GET /api/accessories → Returns the complete accessory catalog for display. Takes no input and outputs a list of all available accessories.
-	• GET /api/accessories/items → Retrieves the authenticated user’s owned accessories. Reads the user token and returns catalog data merged with ownership details.
-	• POST /api/accessories/purchase/still → Allows the user to buy a new accessory. Reads the user token and itemName, then returns the purchase result with the updated score.
-	• PATCH /api/accessories/adjust → Updates the transform or position of an owned accessory. Reads the user token and new transform data, then returns the updated accessory info.
-	• PATCH /api/accessories/equip → Equips or unequips a user’s accessory. Reads the user token and item selection, then returns the item’s new equipped status.
+	• POST /api/auth/register/step1 → Creates a user account without a breed. Reads { email, username, password, confirmPassword, group }; validates and stores the user; returns a step-2 prompt.
+	• POST /api/auth/register/step2 → Binds a breed and completes registration. Reads { email, breedId, remember? }; validates group match, issues JWT (7d if remember, else 1d), persists token, and returns user summary.
+	• POST /api/auth/login → Logs in an existing user. Reads { email, password, remember? }; enforces optional single-session (blocks if another valid token exists), otherwise returns a new JWT and user summary.
+	• POST /api/auth/logout → Logs out the authenticated user by clearing the stored active token. Requires Authorization: Bearer <token>; returns confirmation.
+	• POST /api/auth/forgot-password → Starts password reset by generating a 6-digit code and emailing it. Reads { email }; always returns a generic success message to avoid user enumeration.
+	• POST /api/auth/reset-password → Resets password using the code. Reads { email, code, newPassword }; validates code and expiry, updates password, and marks the code as used.
+	• GET /api/auth/me → Returns the authenticated user profile with populated breed. Requires token; returns email, username, group, breed, score, numPetFood, clothingConfig, createdAt/updatedAt, and isStudent.
 ```
 
 auth.js (Authentication & account)
@@ -383,8 +386,7 @@ setting.js
 
 shop.js
 ```
-• GET /api/shop/catalog → Returns the authenticated user’s weekly shop view with price, weeklyLimit, used, and remaining for each item. Reads the user token and aggregates this week’s purchases to compute remaining quotas.
-
+	• GET /api/shop/catalog → Returns the authenticated user’s weekly shop view with price, weeklyLimit, used, and remaining for each item. Reads the user token and aggregates this week’s purchases to compute remaining quotas.
 	• POST /api/shop/purchase → Processes a purchase for the authenticated user. Reads the user token and body { itemKey, qty }, enforces weekly limits and score balance, applies item effects (inventory/counter), records the purchase, and returns the updated user state and remaining quota.
 ```
 
