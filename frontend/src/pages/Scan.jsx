@@ -9,6 +9,10 @@ export default function Scan() {
   const BASE = import.meta.env.BASE_URL || "/";
   const videoRef = useRef(null);    // Points to the <video> element showing the camera
   const canvasRef = useRef(null);   // A hidden <canvas> used to grab frames from the video and feed pixel data to jsQR
+  const streamRef = useRef(null);   // hold MediaStream so we can stop it on success
+  const animRef = useRef(0);        // hold requestAnimationFrame id
+  const hasScannedRef = useRef(false); // lock to prevent repeated submissions
+  const [scanMsg, setScanMsg] = useState(""); // non-intrusive status message
 
   const [qrResult, setQrResult] = useState(""); // the QR that is decoded successfully
   const [score, setScore] = useState(0);
@@ -38,104 +42,110 @@ export default function Scan() {
   const icons = groupIcons[group] ?? groupIcons.default;
 
   /** Handle successful QR code scan result */
-  const handleScanResult = (code) => {
-    // Check whether the given code is valid and not duplicated (since one code could only be effective once for one user)
-    // Defensive Check
-    if (code && code !== qrResult) {
-      setQrResult(code);
-      console.log("QR Code:", code);
-
-      // Send the code to the backend
-      fetch("http://localhost:5001/api/user/scan", {
+  const handleScanResult = async (code) => {
+    if (!code) return;
+    if (hasScannedRef.current) return; // prevent duplicate submits
+    hasScannedRef.current = true;
+    setQrResult(code);
+    setScanMsg("Submitting...");
+    try {
+      const res = await fetch("http://localhost:5001/api/user/scan", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
         body: JSON.stringify({ code }),
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          setScore(data.score); // Update score
-          alert(`✅ Scanned! Your new score: ${data.score}`);
-        })
-        .catch((err) => console.error("Scan error:", err));
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setScanMsg(data?.message || "Scan failed");
+        hasScannedRef.current = false; // allow re-try on failure
+      } else {
+        setScore(data.score);
+        setScanMsg(`✅ Scan successful! New score: ${data.score}`);
+        // setScanMsg("✅ Scan successful");
+        // stop scanning loop and camera
+        if (animRef.current) cancelAnimationFrame(animRef.current);
+        if (videoRef.current) {
+          videoRef.current.pause();
+          videoRef.current.srcObject = null;
+        }
+        if (streamRef.current) {
+          streamRef.current.getTracks().forEach((t) => t.stop());
+          streamRef.current = null;
+        }
+      }
+    } catch (err) {
+      console.error("Scan error:", err);
+      setScanMsg("Scan error");
+      hasScannedRef.current = false;
     }
   };
 
   /** Method 1: Scan the QR code */
   // QR scanning effect (camera)--live scanning loop
   useEffect(() => {
-    let stream; // Store the camera's media stream (what the browser provides when call "getUserMedia")
-    let animationId;    // Store the ID returned by "requestAnimationFrame", so we can stop it later
-    let isActive = true;    // A flag that ensures we stop scanning when the component unmounts (preventing memory leaks and camera staying on)
+    let isMounted = true;
 
-    // Requests camera
-    // Defin camera constraints--only video not audio
     const constraints = { video: { facingMode: "environment" } };
 
-    // Ask for camera access
-    // If granted, the live feed from the camera would be given back, it is a MediaStream object (s)
-    navigator.mediaDevices.getUserMedia(constraints).then((s) => {
-      stream = s;
-      if (videoRef.current) {
-        // Attach the camera's video stream to the <video> element via "srcObject"
-        videoRef.current.srcObject = stream;
-        // Prevent iPhone from automatically going fullscreen when playing a video
-        videoRef.current.setAttribute("playsinline", true);
-        // Start showing the video feed in the <video> element
-        videoRef.current.play();
-        // Now, the camera is live and displaying inside our component
+    navigator.mediaDevices.getUserMedia(constraints)
+      .then((s) => {
+        if (!isMounted) {
+          s.getTracks().forEach((t) => t.stop());
+          return;
+        }
+        streamRef.current = s;
+        if (videoRef.current) {
+          videoRef.current.srcObject = s;
+          videoRef.current.setAttribute("playsinline", true);
+          videoRef.current.play();
 
-        // Prepare the canvas
-        const canvas = canvasRef.current;
-        const ctx = canvas.getContext("2d");
+          const canvas = canvasRef.current;
+          const ctx = canvas.getContext("2d");
 
-        // The scanning loop
-        const scan = () => {
-          // Defensive Check
-          if (!isActive) return; // Stop loop if unmounted
-          // Check if the video is actually streaming frames, avoiding reading from a video before its ready
-          if (videoRef.current?.readyState === videoRef.current.HAVE_ENOUGH_DATA) {
-            // Synchronize the canvas size with the live video frame size
-            canvas.height = videoRef.current.videoHeight;
-            canvas.width = videoRef.current.videoWidth;
-            ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
-            // Extract all pixel data from the frame
-            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            // Pass it to the library to look for a QR pattern
-            const code = jsQR(imageData.data, imageData.width, imageData.height);
-
-            // If a QR code is recognized, pass and handle it further (adding points for the current user)
-            if (code) {
-              handleScanResult(code.data);
-            } else {
-              alert("❌ No QR code found in this image");
+          const scan = () => {
+            if (!isMounted) return;
+            if (hasScannedRef.current) return; // stop loop once scanned
+            if (videoRef.current?.readyState === videoRef.current.HAVE_ENOUGH_DATA) {
+              canvas.height = videoRef.current.videoHeight;
+              canvas.width = videoRef.current.videoWidth;
+              ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+              const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+              const code = jsQR(imageData.data, imageData.width, imageData.height);
+              if (code?.data) {
+                handleScanResult(code.data);
+                // do not schedule next frame; handleScanResult will stop stream
+                return;
+              } else {
+                // do not alert; just update a gentle status text occasionally
+                setScanMsg((prev) => prev || "Looking for QR...");
+              }
             }
-          }
-          // Call 'scan()' again for the next frame, creating an infinite loop
-          animationId = requestAnimationFrame(scan);
-        };
+            animRef.current = requestAnimationFrame(scan);
+          };
 
-        // Start scanning
-        scan();
-      }
-    });
+          scan();
+        }
+      })
+      .catch((err) => {
+        console.error("getUserMedia error:", err);
+        setScanMsg("Camera permission denied");
+      });
 
-    // Cleanup when leaving the Scan page--Close the camera, and end the live stream
     return () => {
-      // Stop the scanning loop
-      isActive = false;
-      if (animationId) cancelAnimationFrame(animationId);
-      // Stop using camera when leaving the page immediately
+      isMounted = false;
+      if (animRef.current) cancelAnimationFrame(animRef.current);
       if (videoRef.current) {
-        videoRef.current.pause();   // Stop <video> element playback
-        videoRef.current.srcObject = null;  // Detach the stream from the <video> element
+        videoRef.current.pause();
+        videoRef.current.srcObject = null;
       }
-      if (stream) {
-        // Turn off the camera hardware and free resources
-        stream.getTracks().forEach((track) => track.stop());
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((t) => t.stop());
+        streamRef.current = null;
       }
+      hasScannedRef.current = false;
     };
   }, []);
 
@@ -162,9 +172,11 @@ export default function Scan() {
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         const code = jsQR(imageData.data, imageData.width, imageData.height);
         if (code) {
-          handleScanResult(code.data);
+          if (!hasScannedRef.current) {
+            handleScanResult(code.data);
+          }
         } else {
-          alert("❌ No QR code found in this image");
+          setScanMsg("❌ No QR found in this image");
         }
       };
       img.src = reader.result;
@@ -199,13 +211,10 @@ export default function Scan() {
         <canvas ref={canvasRef} className={s.canvas} />
         <div className={s.scanBar} />
 
-        {qrResult ? (
-          <p className={s.qrText}>
-            QR Code: <b>{qrResult}</b>
-          </p>
-        ) : (
-          <p className={s.qrText}>📷 Scan your QR code here</p>
-        )}
+        <p className={s.qrText}>
+          {qrResult ? <>QR Code: <b>{qrResult}</b></> : "📷 Scan your QR code here"}
+          {scanMsg ? <><br />{scanMsg}</> : null}
+        </p>
       </div>
 
       {/* Upload button */}

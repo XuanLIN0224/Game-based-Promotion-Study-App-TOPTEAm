@@ -128,6 +128,7 @@ export default function Teacher() {
           <button className={s.btn} onClick={() => nav('/teacher/events')}>Open Events (Cats vs Dogs)</button>
           <button className={s.btn} onClick={() => nav('/teacher/quizzes')}>Edit Quizzes</button>
           <button className={s.btn} onClick={() => nav('/teacher/settings')}>Settings</button>
+          <button className={s.btn} onClick={() => nav('/teacher/qr')}>QR code</button>
         </div>
       </div>
 

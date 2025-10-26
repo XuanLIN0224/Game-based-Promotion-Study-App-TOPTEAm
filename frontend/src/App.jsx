@@ -19,6 +19,7 @@ import TeacherEvents from './pages/TeacherEvents';
 import TeacherQuizEditor from './pages/TeacherQuizEditor';
 import StudentQuizArchive from './pages/StudentQuizArchive';
 import TeacherSettings from './pages/TeacherSettings';
+import TeacherQR from './pages/TeacherQR';
 // import './styles.css';
 
 // Auth pages
@@ -90,6 +91,7 @@ function App() {
               <Route path="teacher/events" element={<TeacherEvents />} />
               <Route path="teacher/settings" element={<TeacherSettings />} />
               <Route path="/teacher/quizzes" element={<TeacherQuizEditor/>} />
+              <Route path="/teacher/qr" element={<TeacherQR/>} />
               <Route path="/student/archive" element={<StudentQuizArchive/>} />
             </Route>
 

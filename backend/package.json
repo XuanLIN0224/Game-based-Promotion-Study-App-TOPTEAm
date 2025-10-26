@@ -14,6 +14,7 @@
     "node-cron": "^4.2.1",
     "pdf-parse": "^1.1.1",
     "postmark": "^4.0.5",
+    "qrcode": "^1.5.4",
     "zod": "^4.0.17"
   },
   "scripts": {

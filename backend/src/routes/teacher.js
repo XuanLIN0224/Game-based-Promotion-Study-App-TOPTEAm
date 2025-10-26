@@ -8,6 +8,9 @@ const QuizWeekConfig = require('../models/QuizWeekConfig');
 const CourseSettings = require('../models/CourseSettings');
 const DailyQuiz = require('../models/DailyQuiz');
 const { generateQuizFromContext } = require('../utils/genai');
+const QRCode = require('../models/QRcode');
+const { v4: uuidv4 } = require('uuid');
+const QRCodeLib = require('qrcode'); // for generating QR code images
 
 // teacher-only guard
 function requireTeacher(req, res, next) {
@@ -304,9 +307,68 @@ router.post('/quiz-config/:weekIndex/generate', auth, requireTeacher, async (req
 
     return res.json({ message: 'Generated (days)', weekIndex, results });
   }
-
+  
   // —— 未知模式 ——
   return res.status(400).json({ message: 'Unknown mode' });
+});
+
+// ===== Create QR code for an attendance session (robust defaults) =====
+// POST /api/teacher/qrcode
+// Body: { sessionIndex (1..24), validDate:'YYYY-MM-DD', validTime:'HH:MM', validMinutes: number, type?: 'attendance'|'event' }
+router.post('/qrcode', auth, requireTeacher, async (req, res) => {
+  try {
+    let { sessionIndex, validDate, validTime, validMinutes = 40, type = 'attendance' } = req.body || {};
+
+    // Normalize session index (default to 1 if invalid)
+    sessionIndex = Number(sessionIndex);
+    if (!Number.isInteger(sessionIndex) || sessionIndex < 1 || sessionIndex > 24) {
+      sessionIndex = 1;
+    }
+
+    // Compute validFrom (fallback to now if date/time invalid or missing)
+    let validFrom;
+    const now = new Date();
+    const isValidDate = typeof validDate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(validDate);
+    const isValidTime = typeof validTime === 'string' && /^\d{2}:\d{2}$/.test(validTime);
+
+    if (isValidDate && isValidTime) {
+      // local time
+      const tryDate = new Date(`${validDate}T${validTime}:00`);
+      validFrom = isNaN(tryDate.getTime()) ? now : tryDate;
+    } else {
+      validFrom = now;
+    }
+
+    validMinutes = Number(validMinutes) || 10;
+    if (validMinutes < 1) validMinutes = 1;
+    const validUntil = new Date(validFrom.getTime() + validMinutes * 60 * 1000);
+
+    const codeStr = uuidv4();
+
+    const qr = await QRCode.create({
+      code: codeStr,
+      validFrom,
+      validUntil,
+      createdBy: req.user._id,
+      type,
+      sessionIndex
+    });
+
+    const qrDataUrl = await QRCodeLib.toDataURL(codeStr);
+
+    return res.json({
+      message: 'QR code generated',
+      code: codeStr,
+      type,
+      sessionIndex,
+      validFrom,
+      validUntil,
+      qrImage: qrDataUrl,
+    });
+  } catch (err) {
+    console.error('POST /teacher/qrcode error', err);
+    return res.status(500).json({ message: 'Server error' });
+  }
 });
 
 module.exports = router;
