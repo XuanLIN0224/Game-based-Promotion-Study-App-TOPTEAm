@@ -13,18 +13,6 @@ import styles from "./Setting.module.css"
 
 const BASE = import.meta.env.BASE_URL || '/';
 
-export const LABELS = {
-  user_name: { title: "User Name", prop: "Could be reset (countless times allowed)" },
-  group: { title: "Group", prop: "Could not be changed" },
-  join_date: { title: "Join Date", prop: "Could not be reset, done automatically" },
-  last_detail_update_date: { title: "Last Update Date", prop: "Could not be reset, done automatically" },
-  password: { title: "Password", prop: "Could be reset (countless times allowed), need to re-enter the correct old password?" },
-  score: { title: "Total Point/Score", prop: "Could not be reset, done automatically" },
-  asset: { title: "Total Assets", prop: "Could not be reset, done automatically" },
-  setting: { title: "Setting Preference", prop: "Could be reset (countless times allowed)" }
-};
-
-
 export default function Settings() {
   const navigate = useNavigate();
 
@@ -215,8 +203,7 @@ export default function Settings() {
     
       <h1 className="title">Settings</h1>
 
-      
-          
+
       {loading ? (
         <p className={styles.lineNevBack}>Loading...</p>
       ) : (

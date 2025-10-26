@@ -281,12 +281,8 @@ useEffect(() => {
 
         {/* Main Image */}
         <img
-          src={
-            (breedImages[group] && breedImages[group][breed]) ||
-            (breedImages[group] && breedImages[group].default) ||
-            `${BASE}icons/home/main.gif`
-          }
-          alt={breed || group || "default"}
+          src={pickMainSrc()}
+          alt={accessories ? `${breed} with ${accessories}` : (breed || group || "default")}
           className={s.pic}
         />
 
