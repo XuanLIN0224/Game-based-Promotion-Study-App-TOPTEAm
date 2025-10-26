@@ -18,14 +18,14 @@ function scheduleAutoLogoutFromToken(token) {
     if (!expSec) return;
     const ms = expSec * 1000 - Date.now();
     if (ms <= 0) {
-      // token 已过期，立刻登出
+      // token already expired
       clearToken();
-      // 若外部未注册回调，直接跳转登录页
+      // if (onUnauthorized) onUnauthorized();
       if (typeof onUnauthorized === 'function') onUnauthorized();
       else try { window.location.replace('/auth/Login'); } catch {}
       return;
     }
-    // 定时器：到期自动退出
+    // timer to auto logout
     if (window.__logoutTimer) clearTimeout(window.__logoutTimer);
     window.__logoutTimer = setTimeout(() => {
       clearToken();
@@ -33,7 +33,7 @@ function scheduleAutoLogoutFromToken(token) {
       else try { window.location.replace('/auth/Login'); } catch {}
     }, ms);
   } catch (e) {
-    // 无法解析则忽略
+    // cannot parse token
   }
 }
 
@@ -71,7 +71,7 @@ export async function api(path, { method = 'GET', body, headers = {} } = {}) {
   const isFormData = (typeof FormData !== 'undefined') && (body instanceof FormData);
   if (!isFormData) finalHeaders['Content-Type'] = finalHeaders['Content-Type'] || 'application/json';
 
-  // 💡 关键：登录/注册类接口不附加 Authorization
+  // if the path is not auth-related, attach token
   const lower = path.toLowerCase();
   const skipAuth =
     lower.startsWith('/auth/login') ||

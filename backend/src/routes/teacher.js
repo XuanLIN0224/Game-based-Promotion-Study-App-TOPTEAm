@@ -59,7 +59,7 @@ function isMonToFri(dateStr) {
   return day >= 1 && day <= 5;
 }
 
-// 计算某周某天的具体日期字符串
+// calculate specific date for a given weekIndex and dayIndex (0=Mon..4=Fri)
 function dateForWeekDay(startDateStr, weekIndex, dayIndex /* 0..4 => Mon..Fri */) {
   if (!startDateStr) return null;
   if (!Number.isInteger(weekIndex) || weekIndex < 1 || weekIndex > 12) return null;
@@ -72,7 +72,7 @@ function dateForWeekDay(startDateStr, weekIndex, dayIndex /* 0..4 => Mon..Fri */
   return `${y}-${m}-${d}`;
 }
 
-// 计算某周某天的具体日期（支持 mid-semester break 将后续周整体顺延 1 周）
+// calculate specific date for a given weekIndex and dayIndex (0=Mon..4=Fri), considering breakWeek
 function dateForWeekDayWithBreak(startDateStr, weekIndex, dayIndex /* 0..4 */, breakWeek) {
   if (!startDateStr) return null;
   if (!Number.isInteger(weekIndex) || weekIndex < 1 || weekIndex > 12) return null;
@@ -240,12 +240,12 @@ router.delete('/quizzes/week/:weekIndex', auth, requireTeacher, async (req, res)
 router.post('/quiz-config/:weekIndex/generate', auth, requireTeacher, async (req, res) => {
   const weekIndex = Number(req.params.weekIndex);
   const {
-    date,                   // 单天模式：具体 YYYY-MM-DD
+    date,                   // one specific date 'YYYY-MM-DD' for single day generation
     numQuestions = 5,
-    difficulty = 'medium',  // 单天默认难度
-    mode,                    // 'day' | 'week' | 'days'（可选，默认自动判断）
-    days,                    // days 数组 [0..4]，仅当 mode==='days' 时生效
-    difficulties             // 可选：每日难度映射 {0:'easy',1:'medium',...}
+    difficulty = 'medium',  // default difficulty for single-day or whole-week generation
+    mode,                    // 'day' | 'week' | 'days'
+    days,                    // days array for 'days' mode [0,2,4] => Mon, Wed, Fri
+    difficulties             // per-day difficulties for 'days' mode ['easy','medium','difficult',...]
   } = req.body || {};
 
   const allowed = ['easy','medium','difficult'];
@@ -260,20 +260,20 @@ router.post('/quiz-config/:weekIndex/generate', auth, requireTeacher, async (req
     return res.status(400).json({ message: 'No PDF uploaded for this week' });
   }
 
-  // 读取课程设置以便按周/按天集计算具体日期
+  // read course settings
   const settings = await CourseSettings.findOne({ key: 'course' });
   const startDateStr = settings?.startDate || null;
   const breakWeek = Number.isInteger(settings?.breakWeek) ? settings.breakWeek : null;
 
-  // —— 模式判定 ——
+  // choose effective mode
   let effectiveMode = mode;
   if (!effectiveMode) {
     if (Array.isArray(days) && days.length) effectiveMode = 'days';
     else if (date) effectiveMode = 'day';
-    else effectiveMode = 'week'; // 默认整周
+    else effectiveMode = 'week'; // default to week
   }
 
-  // —— 单天生成 ——
+  // one specific day generation
   if (effectiveMode === 'day') {
     const targetDate = (date && /\d{4}-\d{2}-\d{2}/.test(date)) ? date : isoDate();
     const level = normLevel(difficulty);
@@ -295,7 +295,7 @@ router.post('/quiz-config/:weekIndex/generate', auth, requireTeacher, async (req
     return res.json({ message: 'Generated (day)', date: doc.date, count: doc.questions.length, difficulty: level });
   }
 
-  // —— 指定多天（days 数组）或整周 ——
+  // specific week generation
   if (effectiveMode === 'days' || effectiveMode === 'week') {
     if (!startDateStr) {
       return res.status(400).json({ message: 'Start Date not configured. Please set /teacher/quiz-config startDate first.' });
@@ -373,7 +373,7 @@ router.post('/quiz-config/:weekIndex/generate', auth, requireTeacher, async (req
     return res.json({ message: 'Generated (days)', weekIndex, results });
   }
   
-  // —— 未知模式 ——
+  // unknown mode
   return res.status(400).json({ message: 'Unknown mode' });
 });
 

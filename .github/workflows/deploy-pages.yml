@@ -2,7 +2,7 @@ name: Deploy Frontend to GitHub Pages
 
 on:
   push:
-    branches: [ main ]   # 你希望触发部署的分支
+    branches: [ main ]  # Trigger deployment on push to main branch
 
 permissions:
   contents: read

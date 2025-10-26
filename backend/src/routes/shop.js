@@ -18,7 +18,7 @@ const Purchase = require('../models/Purchase');
  * types：
  *   - inventory：added directly to the inventory list for a specific user
  *   - counter：added directly to a field (e.g., pet_food) for a specific user
- *   - booster：设置时效性增益（如 quiz_booster_today
+ *   - booster：set power-up effect fields for a specific user
  */
 const CATALOG = {
   extra_attempt:       { title: 'Extra Quiz Attempt',    weeklyLimit: 2,  type: 'inventory', price: 20 },
@@ -51,12 +51,12 @@ function endOfToday() {
 
 // GET /api/shop/catalog
 /* List out the total power-ups that have been already bought by the (specific) user and the user's remaining balance for the current week */
-// 列出当前用户本周的各道具购买剩余额度与价格
+// list of items with user's purchased count and remaining quota
 router.get('/catalog', auth, async (req, res) => {
   const week = isoWeekKey();
   const userId = req.user._id;
 
-  // 统计本周每个 itemKey 的已购总数
+  // summarize purchases this week
   const purchases = await Purchase.aggregate([
     { $match: { userId, weekStartISO: week } },
     { $group: { _id: '$itemKey', total: { $sum: '$qty' } } }
@@ -84,7 +84,7 @@ router.post('/purchase', auth, async (req, res) => {
   const week = isoWeekKey();
   const userId = req.user._id;
 
-  // 本周已购数量
+  // allowance check
   const agg = await Purchase.aggregate([
     { $match: { userId, itemKey, weekStartISO: week } },
     { $group: { _id: null, total: { $sum: '$qty' } } }
@@ -95,7 +95,7 @@ router.post('/purchase', auth, async (req, res) => {
     return res.status(400).json({ message: `Weekly limit reached. Remaining: ${Math.max(0, remaining)}` });
   }
 
-  // 扣费（score 为货币）
+  // cleanse qty to not exceed remaining
   const pricePerUnit = meta.price || 0;
   const totalCost = pricePerUnit * qty;
   const balance = req.user.score || 0;
@@ -104,7 +104,7 @@ router.post('/purchase', auth, async (req, res) => {
   }
   req.user.score = balance - totalCost;
 
-  // 应用效果
+  // apply item effect
   if (meta.type === 'inventory') {
     const inv = req.user.inventory || [];
     const row = inv.find(i => i.key === itemKey);
@@ -121,7 +121,7 @@ router.post('/purchase', auth, async (req, res) => {
     return res.status(400).json({ message: 'Unsupported item type' });
   }
 
-  // 记录购买
+  // record purchase
   await Purchase.create({ userId, itemKey, qty, weekStartISO: week });
   await req.user.save();
 
