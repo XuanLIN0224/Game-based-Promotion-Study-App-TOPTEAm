@@ -38,6 +38,7 @@ PowerUpTesting/
 │   │  │
 │   │  ├─ Customise.jsx             # Avatar/customization with equipped items
 │   │  ├─ Customise.module.css
+│   │  ├─ Customise.test.jsx
 │   │  │
 │   │  ├─ Game.jsx                  # Cats vs Dogs live event widget & stats
 │   │  ├─ Game.module.css
@@ -45,8 +46,10 @@ PowerUpTesting/
 │   │  │
 │   │  ├─ Home.jsx                  # Landing page after login
 │   │  ├─ Home.module.css
+│   │  ├─ Home.test.jsx
 │   │  │
 │   │  ├─ Quiz.jsx                  # Daily quiz (now “1 quiz per week, 1 Q per day” view)
+│   │  ├─ Quiz.test.jsx
 │   │  ├─ Quiz.test.jsx
 │   │  │
 │   │  ├─ Rank.jsx                  # Leaderboard
