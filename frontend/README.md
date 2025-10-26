@@ -85,7 +85,7 @@ PowerUpTesting/
 
 ## Key Entry Points
 
-###pages/auth
+### pages/auth
 
 -ForgotPassword.jsx
   – Form: email → POST /auth/forgot
@@ -113,7 +113,7 @@ PowerUpTesting/
 
 ⸻
 
-###pages (student)
+### pages (student)
 
 - Backpack.jsx
   – Fetches inventory via GET /shop/inventory or /auth/me
@@ -167,7 +167,7 @@ PowerUpTesting/
 
 ⸻
 
-###pages (teacher)
+### pages (teacher)
 
 - Teacher.jsx
   – Central console for course quiz configuration and scheduling
@@ -204,7 +204,7 @@ PowerUpTesting/
 
 ⸻
 
-###Tests
+### Tests
 
 - Backpack.test.jsx / Game.test.jsx / Quiz.test.jsx / Rank.test.jsx / Scan.test.jsx / Settings.test.jsx / Shop.test.jsx
   – Validate rendering, core workflows, and API integration
@@ -212,7 +212,7 @@ PowerUpTesting/
 
 ⸻
 
-###Shared
+### Shared
 
 - main.jsx
   – Vite + React app bootstrap entry point
