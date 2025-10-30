@@ -1,21 +1,3 @@
-/**
-  * Rank.module.css
-  * Styles for the Scan page
-  * Adjustable for the ipad and laptop views
-  */
-
-h1.title {
-  font-size: 4.5em;
-  text-align: center;
-  /*color: #c0e5d6;*/
-}
-
-@media (max-width: 600px) {
-  h1.title {
-    font-size: 2em;
-  }
-}
-
 .rankList {
   list-style: none;
   padding-left: 0;
@@ -45,13 +27,4 @@ h1.title {
   .rankAvatar { width: 56px; height: 56px; }
 }
 
-/* move font downward (away from top by 12px) */
-.page {
-  padding-top: 12px; 
-}
 
-/* @media (min-width: 768px) { 
-  .page {
-    padding-top: 30px; 
-  }
-} */

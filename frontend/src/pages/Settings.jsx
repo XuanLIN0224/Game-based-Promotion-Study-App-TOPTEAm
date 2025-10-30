@@ -10,7 +10,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api, clearToken } from "../api/client";
 
-import styles from "./Setting.module.css"
+import s from "./Setting.module.css"
 
 const BASE = import.meta.env.BASE_URL || '/';
 
@@ -206,19 +206,19 @@ export default function Settings() {
 
 
       {loading ? (
-        <p className={styles.lineNevBack}>Loading...</p>
+        <p className={s.lineNevBack}>Loading...</p>
       ) : (
         <>
-          {err && <div className={styles.lineErr} style={{ maxWidth: 520 }}>{err}</div>}
-          {msg && <div className={styles.lineMsg} style={{ maxWidth: 520 }}>{msg}</div>}
-          <div className={`content ${styles.settingPage}`}>
-          <div className={styles.userInfo}>
+          {err && <div className={s.lineErr} style={{ maxWidth: 520 }}>{err}</div>}
+          {msg && <div className={s.lineMsg} style={{ maxWidth: 520 }}>{msg}</div>}
+          <div className={`content ${s.settingPage}`}>
+          <div className={s.userInfo}>
             {/* Username row */}
             {!editingUsername ? (
               // C1: "editingUsername == false"--display the username--View MODE
               <div>
                 {/* Display the user's username */}
-                <p className={styles.line} style={{ margin: 0 }}><strong>User Name:</strong> {username}</p>
+                <p className={s.line} style={{ margin: 0 }}><strong>User Name:</strong> {username}</p>
                 {/* if the button "Change" is hit, switch to the Edit MODE */}
                 <button
                   className="btn ghost"
@@ -230,7 +230,7 @@ export default function Settings() {
             ) : (
               // C2: "editingUsername == true"--allow editing--Edit MODE
               // <form> here: When the user clicks "Save" or presses Enter, call my saveUsername function
-              <form className={styles.lineHide} onSubmit={saveUsername}>
+              <form className={s.lineHide} onSubmit={saveUsername}>
                 <label htmlFor="username" style={{ minWidth: 100 }}><strong>User Name:</strong></label>
                 {/* Expected input */}
                 <input
@@ -241,7 +241,7 @@ export default function Settings() {
                   // While “saving”, disable the input so the user can’t change it mid-save
                   disabled={busyField === "username"}
                 />
-                <div className={styles.actions}>
+                <div className={s.actions}>
                   {/* the "Save" button */}
                   <button className="btn" disabled={busyField === "username"}>
                     {busyField === "username" ? "Saving…" : "Save"}
@@ -249,7 +249,7 @@ export default function Settings() {
                   {/* the "Cancel" button */}
                   <button
                     type="button"
-                    className={styles.btn}
+                    className={s.btn}
                     onClick={() => { setEditingUsername(false); setUsernameInput(username || ""); }}
                     disabled={busyField === "username"}
                   >
@@ -262,7 +262,7 @@ export default function Settings() {
             {/* Email row */}
             {!editingEmail ? (
               <div>
-                <p className={styles.line} style={{ margin: 0 }}><strong>Email:</strong> {email}</p>
+                <p className={s.line} style={{ margin: 0 }}><strong>Email:</strong> {email}</p>
                 <button
                   className="btn ghost"
                   onClick={() => { setEmailInput(email || ""); setEditingEmail(true); }}
@@ -271,7 +271,7 @@ export default function Settings() {
                 </button>
               </div>
             ) : (
-              <form className={styles.lineHide} onSubmit={saveEmail}>
+              <form className={s.lineHide} onSubmit={saveEmail}>
                 <label htmlFor="email" style={{ minWidth: 100 }}><strong>Email:</strong></label>
                 <input
                   id="email"
@@ -280,13 +280,13 @@ export default function Settings() {
                   onChange={(e) => setEmailInput(e.target.value)}
                   disabled={busyField === "email"}
                 />
-                <div className={styles.actions}>
-                  <button className={`${styles.btn} ${styles.primary}`} disabled={busyField === "email"}>
+                <div className={s.actions}>
+                  <button className={`${s.btn} ${s.primary}`} disabled={busyField === "email"}>
                     {busyField === "email" ? "Saving…" : "Save"}
                   </button>
                   <button
                     type="button"
-                    className={styles.btn}
+                    className={s.btn}
                     onClick={() => { setEditingEmail(false); setEmailInput(email || ""); }}
                     disabled={busyField === "email"}
                   >
@@ -297,12 +297,12 @@ export default function Settings() {
             )}
 
             {/* Read-only fields */}
-            <p className={styles.line}><strong>Group:</strong> {group}</p>
-            <p className={styles.line}><strong>Breed:</strong> {breed}</p>
-            <p className={styles.line}><strong>Join Date:</strong> {createdAt ? new Date(createdAt).toLocaleString() : "-"}</p>
-            <p className={styles.line}><strong>Last Update Date:</strong> {updatedAt ? new Date(updatedAt).toLocaleString() : "-"}</p>
-            <p className={styles.line}><strong>Total Score:</strong> {score}</p>
-            <p className={styles.line}><strong>Total Assets:</strong> {asset}</p>
+            <p className={s.line}><strong>Group:</strong> {group}</p>
+            <p className={s.line}><strong>Breed:</strong> {breed}</p>
+            <p className={s.line}><strong>Join Date:</strong> {createdAt ? new Date(createdAt).toLocaleString() : "-"}</p>
+            <p className={s.line}><strong>Last Update Date:</strong> {updatedAt ? new Date(updatedAt).toLocaleString() : "-"}</p>
+            <p className={s.line}><strong>Total Score:</strong> {score}</p>
+            <p className={s.line}><strong>Total Assets:</strong> {asset}</p>
 
 
             {/* Password row */}
@@ -310,7 +310,7 @@ export default function Settings() {
               // C1: "performReset == false" -- View MODE
               <div>
                 {/* Display masked password */}
-                <p className={styles.line} style={{ margin: 0 }}><strong>Password:</strong> ••••••••</p>
+                <p className={s.line} style={{ margin: 0 }}><strong>Password:</strong> ••••••••</p>
                 {/* if the button "Change" is hit, switch to the Edit MODE*/}
                 <button
                   className="btn ghost"
@@ -326,7 +326,7 @@ export default function Settings() {
               </div>
             ) : (
               // C2: "editingPassword == true" -- Edit MODE
-              <form className = {styles.lineHide} onSubmit={resetPassword}>
+              <form className = {s.lineHide} onSubmit={resetPassword}>
                 <label htmlFor="oldPassword"><strong>Old Password:</strong></label>
                 <input
                   id="oldPassword"
@@ -355,7 +355,7 @@ export default function Settings() {
                   />
 
                   {/* Show password row (separate class, NOT lineHide) */}
-                  <div className={styles.checkboxRow}>
+                  <div className={s.checkboxRow}>
                     <input
                       id="showPwd"
                       type="checkbox"
@@ -368,15 +368,15 @@ export default function Settings() {
                   </div>
 
 
-                <div className={styles.actions} style={{ display: "flex", gap: 8 }}>
+                <div className={s.actions} style={{ display: "flex", gap: 8 }}>
                   {/* Save button */}
-                  <button className={`${styles.btn} ${styles.primary}`} disabled={busyField === "password"}>
+                  <button className={`${s.btn} ${s.primary}`} disabled={busyField === "password"}>
                     {busyField === "password" ? "Saving…" : "Save"}
                   </button>
                   {/* Cancel button */}
                   <button
                     // type="button"
-                    className={styles.btn}
+                    className={s.btn}
                     onClick={() => {
                       setPerformReset(false);
                       setOldPassword("");
@@ -406,7 +406,7 @@ export default function Settings() {
 
 
             {/* Logout */}
-            <button className="btn secondary" onClick={handleLogout}>
+            <button className={`btn secondary ${s.logOutBtn}`} onClick={handleLogout}>
               <strong>Log out</strong>
             </button>
           </div>

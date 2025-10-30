@@ -113,6 +113,10 @@
   align-self: start;         /* 避免拉高整行 */
 }
 
+.logOutBtn {
+  margin-top: 20px;
+}
+
 
 /* Text popping up as a warning message */
 .lineErr {

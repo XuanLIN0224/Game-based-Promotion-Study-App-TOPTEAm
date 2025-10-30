@@ -64,7 +64,7 @@ export default function Quiz () {
           </div>
         </div>
         <h1 className="title">Quiz</h1>
-        <div className="content">No quiz available for today. Ask your teacher to generate one.</div>
+        <div className="content" style={{}}>No quiz available for today. Ask your teacher to generate one.</div>
       </div>
     );
   }

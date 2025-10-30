@@ -40,9 +40,11 @@ function EventWidget() {
             <p className="iconcaption">Home</p>
         </div>
     </div>
-
-    <div style={{border:'1px solid #ddd', borderRadius:8, padding:12, marginBottom:12}}>
-      <b>No active event</b>
+    <h1 className='title'>Competition</h1>
+    <div className='content'>
+      <div style={{border:'1px solid #ddd', borderRadius:8, padding:12, marginBottom:12}}>
+        <b>No active event</b>
+      </div>
     </div>
     </>
   );
@@ -60,6 +62,9 @@ function EventWidget() {
         </div>
       </div>
 
+      <h1 className='title'>Competition</h1>
+
+      <div className='content'>
       {/* The card */}
       <div className={styles.card}>
         {/* The evet header */}
@@ -105,6 +110,7 @@ function EventWidget() {
             ))}
           </div>
         </div>
+      </div>
       </div>
     </>
   );
