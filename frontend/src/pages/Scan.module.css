@@ -1,12 +1,5 @@
-.page {
-  position: relative;
-  width: 100%;
-  min-height: 100vh;
-  font-family: "SuperShiny", sans-serif;
-}
-
 /* ---------- Score pad ---------- */
-.scorePad {
+.scanScorePad {
   position: absolute;
   top: 20px;
   right: 20px;
@@ -26,7 +19,6 @@
 .score p {
   font-size: 18px;
   font-weight: bold;
-  color: #333;
 }
 
 /* ---------- Title ---------- */
@@ -39,11 +31,24 @@
 }
 
 /* ---------- Scanner ---------- */
-.content {
-  text-align: center;
+.scanContent {
+  display: flex !important;
+  flex-direction: column;
+  justify-content: center;  
+  align-items: center;
+  min-height: 0;
+  height: 100%;
   position: relative;
-  display: inline-block;
-  margin-top: 20px;
+}
+
+.scanContent p {
+  margin: 0;
+  padding: 0;
+}
+
+.scanBox {
+  position: relative;
+  overflow: hidden;
 }
 
 .video {
@@ -83,11 +88,13 @@
 }
 
 /* ---------- QR text ---------- */
-.qrText {
+.qrText p{
   margin-top: 20px;
   font-size: 16px;
-  color: #333;
+  color: #6a6a6a;
 }
+
+
 
 /* ---------- Upload button ---------- */
 .uploadWrapper {

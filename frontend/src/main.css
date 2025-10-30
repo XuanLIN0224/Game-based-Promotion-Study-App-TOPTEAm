@@ -3,6 +3,7 @@
  * for the whole system.
  * 
  */
+html, body, #root { height: 100%; }
 
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
@@ -10,7 +11,7 @@
   font-weight: 400;
 
   color-scheme: light dark;
-  color: rgba(242, 242, 242, 0.932);
+  color: rgba(210, 210, 210, 0.932);
   background-color: #32292F;
 
   font-synthesis: none;
@@ -38,7 +39,7 @@ body {
 
 h1 {
   font-family: "SuperShiny", sans-serif;
-  font-size: 4.5em;
+  font-size: clamp(3em, 11vw, 4.5em);
   line-height: 1.5;
   text-align: center;
 }
@@ -46,7 +47,7 @@ h1 {
 .app {
   display: flex;
   flex-direction: column;
-  min-height: 100svh;
+  height: 100svh;
 }
 
 .page {
@@ -64,13 +65,14 @@ h1 {
   grid-template-rows: auto 1fr auto;
   flex-direction: column;
   place-items:center;
+  margin: 0 12px 0 12px
 }
 
 .footer {
   flex: 0 0 auto;
   text-align: center;
   padding: 1px;
-  color: #555;
+  color: #575757;
 }
 
 .title {
@@ -79,6 +81,7 @@ h1 {
 
 h1, .title {
   margin: 0;
+  margin-top: 12px;
 }
 
 
@@ -149,6 +152,7 @@ h1, .title {
     width: 40px;        
     height: 40px;
   }
+  
 }
 
 
@@ -157,6 +161,10 @@ h1, .title {
   :root {
     color: #213547;
     background-color: #faf8db;
+  }
+
+  .footer {
+    color: #555;
   }
   /* a:hover {
     color: #747bff;

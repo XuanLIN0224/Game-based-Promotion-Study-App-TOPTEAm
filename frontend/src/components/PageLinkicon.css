@@ -7,14 +7,14 @@
 }
 
 .icon {
-  width: clamp(40px, 14vw, 72px);
+  width: clamp(40px, 12vw, 72px);
   height: auto;
   cursor: pointer;
   transition: transform .15s ease;
 }
 
 .iconcaption {
-  font-size:clamp(12px, 3vw, 20px);
+  font-size:clamp(12px, 3.25vw, 20px);
   font-family: "SuperShiny", sans-serif;
   line-height: 1.5;
   font-weight: bold;

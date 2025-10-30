@@ -188,8 +188,12 @@ function Customise() {
   };
 
   return (
-    <div className="page">
-      {/* Left nav and stats */}
+    // <div className="page">
+
+
+      <div className={`content ${s.customiseContent}`}>
+
+              {/* Left nav and stats */}
       <div className="leftside">
         <div className="pagelinkicon" onClick={() => navigate("/")}>
           <img
@@ -202,8 +206,13 @@ function Customise() {
           />
           <p className="iconcaption">Home</p>
         </div>
+      </div>
 
-        <div className="scorePad">
+      {/* Title */}
+      <h1 className="title">Customise</h1>
+
+        {/* User info */}
+        <div className="scorePad" style={{flexDirection: "row", gap: "20px"}}>
           <div className="score">
             <img src={icons.coin} alt="Money" />
             <p>{score}</p>
@@ -214,64 +223,67 @@ function Customise() {
             <p>{numPetfood}</p>
           </div>
         </div>
-      </div>
 
-      {/* Title */}
-      <h1 className={s.title}>Customise</h1>
+        {/* Pet image */}
+        <div className={s.petPreview}>
+          <img src={petImg} alt={breed || group || "default"} className={s.petImg} />
+        </div>
 
-      {/* Pet image */}
-      <div className={s.petPreview}>
-        <img src={petImg} alt={breed || group || "default"} className={s.petImg} />
-      </div>
-
-      {/* Accessories grid */}
-      <section className={s.accessoryGrid}>
-        {accessories.map((item) => (
-          <div key={item.key} className={s.accessoryCard}>
-            <img
-              src={accessoryImages[item.key] || `${BASE}icons/default/missing.png`}
-              alt={item.title}
-              className={s.accessoryImg}
-            />
-            <h4>{item.title}</h4>
-            <p>
+        
+        <div className={s.accessoryGridContainer}>
+          {/* <p className={s.hint}>Scroll to view more</p> */}
+        {/* Accessories grid */}
+        <section className={s.accessoryGrid}>
+          {accessories.map((item) => (
+            <div key={item.key} className={s.accessoryCard}>
               <img
-                src={icons.coin}
-                alt="Price"
-                style={{ width: "16px", verticalAlign: "middle" }}
-              />{" "}
-              {item.price}
-            </p>
+                src={accessoryImages[item.key] || `${BASE}icons/default/missing.png`}
+                alt={item.title}
+                className={s.accessoryImg}
+              />
+              <h4>{item.title}</h4>
+              <p>
+                <img
+                  src={icons.coin}
+                  alt="Price"
+                  style={{ width: "16px", verticalAlign: "middle" }}
+                />{" "}
+                {item.price}
+              </p>
 
-            {/* Purchase */}
-            {item.owned ? (
-              <button disabled className={s.disabledBtn}>
-                Purchased
-              </button>
-            ) : (
-              <button className={s.purchaseBtn} onClick={() => handlePurchase(item.key)}>
-                Purchase
-              </button>
-            )}
+              {/* Purchase */}
+              {item.owned ? (
+                <button disabled className={s.disabledBtn}>
+                  Purchased
+                </button>
+              ) : (
+                <button className={s.purchaseBtn} onClick={() => handlePurchase(item.key)}>
+                  Purchase
+                </button>
+              )}
 
-            {/* Wear */}
-            <button
-              disabled={!item.owned}
-              onClick={() => handleEquip(item.key, !item.equipped)}
-              className={`${s.wearBtn} ${
-                !item.owned
-                  ? s.wearDisabled
-                  : item.equipped
-                  ? s.removeActive
-                  : s.wearActive
-              }`}
-            >
-              {!item.owned ? "Wear" : item.equipped ? "Remove" : "Wear"}
-            </button>
-          </div>
-        ))}
-      </section>
-    </div>
+              {/* Wear */}
+              <button
+                disabled={!item.owned}
+                onClick={() => handleEquip(item.key, !item.equipped)}
+                className={`${s.wearBtn} ${
+                  !item.owned
+                    ? s.wearDisabled
+                    : item.equipped
+                    ? s.removeActive
+                    : s.wearActive
+                }`}
+              >
+                {!item.owned ? "Wear" : item.equipped ? "Remove" : "Wear"}
+              </button>
+            </div>
+          ))}
+      
+        </section>
+        <p className={s.hint}>Scroll to view more</p>
+        </div>
+      </div>
+    // </div>
   );
 }
 

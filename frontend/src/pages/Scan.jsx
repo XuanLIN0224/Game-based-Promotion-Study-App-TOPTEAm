@@ -173,7 +173,7 @@ export default function Scan() {
   };
 
   return (
-    <div className={`page ${s.page}`}>
+    <div className="page">
       {/* Left nav */}
       {/* Left side nav */}
       <div className="leftside">
@@ -184,20 +184,23 @@ export default function Scan() {
       </div>
 
       {/* Score pad */}
-      <div className={s.scorePad}>
+      <div className={`scorePad ${s.scanScorePad}`}>
         <div className={s.score}>
           <img src={icons.coin} alt="Score" />
           <p>{score}</p>
         </div>
       </div>
 
-      <h1 className={s.title}>Scan</h1>
+      <h1 className="title">Scan</h1>
 
       {/* Scanner */}
-      <div className={s.content}>
-        <video ref={videoRef} className={s.video} />
-        <canvas ref={canvasRef} className={s.canvas} />
-        <div className={s.scanBar} />
+      <div className={`content ${s.scanContent}`}>
+
+        <div className={s.scanBox}>
+          <video ref={videoRef} className={s.video} />
+          <canvas ref={canvasRef} className={s.canvas} />
+          <div className={s.scanBar} />
+        </div>
 
         {qrResult ? (
           <p className={s.qrText}>
@@ -206,19 +209,19 @@ export default function Scan() {
         ) : (
           <p className={s.qrText}>📷 Scan your QR code here</p>
         )}
-      </div>
-
-      {/* Upload button */}
-      <div className={s.uploadWrapper}>
-        <label className={s.uploadLabel}>
-          Upload QR from device
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleFileUpload}
-            className={s.uploadInput}
-          />
-        </label>
+      
+        {/* Upload button */}
+        <div className={s.uploadWrapper}>
+          <label className={s.uploadLabel}>
+            Upload QR from device
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFileUpload}
+              className={s.uploadInput}
+            />
+          </label>
+        </div>
       </div>
     </div>
   );

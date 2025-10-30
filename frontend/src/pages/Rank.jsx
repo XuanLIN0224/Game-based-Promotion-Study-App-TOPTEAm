@@ -132,7 +132,7 @@ export default function Rank() {
 
 
   return (
-    <div className={styles.page}>
+    <div className="page">
       <div className="leftside">
         <div className="pagelinkicon" onClick={() => navigate("/")}>
           <img src={`${BASE}icons/home/home.png`} className="icon" alt="Home" />
@@ -140,7 +140,7 @@ export default function Rank() {
         </div>
       </div>
 
-      <h1 className={styles.title}>Leaderboard</h1>
+      <h1 className="title">Leaderboard</h1>
 
       {!loading && !err && rows.length > 0 && (
         <ul className={styles.rankList}>
