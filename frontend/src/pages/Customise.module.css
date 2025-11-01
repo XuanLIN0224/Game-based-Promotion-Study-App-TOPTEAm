@@ -147,6 +147,7 @@
   min-width: 73px;
   justify-self: center;
   transition: background 0.2s;
+  margin-right: 0%;
 }
 
 /* Purchase button */

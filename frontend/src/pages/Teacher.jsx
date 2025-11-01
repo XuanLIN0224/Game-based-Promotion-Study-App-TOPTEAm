@@ -11,7 +11,7 @@ function addDays(dateStr, days){
   d.setDate(d.getDate() + days);
   return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
 }
-// 依据 breakWeek（1..12）将 break 之后的所有周顺延一周
+// Add days to startDateStr, considering breakWeek
 function addDaysWithBreak(startDateStr, weekIndex, dayIndex, breakWeek) {
   if (!startDateStr) return '';
   const extraWeeks = (Number.isInteger(breakWeek) && breakWeek >= 1 && breakWeek <= 12 && weekIndex > breakWeek) ? 1 : 0;

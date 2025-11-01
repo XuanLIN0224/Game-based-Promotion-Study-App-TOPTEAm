@@ -71,6 +71,7 @@ export default function Scan() {
       } else {
         setScore(data.score);
         setScanMsg(`✅ Scan successful! New score: ${data.score}`);
+        alert(`✅ Scan successful!\nYour new score: ${data.score}`);
         // setScanMsg("✅ Scan successful");
         // stop scanning loop and camera
         if (animRef.current) cancelAnimationFrame(animRef.current);
