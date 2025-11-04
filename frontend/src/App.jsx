@@ -37,6 +37,7 @@ import './components/PageLinkIcon.css';
 import { useEffect } from 'react';
 import { setOnUnauthorized } from './api/client';
 import { useNavigate } from 'react-router-dom';
+import { api } from './api/client';
 
 function AuthEvents() {
   const nav = useNavigate();
@@ -53,6 +54,23 @@ function AuthEvents() {
 
   return null; // 不渲染任何 UI
 }
+// for loading breed
+function UserInit() {
+  useEffect(() => {
+    (async () => {
+      try {
+        const me = await api('/auth/me');
+        if (me?.group) {
+          localStorage.setItem('group', me.group);
+        }
+      } catch (err) {
+        console.warn('UserInit: cannot fetch /auth/me (offline or unauthenticated)');
+        // 
+      }
+    })();
+  }, []);
+  return null;
+}
 
 // Guard: require token to access app routes
 // Support auto-log-in
@@ -66,6 +84,7 @@ function App() {
   return (
     <BrowserRouter basename="/Game-based-Promotion-Study-App-TOPTEAm">
       <AuthEvents /> 
+      <UserInit /> {/* user info */}
       <div className="app">
         <main className='page'>
           <Routes>
