@@ -51,7 +51,7 @@
   justify-content: center;
   align-items: flex-start;
   gap: 2vw;
-  margin-top: 16px;
+  margin-top: 1.5vh;
   padding-bottom: 1px;
 
   overflow-x: auto;
@@ -65,7 +65,7 @@
 .accessoryCard {
 
   --card-w: 150px;
-  --card-h: 245px;
+  --card-h: clamp(200px, 30vh, 295px);
   flex: 0 0 var(--card-w);
   height: var(--card-h);
 
@@ -80,15 +80,15 @@
 }
 /* .accessoryCard button { display:flex; gap: 12px; } */
 .accessoryCard h4 {
-  margin: 8px 0 4px 0;
+  margin: 1vh 0 0.5vh 0;
 }
 .accessoryCard p {
-  margin: 8px 0 12px 0;
+  margin: 1vh 0 1.5vh 0;
   font-weight: bold;
 }
 .accessoryImg {
-  width: 80px;
-  height: 80px;
+  width: min(80px, 15vw);
+  height: min(80px, 12.5vw);
   object-fit: contain;
   /* margin-bottom: 10px; */
 }
@@ -98,10 +98,12 @@
   .accessoryGridContainer{
 
     max-width: 90%;
-    max-height: 295px;
+    max-height: clamp(215px, 35vh, 295px);
+    /* max-height: 35vh; */
     padding-inline: 20px;                /* 外壳与内容之间的左右缓冲 */
 
     min-height: 0;
+    margin-top: 10px;
     margin-bottom: 28px;
 
     background: #eceff136;
@@ -130,12 +132,16 @@
     box-sizing: border-box;
   }
 
-  /* 可选：隐藏滚动条（仍可滑动） */
-  /* .accessoryGrid::-webkit-scrollbar{ display:none; }
-  .accessoryGrid{ scrollbar-width: none; } */
 }
 
 /* Buttons */
+.accessoryCard button {
+  /* object-fit: contain; */
+  justify-content: center;
+  align-items: center;
+  margin: 1vh auto;
+}
+
 .purchaseBtn,
 .wearBtn {
   padding: 6px 12px;
@@ -174,6 +180,7 @@
 }
 
 .wearActive {
+  color: inherit;
   background-color: rgba(255, 234, 0, 1);
 }
 

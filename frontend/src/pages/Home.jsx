@@ -286,7 +286,7 @@ useEffect(() => {
           className={s.pic}
         />
 
-        <p className={s.line}>Click or tap anywhere to play...</p>
+        <p className={s.line}>Click or tap anywhere to view the current competition...</p>
       </section>
 
       {/* Bottom Buttons */}

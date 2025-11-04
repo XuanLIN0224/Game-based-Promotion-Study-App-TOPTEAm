@@ -28,6 +28,7 @@
 button, .btn {
   font-family: "SuperShiny", sans-serif;
 	cursor: pointer;
+  color: inherit;
   /* font-size: clamp(14px, 4vw, 16px); */
   /* font-weight: 600; */
   align-items: center;
