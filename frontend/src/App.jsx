@@ -101,7 +101,7 @@ function App() {
         </main>
 
         <footer className='footer'>
-          <small>© 2025 TOPTEAm</small>
+          <p>© 2025 TOPTEAm</p>
         </footer>
       </div>
     </BrowserRouter>
