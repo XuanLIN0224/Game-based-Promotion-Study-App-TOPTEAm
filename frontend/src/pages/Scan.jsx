@@ -238,13 +238,19 @@ export default function Scan() {
           <div className={s.scanBar} />
         </div>
 
-        {qrResult ? (
-          <p className={s.qrText}>
-            QR Code: <b>{qrResult}</b>
-          </p>
-        ) : (
-          <p className={s.qrText}>📷 Scan your QR code here</p>
-        )}
+        {/* Scanner status / QR result */}
+        <p className={s.qrText} data-testid="scan-msg">
+          {qrResult ? (
+            <>QR Code: <b>{qrResult}</b></>
+          ) : (
+                 scanMsg && (
+                   <>
+                   <br />
+                   {scanMsg}
+                   </>
+                 )
+          )}
+        </p>
       
         {/* Upload button */}
         <div className={s.uploadWrapper}>

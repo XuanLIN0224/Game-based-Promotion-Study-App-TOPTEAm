@@ -3,7 +3,7 @@
    1. Scan a QR code through the camera
    2. Upload a QR file
    3. Update user's score (award attendance during lectures)
-   (additional) Navigation back to the Home page
+   4. Cleanup on unmount
 */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
@@ -12,11 +12,38 @@ import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import React from "react";
 
-// ---- Module under test ----
+/** Hoist and basic mocks */
+// 1) Hoist-safe mock for ../api/client (used by Scan.jsx as api("/auth/me"))
+let apiMock;
+vi.mock("../api/client", () => {
+  return {
+    api: (...args) => {
+      if (typeof apiMock === "function") return apiMock(...args);
+      // default safe fallback so import doesn't crash before tests set apiMock
+      return Promise.resolve({ score: 0, group: "default" });
+    },
+  };
+});
+
+// 2) Mock react-router-dom useNavigate
+vi.mock("react-router-dom", async (orig) => {
+  const actual = await orig();
+  return {
+    ...actual,
+    useNavigate: () => vi.fn(),
+  };
+});
+
+// 3) Mock jsQR (Scan.jsx imports default)
+let jsQRReturn = null;
+vi.mock("jsqr", () => {
+  return {
+    default: vi.fn(() => jsQRReturn),
+  };
+});
 import Scan from "./Scan.jsx";
 
-// ----------------- GLOBAL POLYFILLS / MOCKS -----------------
-
+/** Global Polyfills */
 // HTMLMediaElement.srcObject polyfill (JSDOM doesn't provide it)
 Object.defineProperty(HTMLMediaElement.prototype, "srcObject", {
   configurable: true,
@@ -29,7 +56,7 @@ Object.defineProperty(HTMLMediaElement.prototype, "srcObject", {
   },
 });
 
-// Queue-based requestAnimationFrame so we can step frames manually
+// requestAnimationFrame we can step manually
 let rafQueue = [];
 global.requestAnimationFrame = (cb) => {
   const id = Math.floor(Math.random() * 1e6);
@@ -47,28 +74,10 @@ function advanceRaf(times = 1) {
   }
 }
 
-// Mock react-router-dom useNavigate
-vi.mock("react-router-dom", async (orig) => {
-  const actual = await orig();
-  return {
-    ...actual,
-    useNavigate: () => vi.fn(),
-  };
-});
-
-// Mock jsQR
-let jsQRReturn = null;
-vi.mock("jsqr", () => {
-  return {
-    default: vi.fn(() => jsQRReturn),
-  };
-});
-
-// ----------------- PER-TEST SETUP -----------------
-
+/** Mocks */
 let getContextSpy;
 
-// Get the video and canvas element ready
+// Mock canvas API
 beforeEach(() => {
   rafQueue = [];
 
@@ -92,11 +101,9 @@ beforeEach(() => {
     },
   });
 
-  // Keep no-op functions to avoid errors--[Defensive]
   HTMLVideoElement.prototype.play = vi.fn();
   HTMLVideoElement.prototype.pause = vi.fn();
 
-  // Always mock canvas.getContext to return a 2D-like API
   getContextSpy = vi
     .spyOn(HTMLCanvasElement.prototype, "getContext")
     .mockImplementation(() => ({
@@ -109,7 +116,7 @@ beforeEach(() => {
     }));
 });
 
-// "navigator.mediaDevices.getUserMedia" mock
+// Mock camera
 const mockTrackStop = vi.fn();
 const mockStream = { getTracks: () => [{ stop: mockTrackStop }] };
 beforeEach(() => {
@@ -119,27 +126,31 @@ beforeEach(() => {
   };
 });
 
-// Fetching API mock (used by /auth/me and /user/scan)
+// Mock fetch (only used by POST /api/user/scan in your component)
 const fetchMock = vi.fn();
 global.fetch = fetchMock;
-
-// Our fetch implementation replacing the actual fetching calls
 beforeEach(() => {
-  fetchMock.mockImplementation((url) => {
+  fetchMock.mockImplementation((url, init) => {
     const u = String(url);
-    if (u.includes("/api/auth/me")) {
-      return Promise.resolve(
-        new Response(JSON.stringify({ score: 0, group: "default" }), { status: 200 })
-      );
-    }
     if (u.includes("/api/user/scan")) {
-      return Promise.resolve(new Response(JSON.stringify({ score: 0 }), { status: 200 }));
+      // default: echo score 0 unless test overrides with mockResolvedValueOnce
+      return Promise.resolve(
+        new Response(JSON.stringify({ score: 0 }), { status: 200 })
+      );
     }
     return Promise.resolve(new Response("{}", { status: 200 }));
   });
 });
 
-// LocalStorage token mock
+// Hoist-safe api mock impl per test
+beforeEach(() => {
+  apiMock = vi.fn((url) => {
+    if (url === "/auth/me") return Promise.resolve({ score: 0, group: "default" });
+    return Promise.resolve({});
+  });
+});
+
+// token for the Authorization header
 beforeEach(() => {
   vi.spyOn(Storage.prototype, "getItem").mockImplementation((key) => {
     if (key === "token") return "TEST_TOKEN";
@@ -147,12 +158,12 @@ beforeEach(() => {
   });
 });
 
-// Start mocking before we run the code each time
+// alert
 beforeEach(() => {
   vi.spyOn(window, "alert").mockImplementation(() => {});
 });
 
-// Mock Image for the uploading file feature
+// Mock Image for upload path
 class MockImage {
   constructor() {
     this.onload = null;
@@ -179,19 +190,22 @@ afterEach(() => {
   rafQueue = [];
 });
 
-// ----------------- HELPERS -----------------
-
-const urlIncludes = (substr) => ([url]) => typeof url === "string" && url.includes(substr);
+/** Helpers */
+const urlIncludes = (substr) => ([url]) =>
+  typeof url === "string" && url.includes(substr);
 
 async function waitForFetchCall(matchFn, timeoutMs = 1200) {
   const start = Date.now();
-  while (Date.now() - start < timeoutMs) {
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
     const call = fetchMock.mock.calls.find(matchFn);
     if (call) return call;
+    if (Date.now() - start > timeoutMs) {
+      throw new Error("Timed out waiting for matching fetch call.");
+    }
     // eslint-disable-next-line no-await-in-loop
     await new Promise((r) => setTimeout(r, 10));
   }
-  throw new Error("Timed out waiting for matching fetch call.");
 }
 
 function countScanPosts() {
@@ -204,21 +218,16 @@ function countScanPosts() {
   ).length;
 }
 
-// ----------------- TESTS -----------------
+/* ------------------- TESTS ------------------- */
 
 describe("Scan page", () => {
   it("renders, fetches /auth/me and shows score; starts camera", async () => {
-    // /auth/me -> initial score/group
-    fetchMock.mockResolvedValueOnce(
-      new Response(JSON.stringify({ score: 42, group: "dog" }), {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      })
-    );
+    // api("/auth/me") -> dog, 42
+    apiMock.mockResolvedValueOnce({ score: 42, group: "dog" });
 
     render(<Scan />);
 
-    // One frame so loop starts (doesn't decode anything here)
+    // Start loop
     advanceRaf(1);
 
     // Title
@@ -233,32 +242,28 @@ describe("Scan page", () => {
     expect(screen.getByAltText(/home/i)).toBeInTheDocument();
     expect(screen.getByAltText(/score/i)).toBeInTheDocument();
 
-    // Video element present (camera attached)
+    // Video element present and camera requested
     const videoEl = document.querySelector("video");
     expect(videoEl).toBeInTheDocument();
 
-    // "getUserMedia" called with rear cam
     expect(navigator.mediaDevices.getUserMedia).toHaveBeenCalledWith({
       video: { facingMode: "environment" },
     });
   });
 
   it("decodes a new QR frame via jsQR, posts to /user/scan, updates score and avoids duplicate re-posts", async () => {
-    // /auth/me initial (override default)
-    fetchMock.mockResolvedValueOnce(
-      new Response(JSON.stringify({ score: 10, group: "cat" }), { status: 200 })
-    );
-    // POST response with updated score (override default)
+    // /auth/me initial
+    apiMock.mockResolvedValueOnce({ score: 10, group: "cat" });
+    // POST response with updated score
     fetchMock.mockResolvedValueOnce(
       new Response(JSON.stringify({ score: 15 }), { status: 200 })
     );
 
-    // jsQR will decode on the next frame
     jsQRReturn = { data: "LECTURE_ABC" };
 
     render(<Scan />);
 
-    // Trigger one frame: should decode and POST once
+    // one frame: decode and post
     advanceRaf(1);
 
     // Ensure the scan POST happened and has correct body
@@ -275,10 +280,10 @@ describe("Scan page", () => {
       })
     );
 
-    // Updated score should be visible
+    // Updated score visible
     await screen.findByText("15");
 
-    // On subsequent frames, force no decode to avoid pre-state-update duplicates
+    // Subsequent frames should NOT re-post once we null out jsQR
     const before = countScanPosts();
     jsQRReturn = null;
     advanceRaf(2);
@@ -286,42 +291,31 @@ describe("Scan page", () => {
   });
 
   it("cleans up: cancels RAF and stops camera tracks on unmount", async () => {
-    // /auth/me
-    fetchMock.mockResolvedValueOnce(
-      new Response(JSON.stringify({ score: 1, group: "dog" }), { status: 200 })
-    );
+    apiMock.mockResolvedValueOnce({ score: 1, group: "dog" });
 
     const { unmount } = render(<Scan />);
 
     await screen.findByText("1");
 
-    // Ensure camera stream is attached
+    // Ensure camera attached
     const videoEl = document.querySelector("video");
     expect(videoEl).toBeTruthy();
     await waitFor(() => {
       expect(videoEl._srcObject || videoEl.srcObject).toBeTruthy();
     });
 
-    // Run a frame so the loop is active
+    // Run a frame so loop active
     advanceRaf(1);
 
-    // Unmount and verify cleanup effects
+    // Unmount and verify cleanup
     unmount();
 
-    // The important bit: tracks were stopped
+    // Tracks were stopped
     expect(mockTrackStop).toHaveBeenCalled();
-
-    // Optional: if you still want to check clearing, make it non-fatal:--too strict
-    // const after = videoEl._srcObject || videoEl.srcObject;
-    // expect(after === null || after === undefined || Array.isArray(after?.getTracks?.()) && after.getTracks().length === 0).toBe(true);
   });
 
   it("file upload: decodes QR from image and posts to /user/scan; updates score", async () => {
-    // /auth/me
-    fetchMock.mockResolvedValueOnce(
-      new Response(JSON.stringify({ score: 5, group: "dog" }), { status: 200 })
-    );
-    // scan post response
+    apiMock.mockResolvedValueOnce({ score: 5, group: "dog" });
     fetchMock.mockResolvedValueOnce(
       new Response(JSON.stringify({ score: 9 }), { status: 200 })
     );
@@ -330,12 +324,12 @@ describe("Scan page", () => {
 
     await screen.findByText("5");
 
-    // Prepare jsQR to return code when image drawn
+    // jsQR returns code for uploaded image
     jsQRReturn = { data: "QUIZ_WEEK1" };
 
-    // Find the hidden file input via label
+    // Input is inside the label "Upload QR from device"
     const label = screen.getByText(/upload qr from device/i);
-    const fileInput = label.parentElement.querySelector('input[type="file"]');
+    const fileInput = label.parentElement && label.parentElement.querySelector('input[type="file"]');
     expect(fileInput).toBeTruthy();
 
     const file = new File(["dummy-bytes"], "qr.png", { type: "image/png" });
@@ -344,7 +338,7 @@ describe("Scan page", () => {
       await userEvent.upload(fileInput, file);
     });
 
-    // Wait for /user/scan to be called
+    // Wait for /user/scan call
     const uploadScanCall = await waitForFetchCall(urlIncludes("/user/scan"));
     expect(uploadScanCall[1]).toEqual(
       expect.objectContaining({
@@ -357,29 +351,30 @@ describe("Scan page", () => {
     expect(screen.getByText(/qr code:/i)).toBeInTheDocument();
   });
 
-  it("file upload: alerts when no QR is found in the image", async () => {
-    // /auth/me
-    fetchMock.mockResolvedValueOnce(
-      new Response(JSON.stringify({ score: 7, group: "cat" }), { status: 200 })
-    );
+  // file upload: when no QR is found, inline message only (no alert)
+  it("file upload: when no QR is found, no alert (inline message only)", async () => {
+    apiMock.mockResolvedValueOnce({ score: 7, group: "cat" });
 
     render(<Scan />);
-
     await screen.findByText("7");
 
-    // Force jsQR to return null (no QR)
     jsQRReturn = null;
 
     const label = screen.getByText(/upload qr from device/i);
-    const fileInput = label.parentElement.querySelector('input[type="file"]');
+    const fileInput =
+      label.parentElement && label.parentElement.querySelector('input[type="file"]');
+    expect(fileInput).toBeTruthy();
 
     const file = new File(["dummy-bytes-2"], "noqr.jpg", { type: "image/jpeg" });
-
     await act(async () => {
       await userEvent.upload(fileInput, file);
     });
 
-    // Inline message appears under the scanner
-    await screen.findByText(/no qr.*found in this image/i);
+    // ✅ Query the element directly and assert its combined text
+    const msgEl = await screen.findByTestId("scan-msg");
+    expect(msgEl).toHaveTextContent(/no qr\s+found in this image/i);
+
+    // ✅ No alert should fire on the "no QR" path
+    expect(window.alert).not.toHaveBeenCalled();
   });
 });
