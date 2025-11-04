@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 // A JS library that decodes QR codes from raw pixel data
 import jsQR from "jsqr";
 import s from "./Scan.module.css";
+import { api } from "../api/client"; 
 
 export default function Scan() {
   const navigate = useNavigate();
@@ -27,23 +28,19 @@ export default function Scan() {
 
   // Fetch current user
   useEffect(() => {
-    fetch("http://localhost:5001/api/auth/me", {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        const userGroup = data?.group || localStorage.getItem("group") || "default";
+    (async () => {
+      try {
+        const me = await api("/auth/me");
+        const userGroup = me?.group || localStorage.getItem("group") || "default";
         setGroup(userGroup);
         localStorage.setItem("group", userGroup);
-        setScore(data?.score || 0);
-      })
-      .catch((err) => {
+        setScore(me?.score || 0);
+      } catch (err) {
         console.error("Failed to fetch /auth/me:", err);
         const cachedGroup = localStorage.getItem("group") || "default";
         setGroup(cachedGroup);
-      });
+      }
+    })();
   }, []);
 
   // Group icons 
