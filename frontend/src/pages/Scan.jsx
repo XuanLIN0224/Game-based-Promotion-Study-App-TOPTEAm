@@ -34,18 +34,37 @@ export default function Scan() {
     })
       .then((res) => res.json())
       .then((data) => {
+        const userGroup = data?.group || localStorage.getItem("group") || "default";
+        setGroup(userGroup);
+        localStorage.setItem("group", userGroup);
         setScore(data?.score || 0);
-        setGroup(data?.group || "default");
       })
-      .catch((err) => console.error("Failed to fetch /auth/me:", err));
+      .catch((err) => {
+        console.error("Failed to fetch /auth/me:", err);
+        const cachedGroup = localStorage.getItem("group") || "default";
+        setGroup(cachedGroup);
+      });
   }, []);
 
   // Group icons 
-  const groupIcons = {
-    default: { coin: `${BASE}icons/default/moneybag_icon.png` },
-    dog: { coin: `${BASE}icons/dog/coin.png` },
-    cat: { coin: `${BASE}icons/cat/coin.png` },
+    const groupIcons = {
+    default: {
+      coin: `${BASE}icons/default/moneybag_icon.png`,
+      feed: `${BASE}icons/default/feed.png`,
+      home: `${BASE}icons/home/home.png`,
+    },
+    dog: {
+      coin: `${BASE}icons/dog/coin.png`,
+      feed: `${BASE}icons/dog/bone.png`,
+      home: `${BASE}icons/home/home.png`,
+    },
+    cat: {
+      coin: `${BASE}icons/cat/coin.png`,
+      feed: `${BASE}icons/cat/fish.png`,
+      home: `${BASE}icons/home/home.png`,
+    },
   };
+
   const icons = groupIcons[group] ?? groupIcons.default;
 
   /** Handle successful QR code scan result */
