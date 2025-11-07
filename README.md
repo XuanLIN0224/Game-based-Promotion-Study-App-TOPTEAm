@@ -24,7 +24,6 @@ This project is implemented by **TOPTEAm** from *University of Melbourne (The)*.
 
 - 🫡 Adjustable and controllable by the teaching stuffs
 
-(Update later...)
 
 # MVP Tech Stack
 
@@ -41,11 +40,8 @@ This document outlines the **Minimum Viable Product (MVP)** technology stack for
 - 🔁 **React Query** — API cache, background revalidation.
 - 🎨 **Tailwind CSS + shadcn/ui** — Responsive and clean UI components.
 - ✅ **React Hook Form + Zod** — Form handling & schema validation.
-- 📊 **Recharts + Framer Motion** — Data visualisation and animations.
 - 🧪 **Vitest + React Testing Library + Cypress** — Unit & E2E testing.
 - 📷 **jsQR** — QR code scanning.
-- ⏱ **date-fns** — Time utilities.
-- 🧩 **Lucide Icons** — Modern icon set.
 
 ---
 
@@ -58,54 +54,15 @@ This document outlines the **Minimum Viable Product (MVP)** technology stack for
 **Auth & Security**
 - 🔑 **JWT (Access + Refresh)** — Secure token-based authentication.
 - 🧂 **bcrypt** — Password hashing.
-- 🧰 **helmet, cors, express-mongo-sanitize** — Security hardening.
-- 🚦 **rate-limiter-flexible** — API abuse prevention.
 
 **Dev & Maintenance**
 - ⚙️ **Zod / express-zod-api** — Input validation.
-- 🪵 **pino + pino-http** — Structured logging.
-- 🧪 **Jest + Supertest** — API testing.
-- 🌿 **dotenv-flow** — Environment config by stage.
 
 ---
 
 ## 🗄 Database & Caching
 
 - 🍃 **MongoDB Atlas** — Cloud database (users, points, accessories).
-- 🔴 **Redis (Upstash / Railway)** — Caching for leaderboards, sessions, rate limits.
-
----
-
-## 🖼 File & Asset Management
-
-- ☁️ **Cloudflare R2 (S3-compatible)** — Accessory sprites & uploads.
-- 🖼 **imgproxy** *(optional)* — On-demand image resizing.
-
----
-
-## 🔔 Notifications & Analytics
-
-- 📧 **Resend / AWS SES** — Email verification & password reset.
-- 🔔 **Firebase Cloud Messaging (FCM)** — Push notifications (optional).
-- 🧭 **Sentry + PostHog** — Error tracking & user analytics.
-
----
-
-## ⚙️ DevOps & Developer Experience
-
-**Structure**
-- 🧩 **pnpm Workspaces + Turborepo** — Monorepo setup.
-- 🧰 **ESLint + Prettier + Husky + lint-staged** — Code quality.
-- 🧪 **CI/CD via GitHub Actions** — Auto lint, test, and deploy.
-
-**Runtime**
-- 🐳 **Docker + docker-compose** — Local development (API + Mongo + Redis).
-- 🚀 **Deployments**
-  - Frontend → Vercel
-  - Backend → Fly.io / Railway
-  - Database → MongoDB Atlas
-  - Cache → Upstash Redis
-- 🔐 **GitHub Secrets / Doppler** — Secure environment variable management.
 
 ---
 
@@ -169,6 +126,7 @@ Game-based-Promotion-Study-App-TOPTEAm/
 │   │   ├── utils/
 │   │   └── app.js
 │   ├── package.json
+│   ├── .env
 │   └── README.md
 ├── frontend/
 │   ├── public/
@@ -188,9 +146,12 @@ Game-based-Promotion-Study-App-TOPTEAm/
 │   │   ├── main.jsx
 │   ├── index.html
 │   ├── package.json
+│   ├── .env
 │   ├── README.md
+│   ├── eslint.config.js
+│   ├── vitest.config.js
+│   ├── vitest.setup.js
 │   └── vite.config.js
-├── node_modules/
 ├── .gitignore
 └── README.md
 ```
