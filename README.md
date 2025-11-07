@@ -22,7 +22,7 @@ This project is implemented by **TOPTEAm** from *University of Melbourne (The)*.
 
 - 📊 Dynamic leaderboard and ranking system
 
-- 🫡 Adjustable and controllable by the teaching stuffs
+- 🫡 Adjustable and controllable by the teaching staffs
 
 
 # MVP Tech Stack
