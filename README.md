@@ -4,8 +4,8 @@
 
 ## Description
 
-- Detailed README for frontend: [frontend readme](../frontend/README.md)
-- Detailed README for backend: [backend readme](../backend/README.md)
+- Detailed README for frontend: [frontend readme](frontend/README.md)
+- Detailed README for backend: [backend readme](backend/README.md)
 
 This project addresses the topic **Revamping Object-Oriented Software Development Using GenAI**.
 
