@@ -4,6 +4,9 @@
 
 ## Description
 
+- Detailed README for frontend: [frontend readme](../frontend/README.md)
+- Detailed README for backend: [backend readme](../backend/README.md)
+
 This project addresses the topic **Revamping Object-Oriented Software Development Using GenAI**.
 
 PowerUp OOSD is a web application built with *React*, *Node.JS*, *MongoDB* and *Google Gemini*, supporting game-play, customisable account settings, AI-powered feedback, and dynamic leaderboard rendering.  
